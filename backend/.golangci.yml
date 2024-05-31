@@ -1,0 +1,117 @@
+run:
+  concurrency: 4
+  timeout: 1m
+  tests: false
+  issues-exit-code: 0
+  go: '1.22.2'
+
+output:
+  formats:
+    - format: colored-line-number
+
+issues:
+  max-issues-per-linter: 1000
+  max-same-issues: 1000
+  exclude-use-default: false
+  exclude-dirs:
+    - bin
+    - var
+    - tmp
+    - mocks
+    - test
+  exclude:
+    - G104
+    - exported func .* returns unexported type .*, which can be annoying to use
+    - (comment on exported (method|function|type|constants)|should have( a package)? comment|comment should be of the form)
+    - should have a package comment
+    - don't use an underscore in package name
+    - Error return value of .((os\.)?std(out|err)\..*|.*Close|.*Flush|os\.Remove(All)?|.*print(f|ln)?|os\.(Un)?Setenv). is not checked
+    - should check returned error before deferring
+
+linters-settings:
+  prealloc:
+    for-loops: true
+
+  stylecheck:
+    checks: ["all"]
+
+  staticcheck:
+    checks: ["all"]
+
+  nolintlint:
+    allow-unused: true
+    require-explanation: true
+    require-specific: true
+
+  gosimple:
+    checks: ["all"]
+
+  gocyclo:
+    min-complexity: 20
+
+  gocritic:
+    disabled-checks:
+      - hugeParam
+    enabled-tags:
+      - diagnostic
+      - style
+      - performance
+      - experimental
+      - opinionated
+
+  dupl:
+    threshold: 70
+
+  dogsled:
+    max-blank-identifiers: 2
+
+  errcheck:
+    check-type-assertions: true
+    check-blank: true
+
+  govet:
+    enable-all: true
+
+  funlen:
+    lines: 60
+    statements: 60
+    ignore-comments: true
+
+linters:
+  disable-all: true
+  enable:
+    - bodyclose
+    - dogsled
+    - dupl
+    - decorder
+    - errcheck
+    - forbidigo
+    - funlen
+    - gochecknoinits
+    - goconst
+    - gocritic
+    - gocyclo
+    - gofmt
+    - gomodguard
+    - revive
+    - gosec
+    - gosimple
+    - govet
+    - godot
+    - ineffassign
+    - misspell
+    - nakedret
+    - nolintlint
+    - exportloopref
+    - prealloc
+    - staticcheck
+    - stylecheck
+    - typecheck
+    - unconvert
+    - unparam
+    - unused
+    - whitespace
+
+  presets:
+    - comment
+    - error
