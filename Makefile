@@ -1,3 +1,3 @@
 .PHONY: lint
 lint:
-	cd backend && golangci-lint run
+	cd api && golangci-lint run
