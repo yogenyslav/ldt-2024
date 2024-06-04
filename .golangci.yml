@@ -18,17 +18,22 @@ issues:
     - var
     - tmp
     - mocks
+    - vendor
     - test
+    - pb
   exclude:
     - G104
-    - exported func .* returns unexported type .*, which can be annoying to use
     - (comment on exported (method|function|type|constants)|should have( a package)? comment|comment should be of the form)
-    - should have a package comment
     - don't use an underscore in package name
     - Error return value of .((os\.)?std(out|err)\..*|.*Close|.*Flush|os\.Remove(All)?|.*print(f|ln)?|os\.(Un)?Setenv). is not checked
     - should check returned error before deferring
 
 linters-settings:
+  wrapcheck:
+    ignoreSigs:
+      - status.Error(
+      - .JSON(
+
   prealloc:
     for-loops: true
 
