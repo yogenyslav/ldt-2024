@@ -1,1 +1,4 @@
 .idea
+vendor
+.env
+config.yaml
