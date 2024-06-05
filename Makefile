@@ -18,9 +18,9 @@ docker_down:
 
 .PHONY: docker_remove
 docker_remove: docker_down
-	docker volume rm ${PROJECT_DIR}_pg_data
-	docker volume rm ${PROJECT_DIR}_prom_data
-	docker volume rm ${PROJECT_DIR}_jaeger_data
+	docker volume rm ${BASE_IMAGE}_pg_data
+	docker volume rm ${BASE_IMAGE}_prom_data
+	docker volume rm ${BASE_IMAGE}_jaeger_data
 	docker image rm chat
 
 .PHONY: docker_restart
@@ -49,7 +49,18 @@ migrate_new:
 proto:
 	@for dir in $(shell find . -type f -name go.mod -exec dirname {} \;); do \
 		protoc --proto_path=./proto --go_out=$$dir --go-grpc_out=$$dir proto/api/auth.proto; \
-		protoc --proto_path=./proto --grpc-gateway_out=$$dir \
-                --grpc-gateway_opt=generate_unbound_methods=true \
-                proto/api/auth.proto; \
 	done
+	@protoc --proto_path=./proto --grpc-gateway_out=./api \
+                    --grpc-gateway_opt=generate_unbound_methods=true \
+                    proto/api/auth.proto --openapiv2_out ./api/third_party/OpenAPI \
+
+.PHONY: tests
+tests:
+	@for dir in $(shell find . -type f -name go.mod -exec dirname {} \;); do \
+		cd $$dir && go test -v ./... && cd ..; \
+	done
+
+.PHONY: swag
+swag:
+	cd ./chat && swag init -g cmd/server/main.go -o ./docs
+	cd ./bot && swag init -g cmd/server/main.go -o ./docs

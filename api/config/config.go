@@ -9,6 +9,7 @@ import (
 	"github.com/yogenyslav/pkg/storage/postgres"
 )
 
+// Config holds the configuration for the application.
 type Config struct {
 	Server     *srvconfig.Config `yaml:"server"`
 	Postgres   *postgres.Config  `yaml:"postgres"`
@@ -17,13 +18,19 @@ type Config struct {
 	KeyCloak   *KeyCloakConfig   `yaml:"keycloak"`
 }
 
+// KeyCloakConfig holds the configuration for Keycloak.
 type KeyCloakConfig struct {
-	KeyCloakURL          string `yaml:"keycloak_url"`
-	KeyCloakClientID     string `yaml:"keycloak_client_id"`
-	KeyCloakClientSecret string `yaml:"keycloak_client_secret"`
-	KeyCloakRealm        string `yaml:"keycloak_realm"`
+	URL          string `yaml:"url"`
+	ClientID     string `yaml:"client_id"`
+	ClientSecret string `yaml:"client_secret"`
+	Realm        string `yaml:"realm"`
+	AdminRealm   string `yaml:"admin_realm"`
+	User         string `yaml:"user"`
+	Password     string `yaml:"password"`
 }
 
+// MustNew reads the configuration from the given path and returns a Config struct
+// or panics if failed.
 func MustNew(path string) *Config {
 	cfg := &Config{}
 	if err := cleanenv.ReadConfig(path, cfg); err != nil {

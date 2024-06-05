@@ -10,6 +10,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+// Login logs in a user.
 func (h *Handler) Login(c context.Context, params *pb.LoginRequest) (*pb.LoginResponse, error) {
 	ctx, err := getTraceCtx(c)
 	if err != nil {

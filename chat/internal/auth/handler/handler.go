@@ -12,12 +12,14 @@ type authController interface {
 	Login(ctx context.Context, params model.LoginReq) (model.LoginResp, error)
 }
 
+// Handler is the auth handler
 type Handler struct {
 	ctrl      authController
 	validator *validator.Validate
 	tracer    trace.Tracer
 }
 
+// New creates a new auth handler
 func New(ctrl authController, tracer trace.Tracer) *Handler {
 	return &Handler{
 		ctrl:      ctrl,

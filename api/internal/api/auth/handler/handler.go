@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/pkg/errors"
+	"github.com/rs/zerolog/log"
 	"github.com/yogenyslav/ldt-2024/api/internal/api/auth/model"
 	"github.com/yogenyslav/ldt-2024/api/internal/api/pb"
 	"github.com/yogenyslav/ldt-2024/api/pkg/metrics"
@@ -15,6 +16,7 @@ type authController interface {
 	Login(ctx context.Context, params model.LoginReq) (model.LoginResp, error)
 }
 
+// Handler is the struct that implements the AuthServiceServer interface.
 type Handler struct {
 	pb.UnimplementedAuthServiceServer
 	ctrl    authController
@@ -22,6 +24,7 @@ type Handler struct {
 	metrics *metrics.Metrics
 }
 
+// New creates a new Handler.
 func New(ctrl authController, tracer trace.Tracer, m *metrics.Metrics) *Handler {
 	return &Handler{
 		ctrl:    ctrl,
@@ -34,6 +37,7 @@ func getTraceCtx(ctx context.Context) (context.Context, error) {
 	md, _ := metadata.FromIncomingContext(ctx)
 	traceIDVal, ok := md["x-trace-id"]
 	if !ok {
+		log.Debug().Msg("trace id not found")
 		return nil, nil
 	}
 

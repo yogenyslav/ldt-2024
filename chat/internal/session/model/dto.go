@@ -4,6 +4,7 @@ import (
 	"github.com/google/uuid"
 )
 
-type Session struct {
+// SessionDto is a session model for the domain layer.
+type SessionDto struct {
 	ID uuid.UUID `json:"id"`
 }

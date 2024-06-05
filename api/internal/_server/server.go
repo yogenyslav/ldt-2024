@@ -3,10 +3,13 @@ package server
 import (
 	"context"
 	"fmt"
+	"io/fs"
+	"mime"
 	"net"
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 
 	"github.com/Nerzal/gocloak/v13"
@@ -17,6 +20,7 @@ import (
 	ah "github.com/yogenyslav/ldt-2024/api/internal/api/auth/handler"
 	"github.com/yogenyslav/ldt-2024/api/internal/api/pb"
 	"github.com/yogenyslav/ldt-2024/api/pkg/metrics"
+	"github.com/yogenyslav/ldt-2024/api/third_party"
 	"github.com/yogenyslav/pkg/infrastructure/prom"
 	"github.com/yogenyslav/pkg/infrastructure/tracing"
 	"github.com/yogenyslav/pkg/storage"
@@ -69,10 +73,11 @@ func (s *Server) Run() {
 	m := metrics.New()
 	m.Collect()
 
-	authController := ac.New(gocloak.NewClient(s.cfg.KeyCloak.KeyCloakURL), s.cfg.KeyCloak, s.tracer)
+	authController := ac.New(gocloak.NewClient(s.cfg.KeyCloak.URL), s.cfg.KeyCloak, s.tracer)
 	authHandler := ah.New(authController, s.tracer, m)
 	pb.RegisterAuthServiceServer(s.srv, authHandler)
 
+	log.Info().Msg("starting the server")
 	go s.listen()
 	go s.listenGateway()
 	go prom.HandlePrometheus(s.cfg.Prometheus)
@@ -109,12 +114,31 @@ func (s *Server) listenGateway() {
 	}()
 
 	mux := runtime.NewServeMux()
-
 	if err = pb.RegisterAuthServiceHandler(context.Background(), mux, conn); err != nil {
 		log.Panic().Err(err).Msg("failed to register the auth gateway ah")
 	}
 
-	if err = http.ListenAndServe(fmt.Sprintf(":%d", s.cfg.Server.GatewayPort), mux); err != nil { //nolint:G114 // not a security issue
+	gwServer := &http.Server{
+		Addr: fmt.Sprintf(":%d", s.cfg.Server.GatewayPort),
+		Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if strings.HasPrefix(r.URL.Path, "/v1") {
+				mux.ServeHTTP(w, r)
+				return
+			}
+			getOpenAPIHandler().ServeHTTP(w, r)
+		}),
+	}
+
+	if err = gwServer.ListenAndServe(); err != nil { //nolint:G114 // not a security issue
 		log.Error().Err(err).Msg("failed to start the gateway server")
 	}
+}
+
+func getOpenAPIHandler() http.Handler {
+	_ = mime.AddExtensionType(".svg", "image/svg+xml")
+	subFS, err := fs.Sub(third_party.OpenAPI, "OpenAPI")
+	if err != nil {
+		log.Error().Err(err).Msg("couldn't create sub filesystem")
+	}
+	return http.FileServer(http.FS(subFS))
 }

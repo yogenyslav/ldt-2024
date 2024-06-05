@@ -8,14 +8,19 @@ import (
 	"strings"
 	"syscall"
 
+	"github.com/gofiber/contrib/otelfiber"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
+	recovermw "github.com/gofiber/fiber/v2/middleware/recover"
+	"github.com/gofiber/swagger"
 	"github.com/rs/zerolog/log"
 	"github.com/yogenyslav/ldt-2024/chat/config"
+	_ "github.com/yogenyslav/ldt-2024/chat/docs"
 	"github.com/yogenyslav/ldt-2024/chat/internal/auth"
-	"github.com/yogenyslav/ldt-2024/chat/internal/auth/controller"
-	"github.com/yogenyslav/ldt-2024/chat/internal/auth/handler"
+	ac "github.com/yogenyslav/ldt-2024/chat/internal/auth/controller"
+	ah "github.com/yogenyslav/ldt-2024/chat/internal/auth/handler"
+	"github.com/yogenyslav/ldt-2024/chat/pkg/client"
 	"github.com/yogenyslav/pkg/infrastructure/prom"
 	"github.com/yogenyslav/pkg/infrastructure/tracing"
 	srvresp "github.com/yogenyslav/pkg/response"
@@ -24,8 +29,6 @@ import (
 	"go.opentelemetry.io/otel"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/trace"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 )
 
 // Server main struct that holds dependencies.
@@ -48,6 +51,9 @@ func New(cfg *config.Config) *Server {
 	app.Use(cors.New(cors.Config{
 		AllowOrigins: strings.Join(cfg.Server.CorsOrigins, ","),
 	}))
+	app.Use(otelfiber.Middleware())
+	app.Use(recovermw.New())
+	app.Get("/swagger/*", swagger.HandlerDefault)
 
 	exporter := tracing.MustNewExporter(context.Background(), cfg.Jaeger.URL())
 	provider := tracing.MustNewTraceProvider(exporter, "chat")
@@ -78,21 +84,18 @@ func (s *Server) Run() {
 		}
 	}()
 
-	var grpcOpts []grpc.DialOption
-	grpcOpts = append(grpcOpts, grpc.WithTransportCredentials(insecure.NewCredentials()))
-	orchestratorAddr := "api:9999"
-	authConn, err := grpc.NewClient(orchestratorAddr, grpcOpts...)
+	apiClient, err := client.NewGrpcClient(s.cfg.API)
 	if err != nil {
-		log.Fatal().Err(err).Msg("failed to connect to orchestrator")
+		log.Panic().Err(err).Msg("failed to create grpc client")
 	}
 	defer func() {
-		if err = authConn.Close(); err != nil {
-			log.Warn().Err(err).Msg("failed to properly close grpc connection")
+		if err = apiClient.Close(); err != nil {
+			log.Error().Err(err).Msg("failed to close grpc client")
 		}
 	}()
 
-	authController := controller.New(authConn, s.tracer)
-	authHandler := handler.New(authController, s.tracer)
+	authController := ac.New(apiClient.GetConn(), s.tracer)
+	authHandler := ah.New(authController, s.tracer)
 	auth.SetupAuthRoutes(s.app, authHandler)
 
 	go s.listen()
