@@ -17,3 +17,8 @@ type SessionDto struct {
 type NewSessionResp struct {
 	ID uuid.UUID `json:"id"`
 }
+
+// ListResp is a struct for list sessions response.
+type ListResp struct {
+	Sessions []SessionDto `json:"sessions"`
+}

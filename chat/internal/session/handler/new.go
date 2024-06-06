@@ -16,7 +16,7 @@ import (
 // @Accept json
 // @Produce json
 // @Param token header string true "access token"
-// @Success 200 {object} model.NewSessionResp "ID новой сессии"
+// @Success 201 {object} model.NewSessionResp "ID новой сессии"
 // @Failure 400 {object} string "Сессия с таким ID уже существует"
 // @Router /session/new [post]
 func (h *Handler) NewSession(c *fiber.Ctx) error {

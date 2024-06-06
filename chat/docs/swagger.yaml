@@ -1,5 +1,12 @@
 basePath: /
 definitions:
+  model.ListResp:
+    properties:
+      sessions:
+        items:
+          $ref: '#/definitions/model.SessionDto'
+        type: array
+    type: object
   model.LoginReq:
     properties:
       password:
@@ -18,6 +25,15 @@ definitions:
   model.NewSessionResp:
     properties:
       id:
+        type: string
+    type: object
+  model.SessionDto:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: string
+      title:
         type: string
     type: object
 host: localhost:10000
@@ -64,6 +80,28 @@ paths:
       summary: Авторизация
       tags:
       - auth
+  /session/list:
+    get:
+      consumes:
+      - application/json
+      description: Получить список сессий в порядке убывания момента создания от последней
+        к первой для авторизованного пользователя
+      parameters:
+      - description: access token
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Список сессий
+          schema:
+            $ref: '#/definitions/model.ListResp'
+      summary: Список сессий
+      tags:
+      - session
   /session/new:
     post:
       consumes:
@@ -78,7 +116,7 @@ paths:
       produces:
       - application/json
       responses:
-        "200":
+        "201":
           description: ID новой сессии
           schema:
             $ref: '#/definitions/model.NewSessionResp'

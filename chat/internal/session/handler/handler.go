@@ -5,10 +5,12 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
+	"github.com/yogenyslav/ldt-2024/chat/internal/session/model"
 )
 
 type sessionController interface {
 	NewSession(ctx context.Context, id uuid.UUID, username string) error
+	List(ctx context.Context, username string) ([]model.SessionDto, error)
 }
 
 // Handler is the session handler

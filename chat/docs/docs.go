@@ -71,6 +71,38 @@ const docTemplate = `{
                 }
             }
         },
+        "/session/list": {
+            "get": {
+                "description": "Получить список сессий в порядке убывания момента создания от последней к первой для авторизованного пользователя",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "session"
+                ],
+                "summary": "Список сессий",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "access token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Список сессий",
+                        "schema": {
+                            "$ref": "#/definitions/model.ListResp"
+                        }
+                    }
+                }
+            }
+        },
         "/session/new": {
             "post": {
                 "description": "Создать новую сессию в чате для авторизованного пользователя",
@@ -94,7 +126,7 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "200": {
+                    "201": {
                         "description": "ID новой сессии",
                         "schema": {
                             "$ref": "#/definitions/model.NewSessionResp"
@@ -111,6 +143,17 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "model.ListResp": {
+            "type": "object",
+            "properties": {
+                "sessions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.SessionDto"
+                    }
+                }
+            }
+        },
         "model.LoginReq": {
             "type": "object",
             "required": [
@@ -138,6 +181,20 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "id": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.SessionDto": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "title": {
                     "type": "string"
                 }
             }

@@ -9,6 +9,7 @@ import (
 
 type sessionRepo interface {
 	InsertOne(ctx context.Context, params model.SessionDao) error
+	List(ctx context.Context, username string) ([]model.SessionDao, error)
 }
 
 // Controller a struct that implements session business logic.

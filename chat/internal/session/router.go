@@ -8,6 +8,7 @@ import (
 
 type sessionHandler interface {
 	NewSession(c *fiber.Ctx) error
+	List(c *fiber.Ctx) error
 }
 
 func SetupSessionRoutes(app *fiber.App, h sessionHandler, kc *gocloak.GoCloak, realm, cipher string) {
@@ -15,4 +16,5 @@ func SetupSessionRoutes(app *fiber.App, h sessionHandler, kc *gocloak.GoCloak, r
 	g.Use(middleware.JWT(kc, realm, cipher))
 
 	g.Post("/new", h.NewSession)
+	g.Get("/list", h.List)
 }
