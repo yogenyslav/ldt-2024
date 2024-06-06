@@ -16,6 +16,9 @@ var errStatus = map[error]srvresp.ErrorResponse{
 		Msg:    "request needs to be revoked",
 		Status: http.StatusBadRequest,
 	},
+	shared.ErrInvalidUUID: {
+		Status: http.StatusBadRequest,
+	},
 	// 401
 	shared.ErrLoginFailed: {
 		Msg:    "invalid username or password",
@@ -26,6 +29,10 @@ var errStatus = map[error]srvresp.ErrorResponse{
 	},
 	shared.ErrMissingJWT: {
 		Status: http.StatusUnauthorized,
+	},
+	// 404
+	shared.ErrNoSessionWithID: {
+		Status: http.StatusNotFound,
 	},
 	// 500
 	shared.ErrCreateSession: {
@@ -41,6 +48,12 @@ var errStatus = map[error]srvresp.ErrorResponse{
 		Status: http.StatusInternalServerError,
 	},
 	shared.ErrGetSession: {
+		Status: http.StatusInternalServerError,
+	},
+	shared.ErrUpdateSession: {
+		Status: http.StatusInternalServerError,
+	},
+	shared.ErrDeleteSession: {
 		Status: http.StatusInternalServerError,
 	},
 }

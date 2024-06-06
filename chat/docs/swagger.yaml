@@ -27,6 +27,13 @@ definitions:
       id:
         type: string
     type: object
+  model.RenameReq:
+    properties:
+      id:
+        type: string
+      title:
+        type: string
+    type: object
   model.SessionDto:
     properties:
       created_at:
@@ -80,6 +87,35 @@ paths:
       summary: Авторизация
       tags:
       - auth
+  /session/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Удалить сессию по ID
+      parameters:
+      - description: access token
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Сессия удалена
+          schema:
+            type: string
+        "400":
+          description: Неверное значение ID
+          schema:
+            type: string
+        "404":
+          description: Сессия с таким ID не найдена
+          schema:
+            type: string
+      summary: Удалить сессию
+      tags:
+      - session
   /session/list:
     get:
       consumes:
@@ -125,6 +161,41 @@ paths:
           schema:
             type: string
       summary: Новая сессия
+      tags:
+      - session
+  /session/rename:
+    put:
+      consumes:
+      - application/json
+      description: Обновить заголовок сессии, который отображается в интерфейсе
+      parameters:
+      - description: access token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: ID и новое название сессии
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/model.RenameReq'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Сессия переименована
+          schema:
+            type: string
+        "400":
+          description: Сессия с таким ID уже существует
+          schema:
+            type: string
+        "404":
+          description: Сессия с таким ID не найдена
+          schema:
+            type: string
+      summary: Обновить заголовок
       tags:
       - session
 swagger: "2.0"

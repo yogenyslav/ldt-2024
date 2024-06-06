@@ -3,7 +3,9 @@ package repo
 import (
 	"context"
 
+	"github.com/google/uuid"
 	"github.com/yogenyslav/ldt-2024/chat/internal/session/model"
+	"github.com/yogenyslav/ldt-2024/chat/internal/shared"
 	"github.com/yogenyslav/pkg/storage"
 )
 
@@ -40,4 +42,39 @@ func (r *Repo) List(ctx context.Context, username string) ([]model.SessionDao, e
 	var sessions []model.SessionDao
 	err := r.pg.QuerySlice(ctx, &sessions, list, username)
 	return sessions, err
+}
+
+const updateTitle = `
+	update chat.session
+	set title = $2
+	where id = $1;
+`
+
+// UpdateTitle updates session title filtered by id.
+func (r *Repo) UpdateTitle(ctx context.Context, params model.RenameReq) error {
+	tag, err := r.pg.Exec(ctx, updateTitle, params.ID, params.Title)
+	if err != nil {
+		return shared.ErrUpdateSession
+	}
+	if tag.RowsAffected() == 0 {
+		return shared.ErrNoSessionWithID
+	}
+	return err
+}
+
+const deleteOne = `
+	delete from chat.session
+	where id = $1;
+`
+
+// DeleteOne deletes a session by id.
+func (r *Repo) DeleteOne(ctx context.Context, id uuid.UUID) error {
+	tag, err := r.pg.Exec(ctx, deleteOne, id)
+	if err != nil {
+		return shared.ErrDeleteSession
+	}
+	if tag.RowsAffected() == 0 {
+		return shared.ErrNoSessionWithID
+	}
+	return nil
 }

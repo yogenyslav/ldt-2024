@@ -69,7 +69,7 @@ proto:
 .PHONY: tests
 tests:
 	@for dir in $(shell find . -type f -name go.mod -exec dirname {} \;); do \
-		cd $$dir && go test -v ./... -cover && cd ..; \
+		cd $$dir && go test -v ./... -cover -tags=integration && cd ..; \
 	done
 
 .PHONY: swag

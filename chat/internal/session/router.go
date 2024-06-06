@@ -9,6 +9,8 @@ import (
 type sessionHandler interface {
 	NewSession(c *fiber.Ctx) error
 	List(c *fiber.Ctx) error
+	Rename(c *fiber.Ctx) error
+	Delete(c *fiber.Ctx) error
 }
 
 func SetupSessionRoutes(app *fiber.App, h sessionHandler, kc *gocloak.GoCloak, realm, cipher string) {
@@ -17,4 +19,6 @@ func SetupSessionRoutes(app *fiber.App, h sessionHandler, kc *gocloak.GoCloak, r
 
 	g.Post("/new", h.NewSession)
 	g.Get("/list", h.List)
+	g.Put("/rename", h.Rename)
+	g.Delete("/:id", h.Delete)
 }

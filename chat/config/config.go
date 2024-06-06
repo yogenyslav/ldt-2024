@@ -22,11 +22,8 @@ type Config struct {
 
 // KeyCloakConfig holds the configuration for Keycloak.
 type KeyCloakConfig struct {
-	URL        string `yaml:"url"`
-	Realm      string `yaml:"realm"`
-	AdminRealm string `yaml:"admin_realm"`
-	User       string `yaml:"user"`
-	Password   string `yaml:"password"`
+	URL   string `yaml:"url"`
+	Realm string `yaml:"realm"`
 }
 
 // MustNew creates a new Config instance or panics if failed.

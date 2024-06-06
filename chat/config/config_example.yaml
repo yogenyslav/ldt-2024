@@ -8,9 +8,6 @@ server:
 keycloak:
   url: "http://keycloak:8080"
   realm: "ldt"
-  admin_realm: "master"
-  user: "admin"
-  password: "admin"
 
 postgres:
   user: "pguser"

@@ -22,3 +22,9 @@ type NewSessionResp struct {
 type ListResp struct {
 	Sessions []SessionDto `json:"sessions"`
 }
+
+// RenameReq is a model for session rename request.
+type RenameReq struct {
+	Title string    `json:"title"`
+	ID    uuid.UUID `json:"id"`
+}
