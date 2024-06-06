@@ -8,6 +8,7 @@ import (
 	"strings"
 	"syscall"
 
+	"github.com/Nerzal/gocloak/v13"
 	"github.com/gofiber/contrib/otelfiber"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -20,6 +21,10 @@ import (
 	"github.com/yogenyslav/ldt-2024/chat/internal/auth"
 	ac "github.com/yogenyslav/ldt-2024/chat/internal/auth/controller"
 	ah "github.com/yogenyslav/ldt-2024/chat/internal/auth/handler"
+	"github.com/yogenyslav/ldt-2024/chat/internal/session"
+	sc "github.com/yogenyslav/ldt-2024/chat/internal/session/controller"
+	sh "github.com/yogenyslav/ldt-2024/chat/internal/session/handler"
+	sr "github.com/yogenyslav/ldt-2024/chat/internal/session/repo"
 	"github.com/yogenyslav/ldt-2024/chat/pkg/client"
 	"github.com/yogenyslav/pkg/infrastructure/prom"
 	"github.com/yogenyslav/pkg/infrastructure/tracing"
@@ -38,6 +43,7 @@ type Server struct {
 	pg       storage.SQLDatabase
 	tracer   trace.Tracer
 	exporter sdktrace.SpanExporter
+	kc       *gocloak.GoCloak
 }
 
 // New creates a new Server instance.
@@ -67,6 +73,7 @@ func New(cfg *config.Config) *Server {
 		pg:       postgres.MustNew(cfg.Postgres, tracer),
 		exporter: exporter,
 		tracer:   tracer,
+		kc:       gocloak.NewClient(cfg.KeyCloak.URL),
 	}
 }
 
@@ -94,9 +101,14 @@ func (s *Server) Run() {
 		}
 	}()
 
-	authController := ac.New(apiClient.GetConn(), s.tracer)
-	authHandler := ah.New(authController, s.tracer)
+	authController := ac.New(apiClient.GetConn(), s.cfg.Server.CipherKey, s.tracer)
+	authHandler := ah.New(authController)
 	auth.SetupAuthRoutes(s.app, authHandler)
+
+	sessionRepo := sr.New(s.pg)
+	sessionController := sc.New(sessionRepo, s.tracer)
+	sessionHandler := sh.New(sessionController)
+	session.SetupSessionRoutes(s.app, sessionHandler, s.kc, s.cfg.KeyCloak.Realm, s.cfg.Server.CipherKey)
 
 	go s.listen()
 	go prom.HandlePrometheus(s.cfg.Prometheus)

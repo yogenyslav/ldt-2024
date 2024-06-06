@@ -3,10 +3,12 @@ package controller
 import (
 	"context"
 
+	"github.com/rs/zerolog/log"
 	"github.com/yogenyslav/ldt-2024/chat/internal/api/pb"
 	"github.com/yogenyslav/ldt-2024/chat/internal/auth/model"
 	"github.com/yogenyslav/ldt-2024/chat/internal/shared"
 	"github.com/yogenyslav/ldt-2024/chat/pkg"
+	"github.com/yogenyslav/ldt-2024/chat/pkg/secure"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
 )
@@ -16,7 +18,7 @@ func (ctrl *Controller) Login(ctx context.Context, params model.LoginReq) (model
 	ctx, span := ctrl.tracer.Start(
 		ctx,
 		"Controller.Login",
-		trace.WithAttributes(attribute.String("email", params.Email)),
+		trace.WithAttributes(attribute.String("username", params.Username)),
 	)
 	defer span.End()
 
@@ -25,7 +27,7 @@ func (ctrl *Controller) Login(ctx context.Context, params model.LoginReq) (model
 	var resp model.LoginResp
 
 	in := &pb.LoginRequest{
-		Email:    params.Email,
+		Username: params.Username,
 		Password: params.Password,
 	}
 	token, err := ctrl.authService.Login(ctx, in)
@@ -33,6 +35,12 @@ func (ctrl *Controller) Login(ctx context.Context, params model.LoginReq) (model
 		return resp, shared.ErrLoginFailed
 	}
 
-	resp.Token = token.Token
+	tokenEncrypted, err := secure.Encrypt(token.Token, ctrl.cipherKey)
+	if err != nil {
+		log.Error().Err(err).Msg("encryption internal error")
+		return resp, shared.ErrEncryption
+	}
+	resp.Token = tokenEncrypted
+
 	return resp, nil
 }

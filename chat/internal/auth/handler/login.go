@@ -10,7 +10,7 @@ import (
 
 // Login godoc
 // @Summary Авторизация
-// @Description Авторизоваться в системе, используя почту и пароль
+// @Description Авторизоваться в системе, используя логин и пароль
 // @Tags auth
 // @Accept json
 // @Produce json

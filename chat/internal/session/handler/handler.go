@@ -1,10 +1,14 @@
 package handler
 
 import (
+	"context"
+
 	"github.com/go-playground/validator/v10"
+	"github.com/google/uuid"
 )
 
 type sessionController interface {
+	NewSession(ctx context.Context, id uuid.UUID, username string) error
 }
 
 // Handler is the session handler

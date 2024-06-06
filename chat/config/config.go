@@ -17,6 +17,16 @@ type Config struct {
 	Jaeger     *tracing.Config          `yaml:"jaeger"`
 	Prometheus *prom.Config             `yaml:"prometheus"`
 	API        *client.GrpcClientConfig `yaml:"api"`
+	KeyCloak   *KeyCloakConfig          `yaml:"keycloak"`
+}
+
+// KeyCloakConfig holds the configuration for Keycloak.
+type KeyCloakConfig struct {
+	URL        string `yaml:"url"`
+	Realm      string `yaml:"realm"`
+	AdminRealm string `yaml:"admin_realm"`
+	User       string `yaml:"user"`
+	Password   string `yaml:"password"`
 }
 
 // MustNew creates a new Config instance or panics if failed.

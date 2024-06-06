@@ -10,12 +10,14 @@ import (
 type Controller struct {
 	authService pb.AuthServiceClient
 	tracer      trace.Tracer
+	cipherKey   string
 }
 
 // New creates a new instance of the Controller.
-func New(authConn *grpc.ClientConn, tracer trace.Tracer) *Controller {
+func New(authConn *grpc.ClientConn, cipher string, tracer trace.Tracer) *Controller {
 	return &Controller{
 		authService: pb.NewAuthServiceClient(authConn),
+		cipherKey:   cipher,
 		tracer:      tracer,
 	}
 }

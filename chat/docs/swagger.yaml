@@ -2,17 +2,22 @@ basePath: /
 definitions:
   model.LoginReq:
     properties:
-      email:
-        type: string
       password:
         type: string
+      username:
+        type: string
     required:
-    - email
     - password
+    - username
     type: object
   model.LoginResp:
     properties:
       token:
+        type: string
+    type: object
+  model.NewSessionResp:
+    properties:
+      id:
         type: string
     type: object
 host: localhost:10000
@@ -29,7 +34,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: Авторизоваться в системе, используя почту и пароль
+      description: Авторизоваться в системе, используя логин и пароль
       parameters:
       - description: Запрос на авторизацию
         in: body
@@ -59,4 +64,29 @@ paths:
       summary: Авторизация
       tags:
       - auth
+  /session/new:
+    post:
+      consumes:
+      - application/json
+      description: Создать новую сессию в чате для авторизованного пользователя
+      parameters:
+      - description: access token
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ID новой сессии
+          schema:
+            $ref: '#/definitions/model.NewSessionResp'
+        "400":
+          description: Сессия с таким ID уже существует
+          schema:
+            type: string
+      summary: Новая сессия
+      tags:
+      - session
 swagger: "2.0"

@@ -3,7 +3,6 @@ package controller
 import (
 	"context"
 
-	"github.com/rs/zerolog/log"
 	"github.com/yogenyslav/ldt-2024/api/internal/api/auth/model"
 )
 
@@ -14,18 +13,11 @@ func (ctrl *Controller) Login(ctx context.Context, params model.LoginReq) (model
 
 	var resp model.LoginResp
 
-	token, err := ctrl.kc.Login(ctx, ctrl.cfg.ClientID, ctrl.cfg.ClientSecret, ctrl.cfg.Realm, params.Email, params.Password)
+	token, err := ctrl.kc.Login(ctx, ctrl.cfg.ClientID, ctrl.cfg.ClientSecret, ctrl.cfg.Realm, params.Username, params.Password)
 	if err != nil {
 		return resp, err
 	}
 
-	user, err := ctrl.kc.GetUserInfo(ctx, token.AccessToken, ctrl.cfg.Realm)
-	if err != nil {
-		return resp, err
-	}
-
-	log.Debug().Str("user", user.String()).Msg("user info")
 	resp.Token = token.AccessToken
-
 	return resp, nil
 }

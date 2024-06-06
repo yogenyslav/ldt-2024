@@ -2,7 +2,7 @@ package model
 
 // LoginReq is the request model for the login endpoint.
 type LoginReq struct {
-	Email    string `json:"email" validate:"required,email"`
+	Username string `json:"username" validate:"required"`
 	Password string `json:"password" validate:"required"`
 }
 

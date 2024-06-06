@@ -26,7 +26,7 @@ func (h *Handler) Login(c context.Context, params *pb.LoginRequest) (*pb.LoginRe
 	defer span.End()
 
 	req := model.LoginReq{
-		Email:    params.GetEmail(),
+		Username: params.GetUsername(),
 		Password: params.GetPassword(),
 	}
 	resp, err := h.ctrl.Login(ctx, req)
@@ -35,7 +35,7 @@ func (h *Handler) Login(c context.Context, params *pb.LoginRequest) (*pb.LoginRe
 		return nil, status.Error(codes.Unauthenticated, err.Error())
 	}
 
-	log.Info().Str("email", req.Email).Msg("user logged in")
+	log.Info().Str("username", req.Username).Msg("user logged in")
 	h.metrics.LoginCount.Inc()
 
 	return &pb.LoginResponse{

@@ -45,6 +45,11 @@ linters-settings:
       - .WithMessagef(
       - .WithStack(
 
+  revive:
+    rules:
+      - name: blank-imports
+        disabled: true
+
   prealloc:
     for-loops: true
 

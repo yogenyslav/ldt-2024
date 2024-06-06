@@ -41,6 +41,18 @@ migrate_down:
 		password=${POSTGRES_PASSWORD} dbname=${POSTGRES_DB} sslmode=disable \
 		host=localhost port=${POSTGRES_PORT}" down
 
+.PHONY: migrate_up_test
+migrate_up_test:
+	cd migrations && goose postgres "user=${POSTGRES_TEST_USER} \
+		password=${POSTGRES_TEST_PASSWORD} dbname=${POSTGRES_TEST_DB} sslmode=disable \
+		host=${POSTGRES_TEST_HOST} port=${POSTGRES_TEST_PORT}" up
+
+.PHONY: migrate_down_test
+migrate_down_test:
+	cd migrations && goose postgres "user=${POSTGRES_TEST_USER} \
+		password=${POSTGRES_TEST_PASSWORD} dbname=${POSTGRES_TEST_DB} sslmode=disable \
+		host=localhost port=${POSTGRES_TEST_PORT}" down
+
 .PHONY: migrate_new
 migrate_new:
 	cd migrations && goose create $(name) sql
@@ -57,7 +69,7 @@ proto:
 .PHONY: tests
 tests:
 	@for dir in $(shell find . -type f -name go.mod -exec dirname {} \;); do \
-		cd $$dir && go test -v ./... && cd ..; \
+		cd $$dir && go test -v ./... -cover && cd ..; \
 	done
 
 .PHONY: swag

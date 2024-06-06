@@ -54,11 +54,11 @@
     "apiLoginRequest": {
       "type": "object",
       "example": {
-        "email": "test@test.com",
+        "username": "test@test.com",
         "password": "test123456"
       },
       "properties": {
-        "email": {
+        "username": {
           "type": "string"
         },
         "password": {
@@ -68,7 +68,7 @@
       "description": "Login request model holding credentials for authorization.",
       "title": "Login request",
       "required": [
-        "email",
+        "username",
         "password"
       ]
     },

@@ -27,10 +27,8 @@ func init() {
 }
 
 func TestController_Login(t *testing.T) {
-	t.Parallel()
-
 	ctx := context.Background()
-	authController := New(kc, cfg.KeyCloak, tracer)
+	ctrl := New(kc, cfg.KeyCloak, tracer)
 
 	token, err := kc.LoginAdmin(ctx, cfg.KeyCloak.User, cfg.KeyCloak.Password, cfg.KeyCloak.AdminRealm)
 	require.NoError(t, err)
@@ -55,25 +53,31 @@ func TestController_Login(t *testing.T) {
 
 	tests := []struct {
 		name     string
-		email    string
+		username string
 		password string
 		wantErr  bool
 	}{
 		{
 			name:     "success",
-			email:    "test@test.com",
+			username: "test@test.com",
 			password: "test123456",
 			wantErr:  false,
 		},
 		{
-			name:     "fail, invalid email",
-			email:    "test1@test.com",
+			name:     "success",
+			username: "test_user",
+			password: "test123456",
+			wantErr:  false,
+		},
+		{
+			name:     "fail, invalid username",
+			username: "aaa@test.com",
 			password: "test123456",
 			wantErr:  true,
 		},
 		{
 			name:     "fail, invalid password",
-			email:    "test@test.com",
+			username: "test@test.com",
 			password: "test12345",
 			wantErr:  true,
 		},
@@ -82,10 +86,10 @@ func TestController_Login(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			req := model.LoginReq{
-				Email:    tt.email,
+				Username: tt.username,
 				Password: tt.password,
 			}
-			resp, err := authController.Login(ctx, req)
+			resp, err := ctrl.Login(ctx, req)
 			if tt.wantErr {
 				assert.Error(t, err)
 			} else {

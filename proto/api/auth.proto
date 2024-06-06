@@ -21,11 +21,11 @@ message LoginRequest {
     json_schema: {
       title: "Login request"
       description: "Login request model holding credentials for authorization."
-      required: ["email", "password"]
+      required: ["username", "password"]
     }
-    example: "{\"email\": \"test@test.com\", \"password\": \"test123456\"}"
+    example: "{\"username\": \"test@test.com\", \"password\": \"test123456\"}"
   };
-  string email = 1;
+  string username = 1;
   string password = 2;
 }
 

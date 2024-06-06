@@ -21,7 +21,7 @@ const docTemplate = `{
     "paths": {
         "/auth/login": {
             "post": {
-                "description": "Авторизоваться в системе, используя почту и пароль",
+                "description": "Авторизоваться в системе, используя логин и пароль",
                 "consumes": [
                     "application/json"
                 ],
@@ -70,20 +70,58 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/session/new": {
+            "post": {
+                "description": "Создать новую сессию в чате для авторизованного пользователя",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "session"
+                ],
+                "summary": "Новая сессия",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "access token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ID новой сессии",
+                        "schema": {
+                            "$ref": "#/definitions/model.NewSessionResp"
+                        }
+                    },
+                    "400": {
+                        "description": "Сессия с таким ID уже существует",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
         "model.LoginReq": {
             "type": "object",
             "required": [
-                "email",
-                "password"
+                "password",
+                "username"
             ],
             "properties": {
-                "email": {
+                "password": {
                     "type": "string"
                 },
-                "password": {
+                "username": {
                     "type": "string"
                 }
             }
@@ -92,6 +130,14 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "token": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.NewSessionResp": {
+            "type": "object",
+            "properties": {
+                "id": {
                     "type": "string"
                 }
             }
