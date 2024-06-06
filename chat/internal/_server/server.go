@@ -10,6 +10,7 @@ import (
 
 	"github.com/Nerzal/gocloak/v13"
 	"github.com/gofiber/contrib/otelfiber"
+	"github.com/gofiber/contrib/websocket"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
@@ -21,6 +22,10 @@ import (
 	"github.com/yogenyslav/ldt-2024/chat/internal/auth"
 	ac "github.com/yogenyslav/ldt-2024/chat/internal/auth/controller"
 	ah "github.com/yogenyslav/ldt-2024/chat/internal/auth/handler"
+	"github.com/yogenyslav/ldt-2024/chat/internal/chat"
+	cc "github.com/yogenyslav/ldt-2024/chat/internal/chat/controller"
+	ch "github.com/yogenyslav/ldt-2024/chat/internal/chat/handler"
+	cr "github.com/yogenyslav/ldt-2024/chat/internal/chat/repo"
 	"github.com/yogenyslav/ldt-2024/chat/internal/session"
 	sc "github.com/yogenyslav/ldt-2024/chat/internal/session/controller"
 	sh "github.com/yogenyslav/ldt-2024/chat/internal/session/handler"
@@ -110,12 +115,31 @@ func (s *Server) Run() {
 	sessionHandler := sh.New(sessionController)
 	session.SetupSessionRoutes(s.app, sessionHandler, s.kc, s.cfg.KeyCloak.Realm, s.cfg.Server.CipherKey)
 
+	chatRepo := cr.New(s.pg)
+	chatController := cc.New(chatRepo, s.kc, s.cfg.KeyCloak.Realm, s.cfg.Server.CipherKey, s.tracer)
+	chatHandler := ch.New(chatController, s.tracer)
+	wsConfig := websocket.Config{
+		Origins: s.cfg.Server.CorsOrigins,
+		RecoverHandler: func(conn *websocket.Conn) {
+			if e := recover(); e != nil {
+				err = conn.WriteJSON(ch.ErrorResponse{
+					Msg: "internal error",
+					Err: err,
+				})
+				if err != nil {
+					log.Warn().Err(err).Msg("failed to recover ws panic")
+				}
+			}
+		},
+	}
+	chat.SetupChatRoutes(s.app, chatHandler, wsConfig)
+
 	go s.listen()
 	go prom.HandlePrometheus(s.cfg.Prometheus)
 
-	ch := make(chan os.Signal, 1)
-	signal.Notify(ch, os.Interrupt, syscall.SIGTERM, syscall.SIGINT)
-	<-ch
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM, syscall.SIGINT)
+	<-c
 	log.Info().Msg("shutting down the server")
 }
 

@@ -25,6 +25,6 @@ type ListResp struct {
 
 // RenameReq is a model for session rename request.
 type RenameReq struct {
-	Title string    `json:"title"`
-	ID    uuid.UUID `json:"id"`
+	Title string    `json:"title" validate:"required,gte=3,max=25"`
+	ID    uuid.UUID `json:"id" validate:"required"`
 }

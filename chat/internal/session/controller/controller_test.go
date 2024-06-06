@@ -127,3 +127,101 @@ func TestController_List(t *testing.T) {
 		})
 	}
 }
+
+func TestController_Rename(t *testing.T) {
+	ctx := context.Background()
+	repo := sr.New(pg)
+	ctrl := New(repo, tracer)
+
+	sessionID := uuid.New()
+
+	toFill := []model.SessionDao{
+		fixtures.SessionDao().New().ID(sessionID).V(),
+	}
+	fillDB(t, ctx, repo, toFill...)
+
+	defer database.TruncateTable(t, ctx, pg, "chat.session")
+
+	tests := []struct {
+		name    string
+		id      uuid.UUID
+		title   string
+		wantErr error
+	}{
+		{
+			name:    "success",
+			id:      sessionID,
+			title:   "new title",
+			wantErr: nil,
+		},
+		{
+			name:    "fail, no such id",
+			id:      uuid.New(),
+			title:   "new title",
+			wantErr: shared.ErrNoSessionWithID,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := ctrl.Rename(ctx, model.RenameReq{
+				ID:    tt.id,
+				Title: tt.title,
+			})
+
+			if tt.wantErr == nil {
+				assert.NoError(t, err)
+
+				sessions, err := ctrl.List(ctx, "user")
+				require.NoError(t, err)
+
+				assert.Equal(t, tt.title, sessions[0].Title)
+			} else {
+				assert.ErrorIs(t, err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestController_Delete(t *testing.T) {
+	ctx := context.Background()
+	repo := sr.New(pg)
+	ctrl := New(repo, tracer)
+
+	sessionID := uuid.New()
+
+	toFill := []model.SessionDao{
+		fixtures.SessionDao().New().ID(sessionID).V(),
+	}
+	fillDB(t, ctx, repo, toFill...)
+
+	defer database.TruncateTable(t, ctx, pg, "chat.session")
+
+	tests := []struct {
+		name    string
+		id      uuid.UUID
+		wantErr error
+	}{
+		{
+			name:    "success",
+			id:      sessionID,
+			wantErr: nil,
+		},
+		{
+			name:    "fail, no such id",
+			id:      uuid.New(),
+			wantErr: shared.ErrNoSessionWithID,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := ctrl.Delete(ctx, tt.id)
+			if tt.wantErr == nil {
+				assert.NoError(t, err)
+			} else {
+				assert.ErrorIs(t, err, tt.wantErr)
+			}
+		})
+	}
+}

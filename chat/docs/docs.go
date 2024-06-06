@@ -284,12 +284,18 @@ const docTemplate = `{
         },
         "model.RenameReq": {
             "type": "object",
+            "required": [
+                "id",
+                "title"
+            ],
             "properties": {
                 "id": {
                     "type": "string"
                 },
                 "title": {
-                    "type": "string"
+                    "type": "string",
+                    "maxLength": 25,
+                    "minLength": 3
                 }
             }
         },

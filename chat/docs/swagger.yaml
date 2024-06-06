@@ -32,7 +32,12 @@ definitions:
       id:
         type: string
       title:
+        maxLength: 25
+        minLength: 3
         type: string
+    required:
+    - id
+    - title
     type: object
   model.SessionDto:
     properties:
