@@ -9,6 +9,7 @@ import (
 )
 
 type chatRepo interface {
+	BeingTx(ctx context.Context) (context.Context, error)
 	InsertQuery(ctx context.Context, params model.QueryDao) (int64, error)
 	InsertResponse(ctx context.Context, params model.ResponseDao) error
 }

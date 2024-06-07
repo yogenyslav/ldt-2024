@@ -27,7 +27,12 @@ func (ctrl *Controller) InsertQuery(ctx context.Context, params model.QueryCreat
 	// pass the query through prompt detection
 	// and update value in params
 
-	queryID, err := ctrl.repo.InsertQuery(ctx, model.QueryDao{
+	tx, err := ctrl.repo.BeingTx(ctx)
+	if err != nil {
+		return shared.ErrBeginTx
+	}
+
+	queryID, err := ctrl.repo.InsertQuery(tx, model.QueryDao{
 		SessionID: sessionID,
 		Prompt:    params.Prompt,
 		Command:   params.Command,
@@ -37,7 +42,7 @@ func (ctrl *Controller) InsertQuery(ctx context.Context, params model.QueryCreat
 		return shared.ErrCreateQuery
 	}
 
-	if err := ctrl.InsertResponse(ctx, queryID); err != nil {
+	if err := ctrl.InsertResponse(tx, queryID); err != nil {
 		return err
 	}
 

@@ -38,6 +38,8 @@ var (
 	ErrCipherTooShort = errors.New("cipher text is too short")
 	// ErrEncryption is an error when failed to encrypt data.
 	ErrEncryption = errors.New("encryption failed")
+	// ErrBeginTx is an error when failed to being an sql transaction.
+	ErrBeginTx = errors.New("failed to being an sql transaction")
 
 	// ErrCreateSession is an error when unable to create session.
 	ErrCreateSession = errors.New("failed to create session")
