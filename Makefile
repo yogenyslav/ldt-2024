@@ -21,7 +21,11 @@ docker_remove: docker_down
 	docker volume rm ${BASE_IMAGE}_pg_data
 	docker volume rm ${BASE_IMAGE}_prom_data
 	docker volume rm ${BASE_IMAGE}_jaeger_data
+	docker volume rm ${BASE_IMAGE}_redis_data
+	docker volume rm ${BASE_IMAGE}_redis_conf
 	docker image rm chat
+	docker image rm api
+	docker image rm bot
 
 .PHONY: docker_restart
 docker_restart: docker_down docker_up
@@ -75,4 +79,3 @@ tests:
 .PHONY: swag
 swag:
 	cd ./chat && swag init -g cmd/server/main.go -o ./docs
-	cd ./bot && swag init -g cmd/server/main.go -o ./docs

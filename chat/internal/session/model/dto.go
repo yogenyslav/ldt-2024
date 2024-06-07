@@ -11,6 +11,7 @@ import (
 type SessionDto struct {
 	CreatedAt time.Time `json:"created_at"`
 	Title     string    `json:"title"`
+	Tg        bool      `json:"tg"`
 	ID        uuid.UUID `json:"id"`
 }
 
@@ -34,6 +35,7 @@ type RenameReq struct {
 type FindOneResp struct {
 	Content  []SessionContentDto `json:"content"`
 	Editable bool                `json:"editable"`
+	Tg       bool                `json:"tg"`
 	ID       uuid.UUID           `json:"id"`
 }
 

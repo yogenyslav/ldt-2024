@@ -38,6 +38,7 @@ func (ctrl *Controller) FindOne(ctx context.Context, id uuid.UUID, username stri
 	if status.Username == username {
 		resp.Editable = true
 	}
+	resp.Tg = status.Tg
 
 	contentDB, err := ctrl.repo.FindContent(ctx, id)
 	if err != nil {

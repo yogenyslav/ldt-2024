@@ -2,6 +2,8 @@ volumes:
   pg_data:
   jaeger_data:
   prom_data:
+  redis_data:
+  redis_conf:
 
 services:
   jaeger:
@@ -74,6 +76,17 @@ services:
     ports:
       - "8080:8080"
     command: start-dev --db postgres
+
+  redis:
+    image: redis:7.2.4
+    restart: always
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+      - redis_conf:/usr/local/etc/redis/redis.conf
 
   chat:
     build:
