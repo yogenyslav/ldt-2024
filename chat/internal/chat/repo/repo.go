@@ -17,12 +17,23 @@ func New(pg storage.SQLDatabase) *Repo {
 	return &Repo{pg: pg}
 }
 
-func (r *Repo) BeingTx(ctx context.Context) (context.Context, error) {
+// BeginTx starts new transaction.
+func (r *Repo) BeginTx(ctx context.Context) (context.Context, error) {
 	ctx, err := r.pg.BeginSerializable(ctx)
 	if err != nil {
 		return nil, err
 	}
 	return ctx, nil
+}
+
+// CommitTx commits transaction.
+func (r *Repo) CommitTx(ctx context.Context) error {
+	return r.pg.CommitTx(ctx)
+}
+
+// RollbackTx rollbacks transaction.
+func (r *Repo) RollbackTx(ctx context.Context) error {
+	return r.pg.RollbackTx(ctx)
 }
 
 const insertQuery = `

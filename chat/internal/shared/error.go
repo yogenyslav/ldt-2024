@@ -40,6 +40,8 @@ var (
 	ErrEncryption = errors.New("encryption failed")
 	// ErrBeginTx is an error when failed to being an sql transaction.
 	ErrBeginTx = errors.New("failed to being an sql transaction")
+	// ErrCommitTx is an error when failed to commit transaction.
+	ErrCommitTx = errors.New("failed to commit transaction")
 
 	// ErrCreateSession is an error when unable to create session.
 	ErrCreateSession = errors.New("failed to create session")

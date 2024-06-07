@@ -121,6 +121,30 @@ paths:
       summary: Удалить сессию
       tags:
       - session
+    get:
+      consumes:
+      - application/json
+      description: Получить все запросы и ответы для сессии по ID
+      parameters:
+      - description: access token
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Информация о сессии
+          schema:
+            type: string
+        "400":
+          description: Неверное значение ID
+          schema:
+            type: string
+      summary: Получить данные о сессии
+      tags:
+      - session
   /session/list:
     get:
       consumes:

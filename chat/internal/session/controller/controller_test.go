@@ -6,10 +6,14 @@ import (
 	"context"
 	"testing"
 
+	"github.com/Nerzal/gocloak/v13"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/yogenyslav/ldt-2024/chat/config"
+	cc "github.com/yogenyslav/ldt-2024/chat/internal/chat/controller"
+	chatmodel "github.com/yogenyslav/ldt-2024/chat/internal/chat/model"
+	cr "github.com/yogenyslav/ldt-2024/chat/internal/chat/repo"
 	"github.com/yogenyslav/ldt-2024/chat/internal/session/model"
 	sr "github.com/yogenyslav/ldt-2024/chat/internal/session/repo"
 	"github.com/yogenyslav/ldt-2024/chat/internal/shared"
@@ -222,6 +226,116 @@ func TestController_Delete(t *testing.T) {
 			} else {
 				assert.ErrorIs(t, err, tt.wantErr)
 			}
+		})
+	}
+}
+
+func TestController_FindOne(t *testing.T) {
+	kc := gocloak.NewClient(cfg.KeyCloak.URL)
+
+	ctx := context.Background()
+	qr := cr.New(pg)
+	qc := cc.New(qr, kc, cfg.KeyCloak.Realm, cfg.Server.CipherKey, tracer)
+	repo := sr.New(pg)
+	ctrl := New(repo, tracer)
+
+	firstSessionID := uuid.New()
+	secondSessionID := uuid.New()
+
+	defer database.TruncateTable(t, ctx, pg, "chat.session", "chat.query", "chat.response")
+
+	sessionsToFill := []model.SessionDao{
+		fixtures.SessionDao().New().ID(firstSessionID).V(),
+		fixtures.SessionDao().New().ID(secondSessionID).V(),
+	}
+	fillDB(t, ctx, repo, sessionsToFill...)
+
+	queriesToFill := []struct {
+		params    chatmodel.QueryCreateReq
+		username  string
+		sessionID uuid.UUID
+	}{
+		{
+			params:    chatmodel.QueryCreateReq{Prompt: "test prompt"},
+			username:  "user",
+			sessionID: firstSessionID,
+		},
+		{
+			params:    chatmodel.QueryCreateReq{Prompt: "test prompt"},
+			username:  "user",
+			sessionID: firstSessionID,
+		},
+		{
+			params:    chatmodel.QueryCreateReq{Prompt: "test prompt"},
+			username:  "user",
+			sessionID: firstSessionID,
+		},
+	}
+	for _, query := range queriesToFill {
+		err := qc.InsertQuery(ctx, query.params, query.username, query.sessionID)
+		require.NoError(t, err)
+	}
+
+	tests := []struct {
+		name         string
+		sessionID    uuid.UUID
+		username     string
+		wantLen      int
+		wantEditable bool
+		wantErr      error
+	}{
+		{
+			name:         "success, len 3, editable",
+			sessionID:    firstSessionID,
+			username:     "user",
+			wantLen:      3,
+			wantEditable: true,
+			wantErr:      nil,
+		},
+		{
+			name:         "success, empty session, editable",
+			sessionID:    secondSessionID,
+			username:     "user",
+			wantLen:      0,
+			wantEditable: true,
+			wantErr:      nil,
+		},
+		{
+			name:         "success, len 3, not editable",
+			sessionID:    firstSessionID,
+			username:     "another_user",
+			wantLen:      3,
+			wantEditable: false,
+			wantErr:      nil,
+		},
+		{
+			name:         "success, empty session, not editable",
+			sessionID:    secondSessionID,
+			username:     "another_user",
+			wantLen:      0,
+			wantEditable: false,
+			wantErr:      nil,
+		},
+		{
+			name:      "fail, no such id",
+			sessionID: uuid.New(),
+			username:  "user",
+			wantErr:   shared.ErrNoSessionWithID,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			resp, err := ctrl.FindOne(ctx, tt.sessionID, tt.username)
+			if tt.wantErr != nil {
+				assert.ErrorIs(t, err, tt.wantErr)
+				return
+			}
+
+			assert.NoError(t, err)
+			assert.Equal(t, tt.sessionID, resp.ID)
+			assert.Equal(t, tt.wantLen, len(resp.Content))
+			assert.Equal(t, tt.wantEditable, resp.Editable)
 		})
 	}
 }

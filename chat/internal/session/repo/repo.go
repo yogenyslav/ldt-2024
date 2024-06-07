@@ -79,3 +79,39 @@ func (r *Repo) DeleteOne(ctx context.Context, id uuid.UUID) error {
 	}
 	return nil
 }
+
+const findStatus = `
+	select username, is_deleted
+	from chat.session
+	where id = $1;
+`
+
+// FindStatus returns the username of the session creator and status (is_deleted).
+func (r *Repo) FindStatus(ctx context.Context, id uuid.UUID) (model.SessionStatus, error) {
+	var status model.SessionStatus
+	err := r.pg.Query(ctx, &status, findStatus, id)
+	return status, err
+}
+
+const findContent = `
+	select 
+		(r.created_at, r.body, r.status) as response,
+		(q.created_at, q.prompt, q.command, q.id) as query
+	from chat.query q
+	join
+	    chat.response r
+		on q.id = r.query_id
+	join 
+	    chat.session s
+		on q.session_id = s.id
+	where
+	    q.session_id = $1 
+	  	and s.is_deleted = false;
+`
+
+// FindContent finds session content by id.
+func (r *Repo) FindContent(ctx context.Context, id uuid.UUID) ([]model.SessionContentDao, error) {
+	var content []model.SessionContentDao
+	err := r.pg.QuerySlice(ctx, &content, findContent, id)
+	return content, err
+}

@@ -56,4 +56,10 @@ var errStatus = map[error]srvresp.ErrorResponse{
 	shared.ErrDeleteSession: {
 		Status: http.StatusInternalServerError,
 	},
+	shared.ErrBeginTx: {
+		Status: http.StatusInternalServerError,
+	},
+	shared.ErrCommitTx: {
+		Status: http.StatusInternalServerError,
+	},
 }

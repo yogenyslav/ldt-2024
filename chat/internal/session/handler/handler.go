@@ -13,6 +13,7 @@ type sessionController interface {
 	List(ctx context.Context, username string) ([]model.SessionDto, error)
 	Rename(ctx context.Context, params model.RenameReq) error
 	Delete(ctx context.Context, id uuid.UUID) error
+	FindOne(ctx context.Context, id uuid.UUID, username string) (model.FindOneResp, error)
 }
 
 // Handler is the session handler

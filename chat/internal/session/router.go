@@ -11,6 +11,7 @@ type sessionHandler interface {
 	List(c *fiber.Ctx) error
 	Rename(c *fiber.Ctx) error
 	Delete(c *fiber.Ctx) error
+	FindOne(c *fiber.Ctx) error
 }
 
 // SetupSessionRoutes maps the session routes to the session handler.
@@ -20,6 +21,7 @@ func SetupSessionRoutes(app *fiber.App, h sessionHandler, kc *gocloak.GoCloak, r
 
 	g.Post("/new", h.NewSession)
 	g.Get("/list", h.List)
+	g.Get("/:id", h.FindOne)
 	g.Put("/rename", h.Rename)
 	g.Delete("/:id", h.Delete)
 }

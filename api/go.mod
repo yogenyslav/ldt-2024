@@ -10,7 +10,7 @@ require (
 	github.com/prometheus/client_golang v1.19.0
 	github.com/rs/zerolog v1.32.0
 	github.com/stretchr/testify v1.9.0
-	github.com/yogenyslav/pkg v0.2.1
+	github.com/yogenyslav/pkg v0.2.2
 	go.opentelemetry.io/otel v1.27.0
 	go.opentelemetry.io/otel/sdk v1.27.0
 	go.opentelemetry.io/otel/trace v1.27.0

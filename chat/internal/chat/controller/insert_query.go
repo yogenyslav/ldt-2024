@@ -27,10 +27,13 @@ func (ctrl *Controller) InsertQuery(ctx context.Context, params model.QueryCreat
 	// pass the query through prompt detection
 	// and update value in params
 
-	tx, err := ctrl.repo.BeingTx(ctx)
+	tx, err := ctrl.repo.BeginTx(ctx)
 	if err != nil {
 		return shared.ErrBeginTx
 	}
+	defer func() {
+		_ = ctrl.repo.RollbackTx(tx) //nolint:errcheck // transaction is either properly closed or nothing can be done
+	}()
 
 	queryID, err := ctrl.repo.InsertQuery(tx, model.QueryDao{
 		SessionID: sessionID,
@@ -44,6 +47,10 @@ func (ctrl *Controller) InsertQuery(ctx context.Context, params model.QueryCreat
 
 	if err := ctrl.InsertResponse(tx, queryID); err != nil {
 		return err
+	}
+
+	if err := ctrl.repo.CommitTx(tx); err != nil {
+		return shared.ErrCommitTx
 	}
 
 	// make prediction and update

@@ -195,6 +195,42 @@ const docTemplate = `{
             }
         },
         "/session/{id}": {
+            "get": {
+                "description": "Получить все запросы и ответы для сессии по ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "session"
+                ],
+                "summary": "Получить данные о сессии",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "access token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Информация о сессии",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Неверное значение ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
             "delete": {
                 "description": "Удалить сессию по ID",
                 "consumes": [

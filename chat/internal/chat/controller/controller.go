@@ -9,7 +9,9 @@ import (
 )
 
 type chatRepo interface {
-	BeingTx(ctx context.Context) (context.Context, error)
+	BeginTx(ctx context.Context) (context.Context, error)
+	CommitTx(ctx context.Context) error
+	RollbackTx(ctx context.Context) error
 	InsertQuery(ctx context.Context, params model.QueryDao) (int64, error)
 	InsertResponse(ctx context.Context, params model.ResponseDao) error
 }

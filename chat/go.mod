@@ -16,7 +16,7 @@ require (
 	github.com/rs/zerolog v1.33.0
 	github.com/stretchr/testify v1.9.0
 	github.com/swaggo/swag v1.16.3
-	github.com/yogenyslav/pkg v0.2.1
+	github.com/yogenyslav/pkg v0.2.2
 	go.opentelemetry.io/otel v1.27.0
 	go.opentelemetry.io/otel/sdk v1.27.0
 	go.opentelemetry.io/otel/trace v1.27.0

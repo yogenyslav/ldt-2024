@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/yogenyslav/ldt-2024/chat/internal/chat/model"
 )
 
 // SessionDto is a session model for the domain layer.
@@ -27,4 +28,17 @@ type ListResp struct {
 type RenameReq struct {
 	Title string    `json:"title" validate:"required,gte=3,max=25"`
 	ID    uuid.UUID `json:"id" validate:"required"`
+}
+
+// FindOneResp is a model for find one session request.
+type FindOneResp struct {
+	Content  []SessionContentDto `json:"content"`
+	Editable bool                `json:"editable"`
+	ID       uuid.UUID           `json:"id"`
+}
+
+// SessionContentDto is a model that holds all domain layer queries and responses for related session.
+type SessionContentDto struct {
+	Query    model.QueryDto    `json:"query"`
+	Response model.ResponseDto `json:"response"`
 }

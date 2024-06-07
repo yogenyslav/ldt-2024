@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/yogenyslav/ldt-2024/chat/internal/chat/model"
 )
 
 // SessionDao is a session model for the data access layer.
@@ -22,4 +23,16 @@ func (s SessionDao) ToDto() SessionDto {
 		Title:     s.Title,
 		ID:        s.ID,
 	}
+}
+
+// SessionContentDao is a model that holds all data layer queries and responses for related session.
+type SessionContentDao struct {
+	Response model.ResponseDao `db:"response"`
+	Query    model.QueryDao    `db:"query"`
+}
+
+// SessionStatus is a model for session status info.
+type SessionStatus struct {
+	Username  string `db:"username"`
+	IsDeleted bool   `db:"is_deleted"`
 }
