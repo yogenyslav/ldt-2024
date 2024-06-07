@@ -52,4 +52,6 @@ var (
 
 	// ErrCreateQuery is an error when failed to create query.
 	ErrCreateQuery = errors.New("failed to create query")
+	// ErrCreateResponse is an error when failed to create response.
+	ErrCreateResponse = errors.New("failed to create response")
 )

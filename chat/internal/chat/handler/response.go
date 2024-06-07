@@ -18,5 +18,4 @@ func writeError(c *websocket.Conn, msg string, err error) {
 	}); e != nil {
 		log.Warn().Err(e).Msg("failed to write error response")
 	}
-	return
 }

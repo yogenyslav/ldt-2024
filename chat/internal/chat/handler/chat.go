@@ -22,6 +22,7 @@ func (h *Handler) Chat(c *websocket.Conn) {
 	defer func() {
 		if err := c.Close(); err != nil {
 			log.Warn().Err(err).Msg("failed to close websocket conn")
+			return
 		}
 	}()
 
@@ -41,10 +42,7 @@ func (h *Handler) Chat(c *websocket.Conn) {
 		return
 	}
 
-	var (
-		queryCreate        model.QueryCreateReq
-		sessionID, uuidErr = uuid.Parse(c.Params("session_id"))
-	)
+	sessionID, uuidErr := uuid.Parse(c.Params("session_id"))
 
 	if uuidErr != nil {
 		writeError(c, "invalid session uuid", uuidErr)
@@ -52,6 +50,7 @@ func (h *Handler) Chat(c *websocket.Conn) {
 	}
 
 	for {
+		var queryCreate model.QueryCreateReq
 		if err := c.ReadJSON(&queryCreate); err != nil {
 			writeError(c, "failed to read query", err)
 			return

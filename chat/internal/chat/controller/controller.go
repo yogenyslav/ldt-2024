@@ -10,6 +10,7 @@ import (
 
 type chatRepo interface {
 	InsertQuery(ctx context.Context, params model.QueryDao) (int64, error)
+	InsertResponse(ctx context.Context, params model.ResponseDao) error
 }
 
 // Controller is a struct that implements chat business logic.

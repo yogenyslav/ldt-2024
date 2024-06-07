@@ -64,3 +64,30 @@ func TestController_InsertQuery(t *testing.T) {
 		})
 	}
 }
+
+func TestController_InsertResponse(t *testing.T) {
+	ctx := context.Background()
+	database.TruncateTable(t, ctx, pg, "chat.response")
+
+	repo := cr.New(pg)
+	ctrl := New(repo, kc, cfg.KeyCloak.Realm, cfg.Server.CipherKey, tracer)
+
+	defer database.TruncateTable(t, ctx, pg, "chat.response")
+
+	tests := []struct {
+		name    string
+		queryID int64
+	}{
+		{
+			name:    "success",
+			queryID: 1,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := ctrl.InsertResponse(ctx, tt.queryID)
+			assert.NoError(t, err)
+		})
+	}
+}

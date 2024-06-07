@@ -29,3 +29,14 @@ func (r *Repo) InsertQuery(ctx context.Context, params model.QueryDao) (int64, e
 	err := r.pg.Query(ctx, &id, insertQuery, params.Prompt, params.Command, params.Username, params.SessionID)
 	return id, err
 }
+
+const insertResponse = `
+	insert into chat.response(query_id)
+	values ($1);
+`
+
+// InsertResponse create new response with processing status.
+func (r *Repo) InsertResponse(ctx context.Context, params model.ResponseDao) error {
+	_, err := r.pg.Exec(ctx, insertResponse, params.QueryID)
+	return err
+}

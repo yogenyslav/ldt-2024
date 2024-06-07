@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-	"github.com/rs/zerolog/log"
 	"github.com/yogenyslav/ldt-2024/chat/internal/chat/model"
 	"github.com/yogenyslav/ldt-2024/chat/internal/shared"
 	"go.opentelemetry.io/otel/attribute"
@@ -24,6 +23,10 @@ func (ctrl *Controller) InsertQuery(ctx context.Context, params model.QueryCreat
 	)
 	defer span.End()
 
+	// if params.Prompt != ""
+	// pass the query through prompt detection
+	// and update value in params
+
 	queryID, err := ctrl.repo.InsertQuery(ctx, model.QueryDao{
 		SessionID: sessionID,
 		Prompt:    params.Prompt,
@@ -34,7 +37,11 @@ func (ctrl *Controller) InsertQuery(ctx context.Context, params model.QueryCreat
 		return shared.ErrCreateQuery
 	}
 
-	log.Debug().Int64("queryID", queryID).Msg("query created")
+	if err := ctrl.InsertResponse(ctx, queryID); err != nil {
+		return err
+	}
+
+	// make prediction and update
 
 	return nil
 }
