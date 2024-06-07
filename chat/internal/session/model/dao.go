@@ -11,6 +11,7 @@ type SessionDao struct {
 	CreatedAt time.Time `db:"created_at"`
 	Username  string    `db:"username"`
 	Title     string    `db:"title"`
+	IsDeleted bool      `db:"is_deleted"`
 	ID        uuid.UUID `db:"id"`
 }
 

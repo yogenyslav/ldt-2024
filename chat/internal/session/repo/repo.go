@@ -33,7 +33,7 @@ func (r *Repo) InsertOne(ctx context.Context, params model.SessionDao) error {
 const list = `
 	select id, title, created_at
 	from chat.session
-	where username = $1
+	where username = $1 and is_deleted = false
 	order by created_at;
 `
 
@@ -47,7 +47,7 @@ func (r *Repo) List(ctx context.Context, username string) ([]model.SessionDao, e
 const updateTitle = `
 	update chat.session
 	set title = $2
-	where id = $1;
+	where id = $1 and is_deleted = false;
 `
 
 // UpdateTitle updates session title filtered by id.
@@ -63,7 +63,8 @@ func (r *Repo) UpdateTitle(ctx context.Context, params model.RenameReq) error {
 }
 
 const deleteOne = `
-	delete from chat.session
+	update chat.session
+	set is_deleted = true
 	where id = $1;
 `
 
