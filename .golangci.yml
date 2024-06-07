@@ -23,7 +23,9 @@ issues:
     - pb
   exclude:
     - G104
-    - (comment on exported (method|function|type|constants)|should have( a package)? comment|comment should be of the form)
+    - G114
+    - Comment should end in a period
+    - should have a package comment
     - don't use an underscore in package name
     - Error return value of .((os\.)?std(out|err)\..*|.*Close|.*Flush|os\.Remove(All)?|.*print(f|ln)?|os\.(Un)?Setenv). is not checked
     - should check returned error before deferring
@@ -33,6 +35,20 @@ linters-settings:
     ignoreSigs:
       - status.Error(
       - .JSON(
+      - .Errorf(
+      - errors.New(
+      - errors.Unwrap(
+      - errors.Join(
+      - .Wrap(
+      - .Wrapf(
+      - .WithMessage(
+      - .WithMessagef(
+      - .WithStack(
+
+  revive:
+    rules:
+      - name: blank-imports
+        disabled: true
 
   prealloc:
     for-loops: true
@@ -119,4 +135,3 @@ linters:
 
   presets:
     - comment
-    - error

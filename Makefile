@@ -18,9 +18,9 @@ docker_down:
 
 .PHONY: docker_remove
 docker_remove: docker_down
-	docker volume rm ${PROJECT_DIR}_pg_data
-	docker volume rm ${PROJECT_DIR}_prom_data
-	docker volume rm ${PROJECT_DIR}_jaeger_data
+	docker volume rm ${BASE_IMAGE}_pg_data
+	docker volume rm ${BASE_IMAGE}_prom_data
+	docker volume rm ${BASE_IMAGE}_jaeger_data
 	docker image rm chat
 
 .PHONY: docker_restart
@@ -41,6 +41,18 @@ migrate_down:
 		password=${POSTGRES_PASSWORD} dbname=${POSTGRES_DB} sslmode=disable \
 		host=localhost port=${POSTGRES_PORT}" down
 
+.PHONY: migrate_up_test
+migrate_up_test:
+	cd migrations && goose postgres "user=${POSTGRES_TEST_USER} \
+		password=${POSTGRES_TEST_PASSWORD} dbname=${POSTGRES_TEST_DB} sslmode=disable \
+		host=${POSTGRES_TEST_HOST} port=${POSTGRES_TEST_PORT}" up
+
+.PHONY: migrate_down_test
+migrate_down_test:
+	cd migrations && goose postgres "user=${POSTGRES_TEST_USER} \
+		password=${POSTGRES_TEST_PASSWORD} dbname=${POSTGRES_TEST_DB} sslmode=disable \
+		host=localhost port=${POSTGRES_TEST_PORT}" down
+
 .PHONY: migrate_new
 migrate_new:
 	cd migrations && goose create $(name) sql
@@ -49,7 +61,18 @@ migrate_new:
 proto:
 	@for dir in $(shell find . -type f -name go.mod -exec dirname {} \;); do \
 		protoc --proto_path=./proto --go_out=$$dir --go-grpc_out=$$dir proto/api/auth.proto; \
-		protoc --proto_path=./proto --grpc-gateway_out=$$dir \
-                --grpc-gateway_opt=generate_unbound_methods=true \
-                proto/api/auth.proto; \
 	done
+	@protoc --proto_path=./proto --grpc-gateway_out=./api \
+                    --grpc-gateway_opt=generate_unbound_methods=true \
+                    proto/api/auth.proto --openapiv2_out ./api/third_party/OpenAPI \
+
+.PHONY: tests
+tests:
+	@for dir in $(shell find . -type f -name go.mod -exec dirname {} \;); do \
+		cd $$dir && go test -v ./... -cover -tags=integration && cd ..; \
+	done
+
+.PHONY: swag
+swag:
+	cd ./chat && swag init -g cmd/server/main.go -o ./docs
+	cd ./bot && swag init -g cmd/server/main.go -o ./docs

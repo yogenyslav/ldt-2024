@@ -1,0 +1,31 @@
+server:
+  port: 10000
+  log_level: "debug"
+  cors_origins:
+    - "*"
+  cipher_key: "32-bit cipher hex key"
+
+keycloak:
+  url: "http://keycloak:8080"
+  realm: "ldt"
+
+postgres:
+  user: "pguser"
+  password: "pgpass"
+  host: "pg"
+  port: 5432
+  db: "dev"
+  ssl: false
+  retry_timeout: 20
+
+jaeger:
+  host: "jaeger"
+  port: 4318
+
+prometheus:
+  host: ""
+  port: 10001
+
+api:
+  host: "api"
+  port: 9999

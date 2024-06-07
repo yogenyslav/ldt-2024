@@ -1,4 +1,5 @@
 .idea
 vendor
 .env
-config.yaml
+***/config.yaml
+***/config_test.yaml

@@ -8,14 +8,29 @@ import (
 	"strings"
 	"syscall"
 
+	"github.com/Nerzal/gocloak/v13"
+	"github.com/gofiber/contrib/otelfiber"
+	"github.com/gofiber/contrib/websocket"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
+	recovermw "github.com/gofiber/fiber/v2/middleware/recover"
+	"github.com/gofiber/swagger"
 	"github.com/rs/zerolog/log"
 	"github.com/yogenyslav/ldt-2024/chat/config"
+	_ "github.com/yogenyslav/ldt-2024/chat/docs"
 	"github.com/yogenyslav/ldt-2024/chat/internal/auth"
-	"github.com/yogenyslav/ldt-2024/chat/internal/auth/controller"
-	"github.com/yogenyslav/ldt-2024/chat/internal/auth/handler"
+	ac "github.com/yogenyslav/ldt-2024/chat/internal/auth/controller"
+	ah "github.com/yogenyslav/ldt-2024/chat/internal/auth/handler"
+	"github.com/yogenyslav/ldt-2024/chat/internal/chat"
+	cc "github.com/yogenyslav/ldt-2024/chat/internal/chat/controller"
+	ch "github.com/yogenyslav/ldt-2024/chat/internal/chat/handler"
+	cr "github.com/yogenyslav/ldt-2024/chat/internal/chat/repo"
+	"github.com/yogenyslav/ldt-2024/chat/internal/session"
+	sc "github.com/yogenyslav/ldt-2024/chat/internal/session/controller"
+	sh "github.com/yogenyslav/ldt-2024/chat/internal/session/handler"
+	sr "github.com/yogenyslav/ldt-2024/chat/internal/session/repo"
+	"github.com/yogenyslav/ldt-2024/chat/pkg/client"
 	"github.com/yogenyslav/pkg/infrastructure/prom"
 	"github.com/yogenyslav/pkg/infrastructure/tracing"
 	srvresp "github.com/yogenyslav/pkg/response"
@@ -24,8 +39,6 @@ import (
 	"go.opentelemetry.io/otel"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/trace"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 )
 
 // Server main struct that holds dependencies.
@@ -35,6 +48,7 @@ type Server struct {
 	pg       storage.SQLDatabase
 	tracer   trace.Tracer
 	exporter sdktrace.SpanExporter
+	kc       *gocloak.GoCloak
 }
 
 // New creates a new Server instance.
@@ -48,6 +62,9 @@ func New(cfg *config.Config) *Server {
 	app.Use(cors.New(cors.Config{
 		AllowOrigins: strings.Join(cfg.Server.CorsOrigins, ","),
 	}))
+	app.Use(otelfiber.Middleware())
+	app.Use(recovermw.New())
+	app.Get("/swagger/*", swagger.HandlerDefault)
 
 	exporter := tracing.MustNewExporter(context.Background(), cfg.Jaeger.URL())
 	provider := tracing.MustNewTraceProvider(exporter, "chat")
@@ -61,6 +78,7 @@ func New(cfg *config.Config) *Server {
 		pg:       postgres.MustNew(cfg.Postgres, tracer),
 		exporter: exporter,
 		tracer:   tracer,
+		kc:       gocloak.NewClient(cfg.KeyCloak.URL),
 	}
 }
 
@@ -78,29 +96,50 @@ func (s *Server) Run() {
 		}
 	}()
 
-	var grpcOpts []grpc.DialOption
-	grpcOpts = append(grpcOpts, grpc.WithTransportCredentials(insecure.NewCredentials()))
-	orchestratorAddr := "api:9999"
-	authConn, err := grpc.NewClient(orchestratorAddr, grpcOpts...)
+	apiClient, err := client.NewGrpcClient(s.cfg.API)
 	if err != nil {
-		log.Fatal().Err(err).Msg("failed to connect to orchestrator")
+		log.Panic().Err(err).Msg("failed to create grpc client")
 	}
 	defer func() {
-		if err = authConn.Close(); err != nil {
-			log.Warn().Err(err).Msg("failed to properly close grpc connection")
+		if err = apiClient.Close(); err != nil {
+			log.Error().Err(err).Msg("failed to close grpc client")
 		}
 	}()
 
-	authController := controller.New(authConn, s.tracer)
-	authHandler := handler.New(authController, s.tracer)
+	authController := ac.New(apiClient.GetConn(), s.cfg.Server.CipherKey, s.tracer)
+	authHandler := ah.New(authController)
 	auth.SetupAuthRoutes(s.app, authHandler)
+
+	sessionRepo := sr.New(s.pg)
+	sessionController := sc.New(sessionRepo, s.tracer)
+	sessionHandler := sh.New(sessionController)
+	session.SetupSessionRoutes(s.app, sessionHandler, s.kc, s.cfg.KeyCloak.Realm, s.cfg.Server.CipherKey)
+
+	chatRepo := cr.New(s.pg)
+	chatController := cc.New(chatRepo, s.kc, s.cfg.KeyCloak.Realm, s.cfg.Server.CipherKey, s.tracer)
+	chatHandler := ch.New(chatController, s.tracer)
+	wsConfig := websocket.Config{
+		Origins: s.cfg.Server.CorsOrigins,
+		RecoverHandler: func(conn *websocket.Conn) {
+			if e := recover(); e != nil {
+				err = conn.WriteJSON(ch.ErrorResponse{
+					Msg: "internal error",
+					Err: err,
+				})
+				if err != nil {
+					log.Warn().Err(err).Msg("failed to recover ws panic")
+				}
+			}
+		},
+	}
+	chat.SetupChatRoutes(s.app, chatHandler, wsConfig)
 
 	go s.listen()
 	go prom.HandlePrometheus(s.cfg.Prometheus)
 
-	ch := make(chan os.Signal, 1)
-	signal.Notify(ch, os.Interrupt, syscall.SIGTERM, syscall.SIGINT)
-	<-ch
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM, syscall.SIGINT)
+	<-c
 	log.Info().Msg("shutting down the server")
 }
 
