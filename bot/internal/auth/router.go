@@ -8,6 +8,7 @@ type authHandler interface {
 	Auth(c tele.Context) error
 }
 
-func SetupUserRoutes(b *tele.Bot, h authHandler) {
+// SetupAuthRoutes sets up the routes for the auth handler.
+func SetupAuthRoutes(b *tele.Bot, h authHandler) {
 	b.Handle("/auth", h.Auth)
 }

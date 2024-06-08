@@ -102,6 +102,7 @@ services:
       - pg
       - api
       - jaeger
+      - keycloak
 
   api:
     build:
@@ -117,3 +118,20 @@ services:
     depends_on:
       - pg
       - jaeger
+      - keycloak
+
+  bot:
+    build:
+      context: ./bot
+      dockerfile: Dockerfile
+      target: prod
+    restart: always
+    image: bot
+    ports:
+      - "11000:11000"
+    depends_on:
+      - pg
+      - api
+      - jaeger
+      - keycloak
+      - redis

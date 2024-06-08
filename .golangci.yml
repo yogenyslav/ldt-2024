@@ -24,6 +24,7 @@ issues:
   exclude:
     - G104
     - G114
+    - SA1029
     - Comment should end in a period
     - should have a package comment
     - don't use an underscore in package name

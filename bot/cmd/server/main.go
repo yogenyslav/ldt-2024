@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/rs/zerolog"
 	"github.com/yogenyslav/ldt-2024/bot/config"
+	server "github.com/yogenyslav/ldt-2024/bot/internal/_server"
 	"github.com/yogenyslav/pkg/loctime"
 )
 
@@ -14,4 +15,6 @@ func main() {
 	}
 	zerolog.SetGlobalLevel(level)
 	loctime.SetLocation(loctime.MoscowLocation)
+	srv := server.New(cfg)
+	srv.Run()
 }
