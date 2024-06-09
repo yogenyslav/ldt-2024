@@ -8,13 +8,15 @@ import (
 )
 
 // QueryDao is a data layer representation of users query.
-type QueryDao struct {
-	CreatedAt time.Time `db:"created_at"`
-	Prompt    string    `db:"prompt"`
-	Command   string    `db:"command"`
-	Username  string    `db:"username"`
-	ID        int64     `db:"id"`
-	SessionID uuid.UUID `db:"session_id"`
+type QueryDao struct { //nolint:govet // order is required for sql request
+	CreatedAt time.Time        `db:"created_at"`
+	Prompt    string           `db:"prompt"`
+	Command   string           `db:"command"`
+	ID        int64            `db:"id"`
+	Username  string           `db:"username"`
+	Product   string           `db:"product"`
+	Type      shared.QueryType `db:"type"`
+	SessionID uuid.UUID        `db:"session_id"`
 }
 
 // ToDto converts QueryDao to QueryDto.
@@ -23,6 +25,8 @@ func (q QueryDao) ToDto() QueryDto {
 		CreatedAt: q.CreatedAt,
 		Prompt:    q.Prompt,
 		Command:   q.Command,
+		Product:   q.Product,
+		Type:      q.Type,
 		ID:        q.ID,
 	}
 }

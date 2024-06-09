@@ -1,0 +1,6 @@
+grpcio
+grpcio-tools
+google-api-core
+googleapis-common-protos
+grpc-gateway-protoc-gen-openapiv2
+protobuf==3.20.*

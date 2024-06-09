@@ -43,22 +43,33 @@ func (h *Handler) Chat(c *websocket.Conn) {
 	}
 
 	sessionID, uuidErr := uuid.Parse(c.Params("session_id"))
-
 	if uuidErr != nil {
 		writeError(c, "invalid session uuid", uuidErr)
 		return
 	}
 
+	var (
+		validate = make(chan struct{}, 1)
+	)
+
 	for {
-		var queryCreate model.QueryCreateReq
-		if err := c.ReadJSON(&queryCreate); err != nil {
+		var req model.QueryCreateReq
+		if err := c.ReadJSON(&req); err != nil {
 			writeError(c, "failed to read query", err)
 			return
 		}
 
-		if err := h.ctrl.InsertQuery(ctx, queryCreate, username, sessionID); err != nil {
-			writeError(c, err.Error(), err)
-			return
+		select {
+		case <-validate:
+			if req.Command == "valid" {
+				log.Debug().Msg("extracted prompt is valid")
+			}
+		default:
+			validate <- struct{}{}
+			if err := h.ctrl.InsertQuery(ctx, req, username, sessionID); err != nil {
+				writeError(c, err.Error(), err)
+				return
+			}
 		}
 	}
 }

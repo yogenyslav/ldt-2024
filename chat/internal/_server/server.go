@@ -19,6 +19,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/yogenyslav/ldt-2024/chat/config"
 	_ "github.com/yogenyslav/ldt-2024/chat/docs"
+	"github.com/yogenyslav/ldt-2024/chat/internal/api/pb"
 	"github.com/yogenyslav/ldt-2024/chat/internal/auth"
 	ac "github.com/yogenyslav/ldt-2024/chat/internal/auth/controller"
 	ah "github.com/yogenyslav/ldt-2024/chat/internal/auth/handler"
@@ -98,15 +99,15 @@ func (s *Server) Run() {
 
 	apiClient, err := client.NewGrpcClient(s.cfg.API)
 	if err != nil {
-		log.Panic().Err(err).Msg("failed to create grpc client")
+		log.Panic().Err(err).Msg("failed to create api grpc client")
 	}
 	defer func() {
 		if err = apiClient.Close(); err != nil {
-			log.Error().Err(err).Msg("failed to close grpc client")
+			log.Error().Err(err).Msg("failed to close api grpc client")
 		}
 	}()
 
-	authController := ac.New(apiClient.GetConn(), s.cfg.Server.CipherKey, s.tracer)
+	authController := ac.New(pb.NewAuthServiceClient(apiClient.GetConn()), s.cfg.Server.CipherKey, s.tracer)
 	authHandler := ah.New(authController)
 	auth.SetupAuthRoutes(s.app, authHandler)
 
@@ -116,7 +117,7 @@ func (s *Server) Run() {
 	session.SetupSessionRoutes(s.app, sessionHandler, s.kc, s.cfg.KeyCloak.Realm, s.cfg.Server.CipherKey)
 
 	chatRepo := cr.New(s.pg)
-	chatController := cc.New(chatRepo, s.kc, s.cfg.KeyCloak.Realm, s.cfg.Server.CipherKey, s.tracer)
+	chatController := cc.New(chatRepo, pb.NewPrompterClient(apiClient.GetConn()), s.kc, s.cfg.KeyCloak.Realm, s.cfg.Server.CipherKey, s.tracer)
 	chatHandler := ch.New(chatController, s.tracer)
 	wsConfig := websocket.Config{
 		Origins: s.cfg.Server.CorsOrigins,

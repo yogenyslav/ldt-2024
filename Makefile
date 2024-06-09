@@ -26,6 +26,7 @@ docker_remove: docker_down
 	docker image rm chat
 	docker image rm api
 	docker image rm bot
+	docker image rm prompter
 
 .PHONY: docker_restart
 docker_restart: docker_down docker_up
@@ -64,11 +65,13 @@ migrate_new:
 .PHONY: proto
 proto:
 	@for dir in $(shell find . -type f -name go.mod -exec dirname {} \;); do \
-		protoc --proto_path=./proto --go_out=$$dir --go-grpc_out=$$dir proto/api/auth.proto; \
+		protoc --proto_path=./proto --go_out=$$dir --go-grpc_out=$$dir proto/api/auth.proto proto/api/prompter.proto; \
 	done
 	@protoc --proto_path=./proto --grpc-gateway_out=./api \
                     --grpc-gateway_opt=generate_unbound_methods=true \
-                    proto/api/auth.proto --openapiv2_out ./api/third_party/OpenAPI \
+                    proto/api/auth.proto proto/api/prompter.proto --openapiv2_out ./api/third_party/OpenAPI
+	@python -m grpc_tools.protoc -Iproto --python_out=prompter --pyi_out=prompter --grpc_python_out=prompter \
+ 					proto/api/prompter.proto
 
 .PHONY: tests
 tests:

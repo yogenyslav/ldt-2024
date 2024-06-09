@@ -1,3 +1,6 @@
+//go:build integration
+
+//go:generate mockgen -source=../../api/pb/prompter_grpc.pb.go -destination=./mocks/prompter.go -package=mocks
 package controller
 
 import (
@@ -7,7 +10,9 @@ import (
 	"github.com/Nerzal/gocloak/v13"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/yogenyslav/ldt-2024/chat/config"
+	"github.com/yogenyslav/ldt-2024/chat/internal/chat/controller/mocks"
 	"github.com/yogenyslav/ldt-2024/chat/internal/chat/model"
 	cr "github.com/yogenyslav/ldt-2024/chat/internal/chat/repo"
 	"github.com/yogenyslav/ldt-2024/chat/tests/database"
@@ -15,6 +20,7 @@ import (
 	"github.com/yogenyslav/pkg/storage/postgres"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/sdk/trace/tracetest"
+	"go.uber.org/mock/gomock"
 )
 
 var (
@@ -32,8 +38,13 @@ func init() {
 
 func TestController_InsertQuery(t *testing.T) {
 	ctx := context.Background()
+
+	ctrl := gomock.NewController(t)
+	prompter := mocks.NewMockPrompterClient(ctrl)
+	defer ctrl.Finish()
+
 	repo := cr.New(pg)
-	ctrl := New(repo, kc, cfg.KeyCloak.Realm, cfg.Server.CipherKey, tracer)
+	controller := New(repo, prompter, kc, cfg.KeyCloak.Realm, cfg.Server.CipherKey, tracer)
 
 	defer database.TruncateTable(t, ctx, pg, "chat.query")
 
@@ -59,7 +70,10 @@ func TestController_InsertQuery(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := ctrl.InsertQuery(ctx, tt.params, tt.username, tt.sessionID)
+			if tt.params.Prompt != "" {
+				prompter.EXPECT().Extract(gomock.Any(), gomock.Any())
+			}
+			err := controller.InsertQuery(ctx, tt.params, tt.username, tt.sessionID)
 			assert.NoError(t, err)
 		})
 	}
@@ -69,8 +83,12 @@ func TestController_InsertResponse(t *testing.T) {
 	ctx := context.Background()
 	database.TruncateTable(t, ctx, pg, "chat.response")
 
+	ctrl := gomock.NewController(t)
+	prompter := mocks.NewMockPrompterClient(ctrl)
+	defer ctrl.Finish()
+
 	repo := cr.New(pg)
-	ctrl := New(repo, kc, cfg.KeyCloak.Realm, cfg.Server.CipherKey, tracer)
+	controller := New(repo, prompter, kc, cfg.KeyCloak.Realm, cfg.Server.CipherKey, tracer)
 
 	defer database.TruncateTable(t, ctx, pg, "chat.response")
 
@@ -86,8 +104,15 @@ func TestController_InsertResponse(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := ctrl.InsertResponse(ctx, tt.queryID)
-			assert.NoError(t, err)
+			tx, err := repo.BeginTx(ctx)
+			require.NoError(t, err)
+
+			err = controller.InsertResponse(tx, tt.queryID)
+			if assert.NoError(t, err) {
+				require.NoError(t, repo.CommitTx(tx))
+			} else {
+				require.NoError(t, repo.RollbackTx(tx))
+			}
 		})
 	}
 }

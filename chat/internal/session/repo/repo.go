@@ -95,8 +95,8 @@ func (r *Repo) FindStatus(ctx context.Context, id uuid.UUID) (model.SessionStatu
 
 const findContent = `
 	select 
-		(q.created_at, q.prompt, q.command, q.username, q.id) as query,
-		(r.created_at, r.body, r.status) as response
+		(r.created_at, r.body, r.status) as response,
+		(q.created_at, q.prompt, q.command, q.id) as query
 	from chat.query q
 	join
 	    chat.response r

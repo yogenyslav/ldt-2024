@@ -1,5 +1,6 @@
 //go:build integration
 
+//go:generate mockgen -source=../../api/pb/prompter_grpc.pb.go -destination=./mocks/prompter.go -package=mocks
 package controller
 
 import (
@@ -12,6 +13,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/yogenyslav/ldt-2024/chat/config"
 	cc "github.com/yogenyslav/ldt-2024/chat/internal/chat/controller"
+	"github.com/yogenyslav/ldt-2024/chat/internal/chat/controller/mocks"
 	chatmodel "github.com/yogenyslav/ldt-2024/chat/internal/chat/model"
 	cr "github.com/yogenyslav/ldt-2024/chat/internal/chat/repo"
 	"github.com/yogenyslav/ldt-2024/chat/internal/session/model"
@@ -23,6 +25,7 @@ import (
 	"github.com/yogenyslav/pkg/storage/postgres"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/sdk/trace/tracetest"
+	"go.uber.org/mock/gomock"
 )
 
 var (
@@ -233,11 +236,15 @@ func TestController_Delete(t *testing.T) {
 func TestController_FindOne(t *testing.T) {
 	kc := gocloak.NewClient(cfg.KeyCloak.URL)
 
+	ctrl := gomock.NewController(t)
+	prompter := mocks.NewMockPrompterClient(ctrl)
+	defer ctrl.Finish()
+
 	ctx := context.Background()
 	qr := cr.New(pg)
-	qc := cc.New(qr, kc, cfg.KeyCloak.Realm, cfg.Server.CipherKey, tracer)
+	qc := cc.New(qr, prompter, kc, cfg.KeyCloak.Realm, cfg.Server.CipherKey, tracer)
 	repo := sr.New(pg)
-	ctrl := New(repo, tracer)
+	controller := New(repo, tracer)
 
 	firstSessionID := uuid.New()
 	secondSessionID := uuid.New()
@@ -272,6 +279,8 @@ func TestController_FindOne(t *testing.T) {
 		},
 	}
 	for _, query := range queriesToFill {
+		prompter.EXPECT().Extract(gomock.Any(), gomock.Any())
+
 		err := qc.InsertQuery(ctx, query.params, query.username, query.sessionID)
 		require.NoError(t, err)
 	}
@@ -326,7 +335,7 @@ func TestController_FindOne(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			resp, err := ctrl.FindOne(ctx, tt.sessionID, tt.username)
+			resp, err := controller.FindOne(ctx, tt.sessionID, tt.username)
 			if tt.wantErr != nil {
 				assert.ErrorIs(t, err, tt.wantErr)
 				return

@@ -4,13 +4,16 @@ import (
 	"context"
 
 	"github.com/google/uuid"
+	"github.com/rs/zerolog/log"
+	"github.com/yogenyslav/ldt-2024/chat/internal/api/pb"
 	"github.com/yogenyslav/ldt-2024/chat/internal/chat/model"
 	"github.com/yogenyslav/ldt-2024/chat/internal/shared"
+	"github.com/yogenyslav/ldt-2024/chat/pkg"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
 )
 
-// InsertQuery creates new query and returns its domain representation.
+// InsertQuery creates new query.
 func (ctrl *Controller) InsertQuery(ctx context.Context, params model.QueryCreateReq, username string, sessionID uuid.UUID) error {
 	ctx, span := ctrl.tracer.Start(
 		ctx,
@@ -22,10 +25,6 @@ func (ctrl *Controller) InsertQuery(ctx context.Context, params model.QueryCreat
 		),
 	)
 	defer span.End()
-
-	// if params.Prompt != ""
-	// pass the query through prompt detection
-	// and update value in params
 
 	tx, err := ctrl.repo.BeginTx(ctx)
 	if err != nil {
@@ -45,6 +44,25 @@ func (ctrl *Controller) InsertQuery(ctx context.Context, params model.QueryCreat
 		return shared.ErrCreateQuery
 	}
 
+	if params.Prompt != "" {
+		tx = pkg.PushSpan(tx, span)
+
+		in := &pb.ExtractReq{Prompt: params.Prompt}
+		meta, err := ctrl.prompter.Extract(tx, in)
+		if err != nil {
+			log.Error().Err(err).Msg("failed to extract meta from prompt")
+			return err
+		}
+
+		if err := ctrl.repo.UpdateQueryMeta(tx, model.QueryMeta{
+			Product: meta.GetProduct(),
+			Type:    shared.QueryType(meta.GetType()),
+		}, queryID); err != nil {
+			log.Error().Err(err).Msg("failed to update query metadata")
+			return err
+		}
+	}
+
 	if err := ctrl.InsertResponse(tx, queryID); err != nil {
 		return err
 	}
@@ -52,8 +70,6 @@ func (ctrl *Controller) InsertQuery(ctx context.Context, params model.QueryCreat
 	if err := ctrl.repo.CommitTx(tx); err != nil {
 		return shared.ErrCommitTx
 	}
-
-	// make prediction and update
 
 	return nil
 }
