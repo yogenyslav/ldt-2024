@@ -14,3 +14,11 @@ const (
 	StatusError
 	StatusCanceled
 )
+
+type QueryType int8
+
+const (
+	_ QueryType = iota
+	TypePrediction
+	TypeStock
+)

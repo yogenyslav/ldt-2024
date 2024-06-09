@@ -41,6 +41,6 @@ type FindOneResp struct {
 
 // SessionContentDto is a model that holds all domain layer queries and responses for related session.
 type SessionContentDto struct {
-	Query    model.QueryDto    `json:"query"`
 	Response model.ResponseDto `json:"response"`
+	Query    model.QueryDto    `json:"query"`
 }

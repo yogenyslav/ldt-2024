@@ -46,7 +46,7 @@ const insertQuery = `
 func (r *Repo) InsertQuery(ctx context.Context, params model.QueryDao) (int64, error) {
 	var id int64
 
-	err := r.pg.Query(ctx, &id, insertQuery, params.Prompt, params.Command, params.Username, params.SessionID)
+	err := r.pg.QueryTx(ctx, &id, insertQuery, params.Prompt, params.Command, params.Username, params.SessionID)
 	return id, err
 }
 
@@ -57,6 +57,18 @@ const insertResponse = `
 
 // InsertResponse create new response with processing status.
 func (r *Repo) InsertResponse(ctx context.Context, params model.ResponseDao) error {
-	_, err := r.pg.Exec(ctx, insertResponse, params.QueryID)
+	_, err := r.pg.ExecTx(ctx, insertResponse, params.QueryID)
+	return err
+}
+
+const updateQueryMeta = `
+	update chat.query
+	set product = $2, type = $3
+	where id = $1;
+`
+
+// UpdateQueryMeta updates metadata for query after passing through prompter.
+func (r *Repo) UpdateQueryMeta(ctx context.Context, params model.QueryMeta, id int64) error {
+	_, err := r.pg.ExecTx(ctx, updateQueryMeta, id, params.Product, params.Type)
 	return err
 }

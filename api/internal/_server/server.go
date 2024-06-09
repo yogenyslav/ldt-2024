@@ -20,6 +20,9 @@ import (
 	ac "github.com/yogenyslav/ldt-2024/api/internal/api/auth/controller"
 	ah "github.com/yogenyslav/ldt-2024/api/internal/api/auth/handler"
 	"github.com/yogenyslav/ldt-2024/api/internal/api/pb"
+	pc "github.com/yogenyslav/ldt-2024/api/internal/api/prompter/controller"
+	ph "github.com/yogenyslav/ldt-2024/api/internal/api/prompter/handler"
+	"github.com/yogenyslav/ldt-2024/api/pkg/client"
 	"github.com/yogenyslav/ldt-2024/api/pkg/metrics"
 	"github.com/yogenyslav/ldt-2024/api/third_party"
 	"github.com/yogenyslav/pkg/infrastructure/prom"
@@ -78,6 +81,20 @@ func (s *Server) Run() {
 	authHandler := ah.New(authController, s.tracer, m)
 	pb.RegisterAuthServiceServer(s.srv, authHandler)
 
+	prompterClient, err := client.NewGrpcClient(s.cfg.Prompter)
+	if err != nil {
+		log.Panic().Err(err).Msg("failed to create prompter grpc client")
+	}
+	defer func() {
+		if err := prompterClient.Close(); err != nil {
+			log.Error().Err(err).Msg("failed to close prompter grpc client")
+		}
+	}()
+
+	prompterController := pc.New(prompterClient, s.tracer)
+	prompterHandler := ph.New(prompterController, s.tracer)
+	pb.RegisterPrompterServer(s.srv, prompterHandler)
+
 	log.Info().Msg("starting the server")
 	go s.listen()
 	go s.listenGateway()
@@ -114,9 +131,13 @@ func (s *Server) listenGateway() {
 		}
 	}()
 
+	ctx := context.Background()
 	mux := runtime.NewServeMux()
-	if err = pb.RegisterAuthServiceHandler(context.Background(), mux, conn); err != nil {
-		log.Panic().Err(err).Msg("failed to register the auth gateway ah")
+	if err = pb.RegisterAuthServiceHandler(ctx, mux, conn); err != nil {
+		log.Panic().Err(err).Msg("failed to register the auth gateway")
+	}
+	if err = pb.RegisterPrompterHandler(ctx, mux, conn); err != nil {
+		log.Panic().Err(err).Msg("failed to register the prompter gateway")
 	}
 
 	withCors := cors.New(cors.Options{

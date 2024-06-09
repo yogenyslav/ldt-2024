@@ -28,3 +28,7 @@ jaeger:
 prometheus:
   host: ""
   port: 9991
+
+prompter:
+  host: "prompter"
+  port: 9990

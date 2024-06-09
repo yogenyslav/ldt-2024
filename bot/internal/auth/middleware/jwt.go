@@ -17,16 +17,16 @@ func JWT(machine *state.Machine, kc *gocloak.GoCloak, realm string) tele.Middlew
 
 			token, err := machine.GetToken(ctx, c.Sender().ID)
 			if err != nil {
-				if err = c.Send(shared.NeedAuthMessage); err != nil {
-					return err
+				if e := c.Send(shared.NeedAuthMessage); e != nil {
+					return e
 				}
 				return nil
 			}
 
 			userInfo, err := kc.GetUserInfo(ctx, token, realm)
 			if err != nil || userInfo.PreferredUsername == nil {
-				if err = c.Send(shared.NeedAuthMessage); err != nil {
-					return err
+				if e := c.Send(shared.NeedAuthMessage); e != nil {
+					return e
 				}
 				return nil
 			}

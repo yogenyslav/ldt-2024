@@ -6,13 +6,14 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/yogenyslav/ldt-2024/api/internal/api/auth/model"
 	"github.com/yogenyslav/ldt-2024/api/internal/api/pb"
+	"github.com/yogenyslav/ldt-2024/api/pkg"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
 // Login logs in a user.
 func (h *Handler) Login(c context.Context, params *pb.LoginRequest) (*pb.LoginResponse, error) {
-	ctx, err := getTraceCtx(c)
+	ctx, err := pkg.GetTraceCtx(c)
 	if err != nil {
 		log.Error().Err(err).Msg("failed to get trace context")
 		return nil, status.Error(codes.Internal, err.Error())
@@ -40,5 +41,5 @@ func (h *Handler) Login(c context.Context, params *pb.LoginRequest) (*pb.LoginRe
 
 	return &pb.LoginResponse{
 		Token: resp.Token,
-	}, nil
+	}, status.Error(codes.OK, "login success")
 }

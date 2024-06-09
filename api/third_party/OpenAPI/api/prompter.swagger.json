@@ -1,0 +1,129 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "api/prompter.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "Prompter"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/v1/prompter/extract": {
+      "post": {
+        "operationId": "Prompter_Extract",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apiExtractedPrompt"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": "Extracts required metadata from prompt",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/apiExtractReq"
+            }
+          }
+        ],
+        "tags": [
+          "Prompter"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "apiExtractReq": {
+      "type": "object",
+      "example": {
+        "prompt": "я хочу купить бумагу A4 на 18 месяцев вперед"
+      },
+      "properties": {
+        "prompt": {
+          "type": "string"
+        }
+      },
+      "description": "Extracts required metadata from prompt",
+      "title": "Extract prompt request",
+      "required": [
+        "prompt"
+      ]
+    },
+    "apiExtractedPrompt": {
+      "type": "object",
+      "example": {
+        "type": 1,
+        "product": "бумага A4"
+      },
+      "properties": {
+        "type": {
+          "$ref": "#/definitions/apiQueryType"
+        },
+        "product": {
+          "type": "string"
+        }
+      },
+      "description": "Metadata from raw prompt that is passed to predictor",
+      "title": "Extract prompt response",
+      "required": [
+        "type",
+        "product"
+      ]
+    },
+    "apiQueryType": {
+      "type": "string",
+      "enum": [
+        "UNDEFINED",
+        "PREDICTION",
+        "STOCK"
+      ],
+      "default": "UNDEFINED"
+    },
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    }
+  }
+}

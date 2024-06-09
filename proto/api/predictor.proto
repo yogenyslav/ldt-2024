@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package api;
+
+message Metadata {
+
+}
+
+message Response {
+  int64 query_id = 1;
+  string body = 2;
+  bool final = 3;
+  Metadata result = 4;
+}

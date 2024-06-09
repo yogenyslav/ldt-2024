@@ -88,6 +88,15 @@ services:
       - redis_data:/data
       - redis_conf:/usr/local/etc/redis/redis.conf
 
+  prompter:
+    build:
+      context: ./prompter
+      dockerfile: Dockerfile
+    restart: always
+    image: prompter
+    depends_on:
+      - jaeger
+
   chat:
     build:
       context: ./chat
@@ -119,6 +128,7 @@ services:
       - pg
       - jaeger
       - keycloak
+      - prompter
 
   bot:
     build:

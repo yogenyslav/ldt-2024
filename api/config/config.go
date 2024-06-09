@@ -4,6 +4,7 @@ import (
 	"github.com/ilyakaznacheev/cleanenv"
 	"github.com/rs/zerolog/log"
 	srvconfig "github.com/yogenyslav/ldt-2024/api/internal/_server/config"
+	"github.com/yogenyslav/ldt-2024/api/pkg/client"
 	"github.com/yogenyslav/pkg/infrastructure/prom"
 	"github.com/yogenyslav/pkg/infrastructure/tracing"
 	"github.com/yogenyslav/pkg/storage/postgres"
@@ -11,11 +12,12 @@ import (
 
 // Config holds the configuration for the application.
 type Config struct {
-	Server     *srvconfig.Config `yaml:"server"`
-	Postgres   *postgres.Config  `yaml:"postgres"`
-	Jaeger     *tracing.Config   `yaml:"jaeger"`
-	Prometheus *prom.Config      `yaml:"prometheus"`
-	KeyCloak   *KeyCloakConfig   `yaml:"keycloak"`
+	Server     *srvconfig.Config        `yaml:"server"`
+	Postgres   *postgres.Config         `yaml:"postgres"`
+	Jaeger     *tracing.Config          `yaml:"jaeger"`
+	Prometheus *prom.Config             `yaml:"prometheus"`
+	KeyCloak   *KeyCloakConfig          `yaml:"keycloak"`
+	Prompter   *client.GrpcClientConfig `yaml:"prompter"`
 }
 
 // KeyCloakConfig holds the configuration for Keycloak.

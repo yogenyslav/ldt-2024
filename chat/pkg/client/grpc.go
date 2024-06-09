@@ -7,13 +7,19 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-// GrpcClient is a wrapper around grpc.ClientConn
-type GrpcClient struct {
+// GrpcClient is an interface grpc clients.
+type GrpcClient interface {
+	GetConn() *grpc.ClientConn
+	Close() error
+}
+
+// GrpcClient is a wrapper around grpc.ClientConn.
+type grpcClient struct {
 	conn *grpc.ClientConn
 }
 
-// NewGrpcClient creates a new GrpcClient
-func NewGrpcClient(cfg *GrpcClientConfig) (*GrpcClient, error) {
+// NewGrpcClient creates a new GrpcClient.
+func NewGrpcClient(cfg *GrpcClientConfig) (GrpcClient, error) {
 	var grpcOpts []grpc.DialOption
 	grpcOpts = append(grpcOpts, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	addr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
@@ -22,15 +28,15 @@ func NewGrpcClient(cfg *GrpcClientConfig) (*GrpcClient, error) {
 		return nil, err
 	}
 
-	return &GrpcClient{conn: conn}, nil
+	return &grpcClient{conn: conn}, nil
 }
 
-// Close closes the grpc connection
-func (c *GrpcClient) Close() error {
+// Close closes the grpc connection.
+func (c *grpcClient) Close() error {
 	return c.conn.Close()
 }
 
-// GetConn returns the grpc connection
-func (c *GrpcClient) GetConn() *grpc.ClientConn {
+// GetConn returns the grpc connection.
+func (c *grpcClient) GetConn() *grpc.ClientConn {
 	return c.conn
 }
