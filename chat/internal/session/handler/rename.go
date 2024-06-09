@@ -14,7 +14,7 @@ import (
 // @Tags session
 // @Accept json
 // @Produce json
-// @Param token header string true "access token"
+// @Param Authorization header string true "access token"
 // @Param req body model.RenameReq true "ID и новое название сессии"
 // @Success 204 {object} string "Сессия переименована"
 // @Failure 400 {object} string "Сессия с таким ID уже существует"

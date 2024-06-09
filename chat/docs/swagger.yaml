@@ -102,7 +102,7 @@ paths:
       parameters:
       - description: access token
         in: header
-        name: token
+        name: Authorization
         required: true
         type: string
       - description: UUID сессии
@@ -135,7 +135,7 @@ paths:
       parameters:
       - description: access token
         in: header
-        name: token
+        name: Authorization
         required: true
         type: string
       - description: UUID сессии
@@ -166,7 +166,7 @@ paths:
       parameters:
       - description: access token
         in: header
-        name: token
+        name: Authorization
         required: true
         type: string
       produces:
@@ -187,7 +187,7 @@ paths:
       parameters:
       - description: access token
         in: header
-        name: token
+        name: Authorization
         required: true
         type: string
       produces:
@@ -212,7 +212,7 @@ paths:
       parameters:
       - description: access token
         in: header
-        name: token
+        name: Authorization
         required: true
         type: string
       - description: ID и новое название сессии

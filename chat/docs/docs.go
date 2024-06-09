@@ -88,7 +88,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "access token",
-                        "name": "token",
+                        "name": "Authorization",
                         "in": "header",
                         "required": true
                     }
@@ -120,7 +120,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "access token",
-                        "name": "token",
+                        "name": "Authorization",
                         "in": "header",
                         "required": true
                     }
@@ -158,7 +158,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "access token",
-                        "name": "token",
+                        "name": "Authorization",
                         "in": "header",
                         "required": true
                     },
@@ -211,7 +211,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "access token",
-                        "name": "token",
+                        "name": "Authorization",
                         "in": "header",
                         "required": true
                     },
@@ -254,7 +254,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "access token",
-                        "name": "token",
+                        "name": "Authorization",
                         "in": "header",
                         "required": true
                     },

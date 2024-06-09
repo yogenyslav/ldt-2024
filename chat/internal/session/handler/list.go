@@ -14,7 +14,7 @@ import (
 // @Tags session
 // @Accept json
 // @Produce json
-// @Param token header string true "access token"
+// @Param Authorization header string true "access token"
 // @Success 200 {object} model.ListResp "Список сессий"
 // @Router /session/list [get]
 func (h *Handler) List(c *fiber.Ctx) error {
