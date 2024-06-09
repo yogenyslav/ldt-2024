@@ -14,6 +14,7 @@ import (
 
 	"github.com/Nerzal/gocloak/v13"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+	"github.com/rs/cors"
 	"github.com/rs/zerolog/log"
 	"github.com/yogenyslav/ldt-2024/api/config"
 	ac "github.com/yogenyslav/ldt-2024/api/internal/api/auth/controller"
@@ -118,15 +119,24 @@ func (s *Server) listenGateway() {
 		log.Panic().Err(err).Msg("failed to register the auth gateway ah")
 	}
 
+	withCors := cors.New(cors.Options{
+		AllowOriginFunc:  func(origin string) bool { return true },
+		AllowedMethods:   []string{"GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"ACCEPT", "Authorization", "Content-Type", "X-CSRF-Token"},
+		ExposedHeaders:   []string{"Link"},
+		AllowCredentials: true,
+		MaxAge:           300,
+	}).Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasPrefix(r.URL.Path, "/v1") {
+			mux.ServeHTTP(w, r)
+			return
+		}
+		getOpenAPIHandler().ServeHTTP(w, r)
+	}))
+
 	gwServer := &http.Server{
-		Addr: fmt.Sprintf(":%d", s.cfg.Server.GatewayPort),
-		Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			if strings.HasPrefix(r.URL.Path, "/v1") {
-				mux.ServeHTTP(w, r)
-				return
-			}
-			getOpenAPIHandler().ServeHTTP(w, r)
-		}),
+		Addr:    fmt.Sprintf(":%d", s.cfg.Server.GatewayPort),
+		Handler: withCors,
 	}
 
 	if err = gwServer.ListenAndServe(); err != nil { //nolint:G114 // not a security issue

@@ -13,6 +13,7 @@ type SessionDao struct {
 	Username  string    `db:"username"`
 	Title     string    `db:"title"`
 	IsDeleted bool      `db:"is_deleted"`
+	Tg        bool      `db:"tg"`
 	ID        uuid.UUID `db:"id"`
 }
 
@@ -21,6 +22,7 @@ func (s SessionDao) ToDto() SessionDto {
 	return SessionDto{
 		CreatedAt: s.CreatedAt,
 		Title:     s.Title,
+		Tg:        s.Tg,
 		ID:        s.ID,
 	}
 }
@@ -35,4 +37,5 @@ type SessionContentDao struct {
 type SessionStatus struct {
 	Username  string `db:"username"`
 	IsDeleted bool   `db:"is_deleted"`
+	Tg        bool   `db:"tg"`
 }

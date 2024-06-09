@@ -2,6 +2,8 @@ volumes:
   pg_data:
   jaeger_data:
   prom_data:
+  redis_data:
+  redis_conf:
 
 services:
   jaeger:
@@ -75,6 +77,17 @@ services:
       - "8080:8080"
     command: start-dev --db postgres
 
+  redis:
+    image: redis:7.2.4
+    restart: always
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+      - redis_conf:/usr/local/etc/redis/redis.conf
+
   chat:
     build:
       context: ./chat
@@ -89,6 +102,7 @@ services:
       - pg
       - api
       - jaeger
+      - keycloak
 
   api:
     build:
@@ -104,3 +118,20 @@ services:
     depends_on:
       - pg
       - jaeger
+      - keycloak
+
+  bot:
+    build:
+      context: ./bot
+      dockerfile: Dockerfile
+      target: prod
+    restart: always
+    image: bot
+    ports:
+      - "11000:11000"
+    depends_on:
+      - pg
+      - api
+      - jaeger
+      - keycloak
+      - redis
