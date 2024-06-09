@@ -1,2 +1,37 @@
 bot:
   token: "BOT123:TOKEN456"
+  log_level: "debug"
+  debug_mode: true
+  port: 11000
+
+keycloak:
+  url: "http://keycloak:8080"
+  realm: "ldt"
+
+postgres:
+  user: "pguser"
+  password: "pgpass"
+  host: "pg"
+  port: 5432
+  db: "dev"
+  ssl: false
+  retry_timeout: 20
+
+redis:
+  username: ""
+  password: "redispass"
+  host: "redis"
+  port: 6379
+  db: 0
+
+jaeger:
+  host: "jaeger"
+  port: 4318
+
+prometheus:
+  host: ""
+  port: 10001
+
+api:
+  host: "api"
+  port: 9999
