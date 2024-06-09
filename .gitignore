@@ -1,0 +1,6 @@
+.idea
+vendor
+.env
+**/config.yaml
+**/config_test.yaml
+**/.venv

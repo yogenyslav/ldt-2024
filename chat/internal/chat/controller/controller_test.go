@@ -1,0 +1,118 @@
+//go:build integration
+
+//go:generate mockgen -source=../../api/pb/prompter_grpc.pb.go -destination=./mocks/prompter.go -package=mocks
+package controller
+
+import (
+	"context"
+	"testing"
+
+	"github.com/Nerzal/gocloak/v13"
+	"github.com/google/uuid"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"github.com/yogenyslav/ldt-2024/chat/config"
+	"github.com/yogenyslav/ldt-2024/chat/internal/chat/controller/mocks"
+	"github.com/yogenyslav/ldt-2024/chat/internal/chat/model"
+	cr "github.com/yogenyslav/ldt-2024/chat/internal/chat/repo"
+	"github.com/yogenyslav/ldt-2024/chat/tests/database"
+	"github.com/yogenyslav/pkg/infrastructure/tracing"
+	"github.com/yogenyslav/pkg/storage/postgres"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/sdk/trace/tracetest"
+	"go.uber.org/mock/gomock"
+)
+
+var (
+	cfg      = config.MustNew("../../../config/config_test.yaml")
+	exporter = tracetest.NewNoopExporter()
+	provider = tracing.MustNewTraceProvider(exporter, "test")
+	tracer   = otel.Tracer("test")
+	pg       = postgres.MustNew(cfg.Postgres, tracer)
+	kc       = gocloak.NewClient(cfg.KeyCloak.URL)
+)
+
+func init() {
+	otel.SetTracerProvider(provider)
+}
+
+func TestController_InsertQuery(t *testing.T) {
+	ctx := context.Background()
+
+	ctrl := gomock.NewController(t)
+	prompter := mocks.NewMockPrompterClient(ctrl)
+	defer ctrl.Finish()
+
+	repo := cr.New(pg)
+	controller := New(repo, prompter, kc, cfg.KeyCloak.Realm, cfg.Server.CipherKey, tracer)
+
+	defer database.TruncateTable(t, ctx, pg, "chat.query")
+
+	tests := []struct {
+		name      string
+		params    model.QueryCreateReq
+		username  string
+		sessionID uuid.UUID
+	}{
+		{
+			name:      "success, prompt",
+			params:    model.QueryCreateReq{Prompt: "test prompt"},
+			username:  "user",
+			sessionID: uuid.New(),
+		},
+		{
+			name:      "success, command",
+			params:    model.QueryCreateReq{Command: "test command"},
+			username:  "user",
+			sessionID: uuid.New(),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if tt.params.Prompt != "" {
+				prompter.EXPECT().Extract(gomock.Any(), gomock.Any())
+			}
+			err := controller.InsertQuery(ctx, tt.params, tt.username, tt.sessionID)
+			assert.NoError(t, err)
+		})
+	}
+}
+
+func TestController_InsertResponse(t *testing.T) {
+	ctx := context.Background()
+	database.TruncateTable(t, ctx, pg, "chat.response")
+
+	ctrl := gomock.NewController(t)
+	prompter := mocks.NewMockPrompterClient(ctrl)
+	defer ctrl.Finish()
+
+	repo := cr.New(pg)
+	controller := New(repo, prompter, kc, cfg.KeyCloak.Realm, cfg.Server.CipherKey, tracer)
+
+	defer database.TruncateTable(t, ctx, pg, "chat.response")
+
+	tests := []struct {
+		name    string
+		queryID int64
+	}{
+		{
+			name:    "success",
+			queryID: 1,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tx, err := repo.BeginTx(ctx)
+			require.NoError(t, err)
+
+			err = controller.InsertResponse(tx, tt.queryID)
+			if assert.NoError(t, err) {
+				require.NoError(t, repo.CommitTx(tx))
+			} else {
+				require.NoError(t, repo.RollbackTx(tx))
+			}
+		})
+	}
+}

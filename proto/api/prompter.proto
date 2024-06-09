@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+package api;
+
+import "google/api/annotations.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+
+option go_package="internal/api/pb";
+
+service Prompter {
+  rpc Extract(ExtractReq) returns (ExtractedPrompt) {
+    option (google.api.http) = {
+      post: "/api/v1/prompter/extract"
+      body: "*"
+    };
+  }
+}
+
+message ExtractReq {
+  option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_schema) = {
+    json_schema: {
+      title: "Extract prompt request"
+      description: "Extracts required metadata from prompt"
+      required: ["prompt"]
+    }
+    example: "{\"prompt\": \"я хочу купить бумагу A4 на 18 месяцев вперед\"}"
+  };
+  string prompt = 1;
+}
+
+enum QueryType {
+  UNDEFINED = 0;
+  PREDICTION = 1;
+  STOCK = 2;
+}
+
+message ExtractedPrompt {
+  option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_schema) = {
+    json_schema: {
+      title: "Extract prompt response"
+      description: "Metadata from raw prompt that is passed to predictor"
+      required: ["type", "product"]
+    }
+    example: "{\"type\": 1, \"product\": \"бумага A4\"}"
+  };
+  QueryType type = 1;
+  string product = 2;
+}

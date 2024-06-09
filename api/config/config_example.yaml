@@ -1,0 +1,34 @@
+server:
+  port: 9999
+  log_level: "debug"
+  gateway_port: 9998
+
+keycloak:
+  url: "http://keycloak:8080"
+  client_id: "ldt-client"
+  client_secret: "s0m3Cl13NtS3cr3T"
+  realm: "ldt"
+  admin_realm: "master"
+  user: "admin"
+  password: "admin"
+
+postgres:
+  user: "pguser"
+  password: "pgpass"
+  host: "pg"
+  port: 5432
+  db: "dev"
+  ssl: false
+  retry_timeout: 20
+
+jaeger:
+  host: "jaeger"
+  port: 4318
+
+prometheus:
+  host: ""
+  port: 9991
+
+prompter:
+  host: "prompter"
+  port: 9990
