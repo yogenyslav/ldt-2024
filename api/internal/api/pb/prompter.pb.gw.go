@@ -71,7 +71,7 @@ func RegisterPrompterHandlerServer(ctx context.Context, mux *runtime.ServeMux, s
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/api.Prompter/Extract", runtime.WithHTTPPathPattern("/v1/prompter/extract"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/api.Prompter/Extract", runtime.WithHTTPPathPattern("/api/v1/prompter/extract"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -135,7 +135,7 @@ func RegisterPrompterHandlerClient(ctx context.Context, mux *runtime.ServeMux, c
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/api.Prompter/Extract", runtime.WithHTTPPathPattern("/v1/prompter/extract"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/api.Prompter/Extract", runtime.WithHTTPPathPattern("/api/v1/prompter/extract"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -155,7 +155,7 @@ func RegisterPrompterHandlerClient(ctx context.Context, mux *runtime.ServeMux, c
 }
 
 var (
-	pattern_Prompter_Extract_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"v1", "prompter", "extract"}, ""))
+	pattern_Prompter_Extract_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "prompter", "extract"}, ""))
 )
 
 var (

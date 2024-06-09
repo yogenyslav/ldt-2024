@@ -11,7 +11,7 @@
         "version": "1.0"
     },
     "host": "localhost:10000",
-    "basePath": "/",
+    "basePath": "/chat",
     "paths": {
         "/auth/login": {
             "post": {
@@ -337,6 +337,9 @@
                 },
                 "id": {
                     "type": "string"
+                },
+                "tg": {
+                    "type": "boolean"
                 },
                 "title": {
                     "type": "string"

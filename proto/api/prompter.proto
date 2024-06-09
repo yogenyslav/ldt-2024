@@ -10,7 +10,7 @@ option go_package="internal/api/pb";
 service Prompter {
   rpc Extract(ExtractReq) returns (ExtractedPrompt) {
     option (google.api.http) = {
-      post: "/v1/prompter/extract"
+      post: "/api/v1/prompter/extract"
       body: "*"
     };
   }

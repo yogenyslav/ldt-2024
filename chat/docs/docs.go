@@ -344,6 +344,9 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
+                "tg": {
+                    "type": "boolean"
+                },
                 "title": {
                     "type": "string"
                 }
@@ -356,7 +359,7 @@ const docTemplate = `{
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
 	Host:             "localhost:10000",
-	BasePath:         "/",
+	BasePath:         "/chat",
 	Schemes:          []string{},
 	Title:            "Chat service API",
 	Description:      "Документация API чат-сервиса команды misis.tech",

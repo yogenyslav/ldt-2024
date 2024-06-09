@@ -13,7 +13,7 @@ import (
 // @license.name BSD-3-Clause
 // @license.url https://opensource.org/license/bsd-3-clause
 // @host localhost:10000
-// @BasePath /
+// @BasePath /chat
 func main() {
 	cfg := config.MustNew("./config/config.yaml")
 	level, err := zerolog.ParseLevel(cfg.Server.LogLevel)

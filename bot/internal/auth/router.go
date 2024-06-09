@@ -10,5 +10,5 @@ type authHandler interface {
 
 // SetupAuthRoutes sets up the routes for the auth handler.
 func SetupAuthRoutes(b *tele.Bot, h authHandler) {
-	b.Handle("/auth", h.Auth)
+	b.Handle("/bot/auth", h.Auth)
 }

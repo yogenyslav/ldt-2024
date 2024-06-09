@@ -10,7 +10,7 @@ option go_package="internal/api/pb";
 service AuthService {
   rpc Login(LoginRequest) returns (LoginResponse) {
     option (google.api.http) = {
-      post: "/v1/auth/login"
+      post: "/api/v1/auth/login"
       body: "*"
     };
   }

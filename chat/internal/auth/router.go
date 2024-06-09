@@ -10,7 +10,7 @@ type authHandler interface {
 
 // SetupAuthRoutes maps the auth routes to the auth handler.
 func SetupAuthRoutes(app *fiber.App, h authHandler) {
-	g := app.Group("/auth")
+	g := app.Group("/chat/auth")
 
 	g.Post("/login", h.Login)
 }

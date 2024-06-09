@@ -69,8 +69,8 @@ proto:
 	done
 	@protoc --proto_path=./proto --grpc-gateway_out=./api \
                     --grpc-gateway_opt=generate_unbound_methods=true \
-                    proto/api/auth.proto proto/api/prompter.proto --openapiv2_out ./api/third_party/OpenAPI
-	@python -m grpc_tools.protoc -Iproto --python_out=prompter --pyi_out=prompter --grpc_python_out=prompter \
+                    proto/api/auth.proto proto/api/prompter.proto --openapiv2_out ./api/docs/third_party/OpenAPI
+	@python -m grpc_tools.protoc -Iproto --python_out=prompter --grpc_python_out=prompter \
  					proto/api/prompter.proto
 
 .PHONY: tests

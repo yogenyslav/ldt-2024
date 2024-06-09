@@ -148,11 +148,12 @@ func (s *Server) listenGateway() {
 		AllowCredentials: true,
 		MaxAge:           300,
 	}).Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if strings.HasPrefix(r.URL.Path, "/v1") {
+		if strings.HasPrefix(r.URL.Path, "/api/v1") {
 			mux.ServeHTTP(w, r)
 			return
+		} else if strings.HasPrefix(r.URL.Path, "/api") {
+			getOpenAPIHandler().ServeHTTP(w, r)
 		}
-		getOpenAPIHandler().ServeHTTP(w, r)
 	}))
 
 	gwServer := &http.Server{

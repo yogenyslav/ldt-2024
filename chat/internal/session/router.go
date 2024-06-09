@@ -16,7 +16,7 @@ type sessionHandler interface {
 
 // SetupSessionRoutes maps the session routes to the session handler.
 func SetupSessionRoutes(app *fiber.App, h sessionHandler, kc *gocloak.GoCloak, realm, cipher string) {
-	g := app.Group("/session")
+	g := app.Group("/chat/session")
 	g.Use(middleware.JWT(kc, realm, cipher))
 
 	g.Post("/new", h.NewSession)

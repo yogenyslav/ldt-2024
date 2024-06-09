@@ -1,4 +1,4 @@
-basePath: /
+basePath: /chat
 definitions:
   model.ListResp:
     properties:
@@ -45,6 +45,8 @@ definitions:
         type: string
       id:
         type: string
+      tg:
+        type: boolean
       title:
         type: string
     type: object
