@@ -65,7 +65,7 @@ func New(cfg *config.Config) *Server {
 	}))
 	app.Use(otelfiber.Middleware())
 	app.Use(recovermw.New())
-	app.Get("/swagger/*", swagger.HandlerDefault)
+	app.Get("/chat/swagger/*", swagger.HandlerDefault)
 
 	exporter := tracing.MustNewExporter(context.Background(), cfg.Jaeger.URL())
 	provider := tracing.MustNewTraceProvider(exporter, "chat")
