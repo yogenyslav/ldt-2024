@@ -152,9 +152,8 @@ func (s *Server) listenGateway() {
 		if strings.HasPrefix(r.URL.Path, "/api/v1") {
 			mux.ServeHTTP(w, r)
 			return
-		} else if strings.HasPrefix(r.URL.Path, "/api") {
-			getOpenAPIHandler().ServeHTTP(w, r)
 		}
+		getOpenAPIHandler().ServeHTTP(w, r)
 	}))
 
 	gwServer := &http.Server{
