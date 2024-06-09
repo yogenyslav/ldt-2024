@@ -1,12 +1,12 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "api/prompter.proto",
+    "title": "api/auth.proto",
     "version": "version not set"
   },
   "tags": [
     {
-      "name": "Prompter"
+      "name": "AuthService"
     }
   ],
   "consumes": [
@@ -16,14 +16,14 @@
     "application/json"
   ],
   "paths": {
-    "/v1/prompter/extract": {
+    "/api/v1/auth/login": {
       "post": {
-        "operationId": "Prompter_Extract",
+        "operationId": "AuthService_Login",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/apiExtractedPrompt"
+              "$ref": "#/definitions/apiLoginResponse"
             }
           },
           "default": {
@@ -36,66 +36,54 @@
         "parameters": [
           {
             "name": "body",
-            "description": "Extracts required metadata from prompt",
+            "description": "Login request model holding credentials for authorization.",
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/apiExtractReq"
+              "$ref": "#/definitions/apiLoginRequest"
             }
           }
         ],
         "tags": [
-          "Prompter"
+          "AuthService"
         ]
       }
     }
   },
   "definitions": {
-    "apiExtractReq": {
+    "apiLoginRequest": {
       "type": "object",
       "example": {
-        "prompt": "я хочу купить бумагу A4 на 18 месяцев вперед"
+        "username": "test@test.com",
+        "password": "test123456"
       },
       "properties": {
-        "prompt": {
+        "username": {
           "type": "string"
-        }
-      },
-      "description": "Extracts required metadata from prompt",
-      "title": "Extract prompt request",
-      "required": [
-        "prompt"
-      ]
-    },
-    "apiExtractedPrompt": {
-      "type": "object",
-      "example": {
-        "type": 1,
-        "product": "бумага A4"
-      },
-      "properties": {
-        "type": {
-          "$ref": "#/definitions/apiQueryType"
         },
-        "product": {
+        "password": {
           "type": "string"
         }
       },
-      "description": "Metadata from raw prompt that is passed to predictor",
-      "title": "Extract prompt response",
+      "description": "Login request model holding credentials for authorization.",
+      "title": "Login request",
       "required": [
-        "type",
-        "product"
+        "username",
+        "password"
       ]
     },
-    "apiQueryType": {
-      "type": "string",
-      "enum": [
-        "UNDEFINED",
-        "PREDICTION",
-        "STOCK"
-      ],
-      "default": "UNDEFINED"
+    "apiLoginResponse": {
+      "type": "object",
+      "example": {
+        "token": "some_random_access_token"
+      },
+      "properties": {
+        "token": {
+          "type": "string"
+        }
+      },
+      "description": "Login response returning a token for authorization.",
+      "title": "Login response"
     },
     "protobufAny": {
       "type": "object",
