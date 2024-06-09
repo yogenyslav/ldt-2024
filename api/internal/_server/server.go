@@ -148,6 +148,7 @@ func (s *Server) listenGateway() {
 		AllowCredentials: true,
 		MaxAge:           300,
 	}).Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Debug().Str("path", r.URL.Path).Msg("incoming request")
 		if strings.HasPrefix(r.URL.Path, "/api/v1") {
 			mux.ServeHTTP(w, r)
 			return
