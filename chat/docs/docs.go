@@ -214,6 +214,13 @@ const docTemplate = `{
                         "name": "token",
                         "in": "header",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "UUID сессии",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -249,6 +256,13 @@ const docTemplate = `{
                         "description": "access token",
                         "name": "token",
                         "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "UUID сессии",
+                        "name": "id",
+                        "in": "path",
                         "required": true
                     }
                 ],
@@ -358,7 +372,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "localhost:10000",
+	Host:             "hawk-handy-wolf.ngrok-free.app",
 	BasePath:         "/chat",
 	Schemes:          []string{},
 	Title:            "Chat service API",

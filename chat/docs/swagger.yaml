@@ -50,7 +50,7 @@ definitions:
       title:
         type: string
     type: object
-host: localhost:10000
+host: hawk-handy-wolf.ngrok-free.app
 info:
   contact: {}
   description: Документация API чат-сервиса команды misis.tech
@@ -105,6 +105,11 @@ paths:
         name: token
         required: true
         type: string
+      - description: UUID сессии
+        in: path
+        name: id
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -131,6 +136,11 @@ paths:
       - description: access token
         in: header
         name: token
+        required: true
+        type: string
+      - description: UUID сессии
+        in: path
+        name: id
         required: true
         type: string
       produces:

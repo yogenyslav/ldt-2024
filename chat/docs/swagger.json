@@ -10,7 +10,7 @@
         },
         "version": "1.0"
     },
-    "host": "localhost:10000",
+    "host": "hawk-handy-wolf.ngrok-free.app",
     "basePath": "/chat",
     "paths": {
         "/auth/login": {
@@ -208,6 +208,13 @@
                         "name": "token",
                         "in": "header",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "UUID сессии",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -243,6 +250,13 @@
                         "description": "access token",
                         "name": "token",
                         "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "UUID сессии",
+                        "name": "id",
+                        "in": "path",
                         "required": true
                     }
                 ],

@@ -12,7 +12,7 @@ import (
 // @description Документация API чат-сервиса команды misis.tech
 // @license.name BSD-3-Clause
 // @license.url https://opensource.org/license/bsd-3-clause
-// @host localhost:10000
+// @host hawk-handy-wolf.ngrok-free.app
 // @BasePath /chat
 func main() {
 	cfg := config.MustNew("./config/config.yaml")

@@ -16,7 +16,7 @@ import (
 func Listen(machine *state.Machine, bot *tele.Bot, port int) *fiber.App {
 	srv := fiber.New()
 	srv.Use(cors.New(cors.Config{
-		AllowOrigins: "*",
+		AllowOrigins: "https://hawk-handy-wolf.ngrok-free.app",
 	}))
 	srv.Post("/auth", func(c *fiber.Ctx) error {
 		var req model.AuthorizeReq
