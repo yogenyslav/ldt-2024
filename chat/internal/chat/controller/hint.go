@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/rs/zerolog/log"
 	"github.com/yogenyslav/ldt-2024/chat/internal/chat/model"
 	"github.com/yogenyslav/ldt-2024/chat/internal/shared"
 	"go.opentelemetry.io/otel/attribute"
@@ -35,8 +36,11 @@ func (ctrl *Controller) Hint(ctx context.Context, queryID int64, params model.Qu
 		return shared.ErrGetQuery
 	}
 
+	log.Debug().Str("initial prompt", prompt).Msg("adding hint")
+
 	return ctrl.repo.UpdateQuery(ctx, model.QueryDao{
 		ID:     queryID,
 		Prompt: prompt + "\nhint: " + params.Prompt,
+		Status: shared.StatusPending,
 	})
 }

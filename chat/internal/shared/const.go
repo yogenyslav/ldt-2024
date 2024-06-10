@@ -5,6 +5,10 @@ var (
 	UsernameKey = "x-username"
 )
 
+const (
+	enumsUndefined = "UNDEFINED"
+)
+
 type ResponseStatus int8
 
 const (
@@ -30,7 +34,7 @@ func (s ResponseStatus) ToString() string {
 	case StatusCanceled:
 		return "CANCELED"
 	}
-	return "UNDEFINED"
+	return enumsUndefined
 }
 
 type QueryType int8
@@ -49,7 +53,7 @@ func (t QueryType) ToString() string {
 	case TypeStock:
 		return "STOCK"
 	}
-	return "UNDEFINED"
+	return enumsUndefined
 }
 
 type QueryCommand string
@@ -76,5 +80,5 @@ func (s QueryStatus) ToString() string {
 	case StatusValid:
 		return "VALID"
 	}
-	return "UNDEFINED"
+	return enumsUndefined
 }
