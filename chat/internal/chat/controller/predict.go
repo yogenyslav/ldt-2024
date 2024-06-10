@@ -9,9 +9,19 @@ import (
 	ch "github.com/yogenyslav/ldt-2024/chat/internal/chat/handler"
 	"github.com/yogenyslav/ldt-2024/chat/internal/chat/model"
 	"github.com/yogenyslav/ldt-2024/chat/internal/shared"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
 )
 
+// Predict get prediction for query.
 func (ctrl *Controller) Predict(ctx context.Context, out chan<- ch.Response, cancel <-chan struct{}, queryID int64) {
+	ctx, span := ctrl.tracer.Start(
+		ctx,
+		"Controller.Predict",
+		trace.WithAttributes(attribute.Int64("queryID", queryID)),
+	)
+	defer span.End()
+
 	if err := ctrl.repo.UpdateResponse(ctx, queryID, model.ResponseDao{
 		Status: shared.StatusProcessing,
 	}); err != nil {
@@ -22,7 +32,7 @@ func (ctrl *Controller) Predict(ctx context.Context, out chan<- ch.Response, can
 		return
 	}
 
-	ctx, finish := context.WithCancel(ctx)
+	withCancel, finish := context.WithCancel(ctx)
 	defer finish()
 
 	cnt := 0
@@ -46,7 +56,7 @@ func (ctrl *Controller) Predict(ctx context.Context, out chan<- ch.Response, can
 				}
 			}
 			return
-		case <-ctx.Done():
+		case <-withCancel.Done():
 			out <- ch.Response{
 				Err:    nil,
 				Msg:    "finished",
