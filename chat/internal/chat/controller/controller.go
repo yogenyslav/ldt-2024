@@ -19,7 +19,7 @@ type chatRepo interface {
 	UpdateQueryMeta(ctx context.Context, params model.QueryMeta, id int64) error
 	UpdateResponse(ctx context.Context, params model.ResponseDao) error
 	FindQueryPrompt(ctx context.Context, id int64) (string, error)
-	UpdateQueryPrompt(ctx context.Context, id int64, prompt string) error
+	UpdateQuery(ctx context.Context, params model.QueryDao) error
 	UpdateQueryStatus(ctx context.Context, id int64, status shared.QueryStatus) error
 }
 
