@@ -5,6 +5,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/yogenyslav/ldt-2024/chat/internal/chat/model"
+	"github.com/yogenyslav/ldt-2024/chat/internal/shared"
 )
 
 var queryID int64 = 0
@@ -26,8 +27,10 @@ func (b *QueryDaoBuilder) New() *QueryDaoBuilder {
 		SessionID(uuid.New()).
 		Username("user").
 		Prompt("some prompt").
-		Command("").
-		CreatedAt(time.Now())
+		CreatedAt(time.Now()).
+		Status(shared.StatusPending).
+		Type(shared.TypePrediction).
+		Product("test product")
 }
 
 func (b *QueryDaoBuilder) V() model.QueryDao {
@@ -58,12 +61,22 @@ func (b *QueryDaoBuilder) Prompt(v string) *QueryDaoBuilder {
 	return b
 }
 
-func (b *QueryDaoBuilder) Command(v string) *QueryDaoBuilder {
-	b.QueryDao.Command = v
+func (b *QueryDaoBuilder) CreatedAt(v time.Time) *QueryDaoBuilder {
+	b.QueryDao.CreatedAt = v
 	return b
 }
 
-func (b *QueryDaoBuilder) CreatedAt(v time.Time) *QueryDaoBuilder {
-	b.QueryDao.CreatedAt = v
+func (b *QueryDaoBuilder) Status(v shared.QueryStatus) *QueryDaoBuilder {
+	b.QueryDao.Status = v
+	return b
+}
+
+func (b *QueryDaoBuilder) Type(v shared.QueryType) *QueryDaoBuilder {
+	b.QueryDao.Type = v
+	return b
+}
+
+func (b *QueryDaoBuilder) Product(v string) *QueryDaoBuilder {
+	b.QueryDao.Product = v
 	return b
 }

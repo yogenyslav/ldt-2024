@@ -3,14 +3,18 @@ package handler
 import (
 	"context"
 	"errors"
+	"time"
 
 	"github.com/gofiber/contrib/websocket"
 	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
 	"github.com/yogenyslav/ldt-2024/chat/internal/chat/model"
+	"github.com/yogenyslav/ldt-2024/chat/internal/shared"
 )
 
 // Chat handles chat ws functional.
+//
+//nolint:funlen // will be soon refactored
 func (h *Handler) Chat(c *websocket.Conn) {
 	ctx := context.Background()
 
@@ -32,44 +36,97 @@ func (h *Handler) Chat(c *websocket.Conn) {
 		return
 	}
 	if mt != websocket.TextMessage {
-		writeError(c, "need authorization first", errors.New("unexpected message type"))
+		respondRaw(c, "need authorization first", errors.New("unexpected message type"))
 		return
 	}
 
 	username, authErr := h.ctrl.Authorize(ctx, string(msg))
 	if authErr != nil {
-		writeError(c, "unauthorized", authErr)
+		respondRaw(c, "unauthorized", authErr)
 		return
 	}
 
 	sessionID, uuidErr := uuid.Parse(c.Params("session_id"))
 	if uuidErr != nil {
-		writeError(c, "invalid session uuid", uuidErr)
+		respondRaw(c, "invalid session uuid", uuidErr)
 		return
 	}
 
 	var (
-		validate = make(chan struct{}, 1)
+		validate = make(chan int64, 1)
+		out      = make(chan Response)
+		hint     = make(chan int64, 1)
+		cancel   = make(chan struct{}, 1)
 	)
 
 	for {
 		var req model.QueryCreateReq
 		if err := c.ReadJSON(&req); err != nil {
-			writeError(c, "failed to read query", err)
+			respondRaw(c, "failed to read query", err)
 			return
 		}
 
+		if req.Command == shared.CommandCancel {
+			cancel <- struct{}{}
+			log.Debug().Msg("predict was canceled")
+			continue
+		}
+
 		select {
-		case <-validate:
-			if req.Command == "valid" {
+		case queryID := <-hint:
+			log.Debug().Msg("processing hint")
+			if err := h.ctrl.Hint(ctx, queryID, req); err != nil {
+				respondRaw(c, "failed to process hint", err)
+				hint <- queryID
+				continue
+			}
+			validate <- queryID
+			continue
+		case queryID := <-validate:
+			if req.Command == shared.CommandValid {
+				// for debug purposes
 				log.Debug().Msg("extracted prompt is valid")
+				go h.ctrl.Predict(ctx, out, cancel, queryID)
+				if err := h.ctrl.UpdateStatus(ctx, queryID, shared.StatusValid); err != nil {
+					respondRaw(c, "failed to update status to valid", err)
+					validate <- queryID
+					cancel <- struct{}{}
+					continue
+				}
+			} else if req.Command == shared.CommandInvalid {
+				log.Debug().Msg("extracted prompt is invalid")
+				if err := h.ctrl.UpdateStatus(ctx, queryID, shared.StatusPending); err != nil {
+					respondRaw(c, "failed to update status to pending", err)
+					validate <- queryID
+					continue
+				}
+				hint <- queryID
+				continue
 			}
 		default:
-			validate <- struct{}{}
-			if err := h.ctrl.InsertQuery(ctx, req, username, sessionID); err != nil {
-				writeError(c, err.Error(), err)
+			queryID, err := h.ctrl.InsertQuery(ctx, req, username, sessionID)
+			if err != nil {
+				respondRaw(c, err.Error(), err)
 				return
 			}
+			validate <- queryID
+			continue
 		}
+
+		go func() {
+			for {
+				select {
+				case chunk := <-out:
+					respond(c, chunk)
+					if chunk.Finish {
+						log.Debug().Msg("predict finished")
+						return
+					}
+				default:
+					time.Sleep(time.Second * 1)
+					log.Debug().Msg("waiting for messages...")
+				}
+			}
+		}()
 	}
 }

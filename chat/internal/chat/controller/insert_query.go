@@ -14,21 +14,25 @@ import (
 )
 
 // InsertQuery creates new query.
-func (ctrl *Controller) InsertQuery(ctx context.Context, params model.QueryCreateReq, username string, sessionID uuid.UUID) error {
+func (ctrl *Controller) InsertQuery(ctx context.Context, params model.QueryCreateReq, username string, sessionID uuid.UUID) (int64, error) {
 	ctx, span := ctrl.tracer.Start(
 		ctx,
 		"Controller.InsertQuery",
 		trace.WithAttributes(
 			attribute.String("username", username),
-			attribute.String("query", params.Prompt+params.Command),
+			attribute.String("query", params.Prompt),
 			attribute.String("sessionID", sessionID.String()),
 		),
 	)
 	defer span.End()
 
+	if params.Prompt == "" {
+		return 0, shared.ErrEmptyQueryHint
+	}
+
 	tx, err := ctrl.repo.BeginTx(ctx)
 	if err != nil {
-		return shared.ErrBeginTx
+		return 0, shared.ErrBeginTx
 	}
 	defer func() {
 		_ = ctrl.repo.RollbackTx(tx) //nolint:errcheck // transaction is either properly closed or nothing can be done
@@ -37,39 +41,36 @@ func (ctrl *Controller) InsertQuery(ctx context.Context, params model.QueryCreat
 	queryID, err := ctrl.repo.InsertQuery(tx, model.QueryDao{
 		SessionID: sessionID,
 		Prompt:    params.Prompt,
-		Command:   params.Command,
 		Username:  username,
+		Status:    shared.StatusPending,
 	})
 	if err != nil {
-		return shared.ErrCreateQuery
+		return 0, shared.ErrCreateQuery
 	}
 
-	if params.Prompt != "" {
-		tx = pkg.PushSpan(tx, span)
+	tx = pkg.PushSpan(tx, span)
 
-		in := &pb.ExtractReq{Prompt: params.Prompt}
-		meta, err := ctrl.prompter.Extract(tx, in)
-		if err != nil {
-			log.Error().Err(err).Msg("failed to extract meta from prompt")
-			return err
-		}
+	in := &pb.ExtractReq{Prompt: params.Prompt}
+	meta, err := ctrl.prompter.Extract(tx, in)
+	if err != nil {
+		log.Error().Err(err).Msg("failed to extract meta from prompt")
+		return 0, err
+	}
 
-		if err := ctrl.repo.UpdateQueryMeta(tx, model.QueryMeta{
-			Product: meta.GetProduct(),
-			Type:    shared.QueryType(meta.GetType()),
-		}, queryID); err != nil {
-			log.Error().Err(err).Msg("failed to update query metadata")
-			return err
-		}
+	if err := ctrl.repo.UpdateQueryMeta(tx, model.QueryMeta{
+		Product: meta.GetProduct(),
+		Type:    shared.QueryType(meta.GetType()),
+	}, queryID); err != nil {
+		log.Error().Err(err).Msg("failed to update query metadata")
+		return 0, err
 	}
 
 	if err := ctrl.InsertResponse(tx, queryID); err != nil {
-		return err
+		return 0, err
 	}
-
 	if err := ctrl.repo.CommitTx(tx); err != nil {
-		return shared.ErrCommitTx
+		return 0, shared.ErrCommitTx
 	}
 
-	return nil
+	return queryID, nil
 }
