@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"errors"
+	"time"
 
 	"github.com/gofiber/contrib/websocket"
 	"github.com/google/uuid"
@@ -55,7 +56,6 @@ func (h *Handler) Chat(c *websocket.Conn) {
 		out      = make(chan Response)
 		cancel   = make(chan struct{}, 1)
 	)
-	defer close(out)
 
 	for {
 		var req model.QueryCreateReq
@@ -88,12 +88,19 @@ func (h *Handler) Chat(c *websocket.Conn) {
 			validate <- queryID
 		}
 
-		for chunk := range out {
-			if chunk.Msg == "finished" {
-				log.Debug().Msg("predict finished")
-				break
+	read:
+		for {
+			select {
+			case chunk := <-out:
+				if chunk.Msg == "finished" {
+					log.Debug().Msg("predict finished")
+					break read
+				}
+				respond(c, chunk)
+			default:
+				time.Sleep(time.Second * 1)
+				log.Debug().Msg("waiting for messages...")
 			}
-			respond(c, chunk)
 		}
 	}
 }
