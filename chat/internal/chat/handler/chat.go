@@ -77,11 +77,18 @@ func (h *Handler) Chat(c *websocket.Conn) {
 		select {
 		case queryID := <-hint:
 			log.Debug().Msg("processing hint")
-			if err := h.ctrl.Hint(ctx, queryID, req); err != nil {
+			query, err := h.ctrl.Hint(ctx, queryID, req)
+			if err != nil {
 				respondRaw(c, "failed to process hint", err)
 				hint <- queryID
 				continue
 			}
+			queryMsg, err := json.Marshal(query)
+			if err != nil {
+				respondRaw(c, err.Error(), err)
+				return
+			}
+			respondRaw(c, string(queryMsg), nil)
 			validate <- queryID
 			continue
 		case queryID := <-validate:
