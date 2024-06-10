@@ -3,6 +3,7 @@ package controller
 import (
 	"context"
 	"errors"
+	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/rs/zerolog/log"
@@ -14,7 +15,7 @@ import (
 )
 
 // Hint adds hint to existing prompt by id.
-func (ctrl *Controller) Hint(ctx context.Context, queryID int64, params model.QueryCreateReq) error {
+func (ctrl *Controller) Hint(ctx context.Context, queryID int64, params model.QueryCreateReq) (model.QueryDto, error) {
 	ctx, span := ctrl.tracer.Start(
 		ctx,
 		"Controller.Hint",
@@ -25,16 +26,18 @@ func (ctrl *Controller) Hint(ctx context.Context, queryID int64, params model.Qu
 	)
 	defer span.End()
 
+	var query model.QueryDto
+
 	if params.Prompt == "" {
-		return shared.ErrEmptyQueryHint
+		return query, shared.ErrEmptyQueryHint
 	}
 
 	prompt, err := ctrl.repo.FindQueryPrompt(ctx, queryID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return shared.ErrNoQueryWithID
+			return query, shared.ErrNoQueryWithID
 		}
-		return shared.ErrGetQuery
+		return query, shared.ErrGetQuery
 	}
 
 	log.Debug().Str("initial prompt", prompt).Msg("adding hint")
@@ -45,14 +48,26 @@ func (ctrl *Controller) Hint(ctx context.Context, queryID int64, params model.Qu
 	meta, err := ctrl.prompter.Extract(ctx, in)
 	if err != nil {
 		log.Error().Err(err).Msg("failed to extract meta from prompt")
-		return err
+		return query, err
 	}
 
-	return ctrl.repo.UpdateQuery(ctx, model.QueryDao{
+	if err := ctrl.repo.UpdateQuery(ctx, model.QueryDao{
 		ID:      queryID,
 		Prompt:  newPrompt,
 		Status:  shared.StatusPending,
 		Product: meta.GetProduct(),
 		Type:    shared.QueryType(meta.GetType()),
-	})
+	}); err != nil {
+		log.Error().Err(err).Msg("failed to update query")
+		return query, err
+	}
+
+	query.ID = queryID
+	query.Prompt = newPrompt
+	query.Status = shared.StatusPending.ToString()
+	query.Product = meta.GetProduct()
+	query.Type = shared.QueryType(meta.GetType()).ToString()
+	query.CreatedAt = time.Now()
+
+	return query, nil
 }

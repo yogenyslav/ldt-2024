@@ -13,7 +13,7 @@ type chatController interface {
 	InsertQuery(ctx context.Context, params model.QueryCreateReq, username string, sessionID uuid.UUID) (model.QueryDto, error)
 	Authorize(ctx context.Context, token string) (string, error)
 	Predict(ctx context.Context, out chan<- Response, cancel <-chan struct{}, queryID int64)
-	Hint(ctx context.Context, queryID int64, params model.QueryCreateReq) error
+	Hint(ctx context.Context, queryID int64, params model.QueryCreateReq) (model.QueryDto, error)
 	UpdateStatus(ctx context.Context, queryID int64, status shared.QueryStatus) error
 }
 
