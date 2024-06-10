@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/yogenyslav/ldt-2024/chat/internal/chat/model"
+	"github.com/yogenyslav/ldt-2024/chat/internal/shared"
 	"github.com/yogenyslav/pkg/storage"
 )
 
@@ -71,4 +72,22 @@ const updateQueryMeta = `
 func (r *Repo) UpdateQueryMeta(ctx context.Context, params model.QueryMeta, id int64) error {
 	_, err := r.pg.ExecTx(ctx, updateQueryMeta, id, params.Product, params.Type)
 	return err
+}
+
+const updateResponseStatus = `
+	update chat.response
+	set status = $2
+	where query_id = $1;
+`
+
+// UpdateResponseStatus updates response status by query id.
+func (r *Repo) UpdateResponseStatus(ctx context.Context, id int64, status shared.ResponseStatus) error {
+	tag, err := r.pg.Exec(ctx, updateResponseStatus, id, status)
+	if err != nil {
+		return shared.ErrUpdateResponse
+	}
+	if tag.RowsAffected() == 0 {
+		return shared.ErrNoResponseWithID
+	}
+	return nil
 }

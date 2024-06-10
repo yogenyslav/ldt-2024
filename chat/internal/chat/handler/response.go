@@ -5,17 +5,17 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-// ErrorResponse is a struct for websocket error responses.
-type ErrorResponse struct {
-	Err error  `json:"err"`
+// Response is a struct for websocket error responses.
+type Response struct {
+	Err error  `json:"err,omitempty"`
 	Msg string `json:"msg"`
 }
 
-func writeError(c *websocket.Conn, msg string, err error) {
-	if e := c.WriteJSON(ErrorResponse{
+func respond(c *websocket.Conn, msg string, err error) {
+	if e := c.WriteJSON(Response{
 		Msg: msg,
 		Err: err,
 	}); e != nil {
-		log.Warn().Err(e).Msg("failed to write error response")
+		log.Warn().Err(e).Msg("failed to write response")
 	}
 }

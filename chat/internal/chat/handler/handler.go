@@ -9,8 +9,9 @@ import (
 )
 
 type chatController interface {
-	InsertQuery(ctx context.Context, params model.QueryCreateReq, username string, sessionID uuid.UUID) error
+	InsertQuery(ctx context.Context, params model.QueryCreateReq, username string, sessionID uuid.UUID) (int64, error)
 	Authorize(ctx context.Context, token string) (string, error)
+	Predict(ctx context.Context, out chan<- Response, cancel <-chan struct{}, queryID int64)
 }
 
 // Handler is the chat handler

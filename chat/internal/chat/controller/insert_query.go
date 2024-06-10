@@ -14,7 +14,7 @@ import (
 )
 
 // InsertQuery creates new query.
-func (ctrl *Controller) InsertQuery(ctx context.Context, params model.QueryCreateReq, username string, sessionID uuid.UUID) error {
+func (ctrl *Controller) InsertQuery(ctx context.Context, params model.QueryCreateReq, username string, sessionID uuid.UUID) (int64, error) {
 	ctx, span := ctrl.tracer.Start(
 		ctx,
 		"Controller.InsertQuery",
@@ -28,7 +28,7 @@ func (ctrl *Controller) InsertQuery(ctx context.Context, params model.QueryCreat
 
 	tx, err := ctrl.repo.BeginTx(ctx)
 	if err != nil {
-		return shared.ErrBeginTx
+		return 0, shared.ErrBeginTx
 	}
 	defer func() {
 		_ = ctrl.repo.RollbackTx(tx) //nolint:errcheck // transaction is either properly closed or nothing can be done
@@ -41,7 +41,7 @@ func (ctrl *Controller) InsertQuery(ctx context.Context, params model.QueryCreat
 		Username:  username,
 	})
 	if err != nil {
-		return shared.ErrCreateQuery
+		return 0, shared.ErrCreateQuery
 	}
 
 	if params.Prompt != "" {
@@ -51,7 +51,7 @@ func (ctrl *Controller) InsertQuery(ctx context.Context, params model.QueryCreat
 		meta, err := ctrl.prompter.Extract(tx, in)
 		if err != nil {
 			log.Error().Err(err).Msg("failed to extract meta from prompt")
-			return err
+			return 0, err
 		}
 
 		if err := ctrl.repo.UpdateQueryMeta(tx, model.QueryMeta{
@@ -59,17 +59,16 @@ func (ctrl *Controller) InsertQuery(ctx context.Context, params model.QueryCreat
 			Type:    shared.QueryType(meta.GetType()),
 		}, queryID); err != nil {
 			log.Error().Err(err).Msg("failed to update query metadata")
-			return err
+			return 0, err
 		}
 	}
 
 	if err := ctrl.InsertResponse(tx, queryID); err != nil {
-		return err
+		return 0, err
 	}
-
 	if err := ctrl.repo.CommitTx(tx); err != nil {
-		return shared.ErrCommitTx
+		return 0, shared.ErrCommitTx
 	}
 
-	return nil
+	return queryID, nil
 }

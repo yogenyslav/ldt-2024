@@ -9,6 +9,7 @@ type ResponseStatus int8
 
 const (
 	_ ResponseStatus = iota
+	StatusCreated
 	StatusProcessing
 	StatusSuccess
 	StatusError

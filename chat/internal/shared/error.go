@@ -28,6 +28,8 @@ var (
 var (
 	// ErrNoSessionWithID is an error when session with requested id wasn't found.
 	ErrNoSessionWithID = errors.New("no session with such id found")
+	// ErrNoResponseWithID is an error when response with requested id wasn't found.
+	ErrNoResponseWithID = errors.New("no response with such id found")
 )
 
 // 500
@@ -58,4 +60,6 @@ var (
 	ErrCreateQuery = errors.New("failed to create query")
 	// ErrCreateResponse is an error when failed to create response.
 	ErrCreateResponse = errors.New("failed to create response")
+	// ErrUpdateResponse is an error when failed to update response.
+	ErrUpdateResponse = errors.New("failed to update response")
 )

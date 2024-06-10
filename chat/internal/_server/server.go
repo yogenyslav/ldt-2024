@@ -122,7 +122,7 @@ func (s *Server) Run() {
 	wsConfig := websocket.Config{
 		RecoverHandler: func(conn *websocket.Conn) {
 			if e := recover(); e != nil {
-				err = conn.WriteJSON(ch.ErrorResponse{
+				err = conn.WriteJSON(ch.Response{
 					Msg: "internal error",
 					Err: err,
 				})
