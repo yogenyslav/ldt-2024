@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"time"
 
@@ -15,6 +16,7 @@ import (
 // Chat handles chat ws functional.
 //
 //nolint:funlen // will be soon refactored
+//nolint:gocyclo // will be soon refactored
 func (h *Handler) Chat(c *websocket.Conn) {
 	ctx := context.Background()
 
@@ -104,12 +106,19 @@ func (h *Handler) Chat(c *websocket.Conn) {
 				continue
 			}
 		default:
-			queryID, err := h.ctrl.InsertQuery(ctx, req, username, sessionID)
+			query, err := h.ctrl.InsertQuery(ctx, req, username, sessionID)
 			if err != nil {
 				respondRaw(c, err.Error(), err)
 				return
 			}
-			validate <- queryID
+			queryMsg, err := json.Marshal(query)
+			if err != nil {
+				respondRaw(c, err.Error(), err)
+				return
+			}
+			respondRaw(c, string(queryMsg), nil)
+
+			validate <- query.ID
 			continue
 		}
 

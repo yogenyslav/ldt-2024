@@ -14,7 +14,9 @@ import (
 )
 
 // InsertQuery creates new query.
-func (ctrl *Controller) InsertQuery(ctx context.Context, params model.QueryCreateReq, username string, sessionID uuid.UUID) (int64, error) {
+//
+//nolint:funlen // will be soon refactored
+func (ctrl *Controller) InsertQuery(ctx context.Context, params model.QueryCreateReq, username string, sessionID uuid.UUID) (model.QueryDto, error) {
 	ctx, span := ctrl.tracer.Start(
 		ctx,
 		"Controller.InsertQuery",
@@ -26,13 +28,15 @@ func (ctrl *Controller) InsertQuery(ctx context.Context, params model.QueryCreat
 	)
 	defer span.End()
 
+	var query model.QueryDto
+
 	if params.Prompt == "" {
-		return 0, shared.ErrEmptyQueryHint
+		return query, shared.ErrEmptyQueryHint
 	}
 
 	tx, err := ctrl.repo.BeginTx(ctx)
 	if err != nil {
-		return 0, shared.ErrBeginTx
+		return query, shared.ErrBeginTx
 	}
 	defer func() {
 		_ = ctrl.repo.RollbackTx(tx) //nolint:errcheck // transaction is either properly closed or nothing can be done
@@ -45,7 +49,7 @@ func (ctrl *Controller) InsertQuery(ctx context.Context, params model.QueryCreat
 		Status:    shared.StatusPending,
 	})
 	if err != nil {
-		return 0, shared.ErrCreateQuery
+		return query, shared.ErrCreateQuery
 	}
 
 	tx = pkg.PushSpan(tx, span)
@@ -54,7 +58,7 @@ func (ctrl *Controller) InsertQuery(ctx context.Context, params model.QueryCreat
 	meta, err := ctrl.prompter.Extract(tx, in)
 	if err != nil {
 		log.Error().Err(err).Msg("failed to extract meta from prompt")
-		return 0, err
+		return query, err
 	}
 
 	if err := ctrl.repo.UpdateQueryMeta(tx, model.QueryMeta{
@@ -62,15 +66,19 @@ func (ctrl *Controller) InsertQuery(ctx context.Context, params model.QueryCreat
 		Type:    shared.QueryType(meta.GetType()),
 	}, queryID); err != nil {
 		log.Error().Err(err).Msg("failed to update query metadata")
-		return 0, err
+		return query, err
 	}
 
 	if err := ctrl.InsertResponse(tx, queryID); err != nil {
-		return 0, err
+		return query, err
 	}
 	if err := ctrl.repo.CommitTx(tx); err != nil {
-		return 0, shared.ErrCommitTx
+		return query, shared.ErrCommitTx
 	}
 
-	return queryID, nil
+	query.ID = queryID
+	query.Type = shared.QueryType(meta.GetType()).ToString()
+	query.Product = meta.GetProduct()
+
+	return query, nil
 }
