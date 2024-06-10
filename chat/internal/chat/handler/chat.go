@@ -95,8 +95,8 @@ func (h *Handler) Chat(c *websocket.Conn) {
 				}
 			} else if req.Command == shared.CommandInvalid {
 				log.Debug().Msg("extracted prompt is invalid")
-				if err := h.ctrl.UpdateStatus(ctx, queryID, shared.StatusInvalid); err != nil {
-					respondRaw(c, "failed to update status to invalid", err)
+				if err := h.ctrl.UpdateStatus(ctx, queryID, shared.StatusPending); err != nil {
+					respondRaw(c, "failed to update status to pending", err)
 					validate <- queryID
 					continue
 				}

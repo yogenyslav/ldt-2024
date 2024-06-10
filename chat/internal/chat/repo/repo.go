@@ -38,8 +38,8 @@ func (r *Repo) RollbackTx(ctx context.Context) error {
 }
 
 const insertQuery = `
-	insert into chat.query(prompt, username, session_id)
-	values ($1, $2, $3)
+	insert into chat.query(prompt, username, session_id, status)
+	values ($1, $2, $3, $4)
 	returning id;
 `
 
@@ -47,7 +47,7 @@ const insertQuery = `
 func (r *Repo) InsertQuery(ctx context.Context, params model.QueryDao) (int64, error) {
 	var id int64
 
-	err := r.pg.QueryTx(ctx, &id, insertQuery, params.Prompt, params.Username, params.SessionID)
+	err := r.pg.QueryTx(ctx, &id, insertQuery, params.Prompt, params.Username, params.SessionID, params.Status)
 	return id, err
 }
 

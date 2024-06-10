@@ -42,6 +42,7 @@ func (ctrl *Controller) InsertQuery(ctx context.Context, params model.QueryCreat
 		SessionID: sessionID,
 		Prompt:    params.Prompt,
 		Username:  username,
+		Status:    shared.StatusPending,
 	})
 	if err != nil {
 		return 0, shared.ErrCreateQuery

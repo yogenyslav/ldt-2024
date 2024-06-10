@@ -66,7 +66,6 @@ const (
 	_ = iota
 	StatusPending
 	StatusValid
-	StatusInvalid
 )
 
 // ToString return string representation of QueryStatus.
@@ -76,8 +75,6 @@ func (s QueryStatus) ToString() string {
 		return "PENDING"
 	case StatusValid:
 		return "VALID"
-	case StatusInvalid:
-		return "INVALID"
 	}
 	return "UNDEFINED"
 }
