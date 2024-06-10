@@ -11,11 +11,17 @@ type Response struct {
 	Msg string `json:"msg"`
 }
 
-func respond(c *websocket.Conn, msg string, err error) {
+func respondRaw(c *websocket.Conn, msg string, err error) {
 	if e := c.WriteJSON(Response{
 		Msg: msg,
 		Err: err,
 	}); e != nil {
+		log.Warn().Err(e).Msg("failed to write response")
+	}
+}
+
+func respond(c *websocket.Conn, resp Response) {
+	if e := c.WriteJSON(resp); e != nil {
 		log.Warn().Err(e).Msg("failed to write response")
 	}
 }

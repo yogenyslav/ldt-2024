@@ -34,19 +34,19 @@ func (h *Handler) Chat(c *websocket.Conn) {
 		return
 	}
 	if mt != websocket.TextMessage {
-		respond(c, "need authorization first", errors.New("unexpected message type"))
+		respondRaw(c, "need authorization first", errors.New("unexpected message type"))
 		return
 	}
 
 	username, authErr := h.ctrl.Authorize(ctx, string(msg))
 	if authErr != nil {
-		respond(c, "unauthorized", authErr)
+		respondRaw(c, "unauthorized", authErr)
 		return
 	}
 
 	sessionID, uuidErr := uuid.Parse(c.Params("session_id"))
 	if uuidErr != nil {
-		respond(c, "invalid session uuid", uuidErr)
+		respondRaw(c, "invalid session uuid", uuidErr)
 		return
 	}
 
@@ -60,7 +60,7 @@ func (h *Handler) Chat(c *websocket.Conn) {
 	for {
 		var req model.QueryCreateReq
 		if err := c.ReadJSON(&req); err != nil {
-			respond(c, "failed to read query", err)
+			respondRaw(c, "failed to read query", err)
 			return
 		}
 
@@ -82,10 +82,18 @@ func (h *Handler) Chat(c *websocket.Conn) {
 		default:
 			queryID, err := h.ctrl.InsertQuery(ctx, req, username, sessionID)
 			if err != nil {
-				respond(c, err.Error(), err)
+				respondRaw(c, err.Error(), err)
 				return
 			}
 			validate <- queryID
+		}
+
+		for chunk := range out {
+			if chunk.Msg == "finished" {
+				log.Debug().Msg("predict finished")
+				break
+			}
+			respond(c, chunk)
 		}
 	}
 }
