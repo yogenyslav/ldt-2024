@@ -22,8 +22,8 @@ func (ctrl *Controller) Predict(ctx context.Context, out chan<- ch.Response, can
 		return
 	}
 
-	ctx, cancelf := context.WithCancel(ctx)
-	defer cancelf()
+	ctx, finish := context.WithCancel(ctx)
+	defer finish()
 
 	cnt := 0
 	buff := strings.Builder{}
@@ -31,31 +31,35 @@ func (ctrl *Controller) Predict(ctx context.Context, out chan<- ch.Response, can
 		select {
 		case <-cancel:
 			out <- ch.Response{
-				Err: nil,
-				Msg: "predict canceled",
+				Err:    nil,
+				Msg:    "predict canceled",
+				Finish: true,
 			}
 			if err := ctrl.repo.UpdateResponse(ctx, queryID, model.ResponseDao{
 				Status: shared.StatusCanceled,
 				Body:   buff.String(),
 			}); err != nil {
 				out <- ch.Response{
-					Err: err,
-					Msg: "cancel failed",
+					Err:    err,
+					Msg:    "cancel failed",
+					Finish: true,
 				}
 			}
 			return
 		case <-ctx.Done():
 			out <- ch.Response{
-				Err: nil,
-				Msg: "finished",
+				Err:    nil,
+				Msg:    "finished",
+				Finish: true,
 			}
 			if err := ctrl.repo.UpdateResponse(ctx, queryID, model.ResponseDao{
 				Status: shared.StatusSuccess,
 				Body:   buff.String(),
 			}); err != nil {
 				out <- ch.Response{
-					Err: err,
-					Msg: "failed to save response",
+					Err:    err,
+					Msg:    "failed to save response",
+					Finish: true,
 				}
 			}
 			return
@@ -69,7 +73,7 @@ func (ctrl *Controller) Predict(ctx context.Context, out chan<- ch.Response, can
 			}
 			buff.WriteString(msg)
 			if cnt >= 10 {
-				cancelf()
+				finish()
 			}
 		}
 	}
