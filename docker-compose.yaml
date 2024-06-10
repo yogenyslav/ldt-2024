@@ -94,8 +94,17 @@ services:
       dockerfile: Dockerfile
     restart: always
     image: prompter
+    ports:
+      - "9990:9990"
     depends_on:
       - jaeger
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
 
   chat:
     build:

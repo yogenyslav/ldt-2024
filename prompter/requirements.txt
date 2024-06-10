@@ -4,3 +4,8 @@ google-api-core
 googleapis-common-protos
 grpc-gateway-protoc-gen-openapiv2
 protobuf==3.20.*
+transformers
+torch
+accelerate
+bitsandbytes
+peft

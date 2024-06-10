@@ -2,12 +2,21 @@ from api import prompter_pb2_grpc
 from api.prompter_pb2 import ExtractReq, ExtractedPrompt, QueryType
 from grpc import ServicerContext, server
 from concurrent import futures
+from saiga_prompter import SaigaPrompter, SaigaOutput
+from pathlib import Path
 
 
 class Prompter(prompter_pb2_grpc.PrompterServicer):
+
+    def __init__(self):
+        
+        self.prompts_path = Path(__file__).parent / "prompts.json"
+        self.saiga = SaigaPrompter(prompts_path=self.prompts_path)
+        
     def Extract(self, request: ExtractReq, context: ServicerContext) -> ExtractedPrompt:
         # prompter action here
-        return ExtractedPrompt(type=QueryType.UNDEFINED, product="test")
+        output = self.saiga.process_request(request.prompt)
+        return ExtractedPrompt(type=output.type, product=output.product)
 
 
 def serve():
