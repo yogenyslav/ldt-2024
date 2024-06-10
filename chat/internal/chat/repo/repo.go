@@ -39,7 +39,7 @@ func (r *Repo) RollbackTx(ctx context.Context) error {
 
 const insertQuery = `
 	insert into chat.query(prompt, username, session_id)
-	values ($1, $3, $4)
+	values ($1, $2, $3)
 	returning id;
 `
 

@@ -26,6 +26,10 @@ func (ctrl *Controller) InsertQuery(ctx context.Context, params model.QueryCreat
 	)
 	defer span.End()
 
+	if params.Prompt == "" {
+		return 0, shared.ErrEmptyQueryHint
+	}
+
 	tx, err := ctrl.repo.BeginTx(ctx)
 	if err != nil {
 		return 0, shared.ErrBeginTx
@@ -43,23 +47,21 @@ func (ctrl *Controller) InsertQuery(ctx context.Context, params model.QueryCreat
 		return 0, shared.ErrCreateQuery
 	}
 
-	if params.Prompt != "" {
-		tx = pkg.PushSpan(tx, span)
+	tx = pkg.PushSpan(tx, span)
 
-		in := &pb.ExtractReq{Prompt: params.Prompt}
-		meta, err := ctrl.prompter.Extract(tx, in)
-		if err != nil {
-			log.Error().Err(err).Msg("failed to extract meta from prompt")
-			return 0, err
-		}
+	in := &pb.ExtractReq{Prompt: params.Prompt}
+	meta, err := ctrl.prompter.Extract(tx, in)
+	if err != nil {
+		log.Error().Err(err).Msg("failed to extract meta from prompt")
+		return 0, err
+	}
 
-		if err := ctrl.repo.UpdateQueryMeta(tx, model.QueryMeta{
-			Product: meta.GetProduct(),
-			Type:    shared.QueryType(meta.GetType()),
-		}, queryID); err != nil {
-			log.Error().Err(err).Msg("failed to update query metadata")
-			return 0, err
-		}
+	if err := ctrl.repo.UpdateQueryMeta(tx, model.QueryMeta{
+		Product: meta.GetProduct(),
+		Type:    shared.QueryType(meta.GetType()),
+	}, queryID); err != nil {
+		log.Error().Err(err).Msg("failed to update query metadata")
+		return 0, err
 	}
 
 	if err := ctrl.InsertResponse(tx, queryID); err != nil {

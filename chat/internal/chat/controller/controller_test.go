@@ -15,6 +15,7 @@ import (
 	"github.com/yogenyslav/ldt-2024/chat/internal/chat/controller/mocks"
 	"github.com/yogenyslav/ldt-2024/chat/internal/chat/model"
 	cr "github.com/yogenyslav/ldt-2024/chat/internal/chat/repo"
+	"github.com/yogenyslav/ldt-2024/chat/internal/shared"
 	"github.com/yogenyslav/ldt-2024/chat/tests/database"
 	"github.com/yogenyslav/pkg/infrastructure/tracing"
 	"github.com/yogenyslav/pkg/storage/postgres"
@@ -53,18 +54,21 @@ func TestController_InsertQuery(t *testing.T) {
 		params    model.QueryCreateReq
 		username  string
 		sessionID uuid.UUID
+		wantErr   error
 	}{
 		{
 			name:      "success, prompt",
 			params:    model.QueryCreateReq{Prompt: "test prompt"},
 			username:  "user",
 			sessionID: uuid.New(),
+			wantErr:   nil,
 		},
 		{
-			name:      "success, command",
+			name:      "fail, empty prompt",
 			params:    model.QueryCreateReq{Command: "test command"},
 			username:  "user",
 			sessionID: uuid.New(),
+			wantErr:   shared.ErrEmptyQueryHint,
 		},
 	}
 
@@ -73,8 +77,13 @@ func TestController_InsertQuery(t *testing.T) {
 			if tt.params.Prompt != "" {
 				prompter.EXPECT().Extract(gomock.Any(), gomock.Any())
 			}
-			err := controller.InsertQuery(ctx, tt.params, tt.username, tt.sessionID)
-			assert.NoError(t, err)
+			_, err := controller.InsertQuery(ctx, tt.params, tt.username, tt.sessionID)
+			t.Log(err)
+			if tt.wantErr == nil {
+				assert.NoError(t, err)
+			} else {
+				assert.ErrorIs(t, err, tt.wantErr)
+			}
 		})
 	}
 }

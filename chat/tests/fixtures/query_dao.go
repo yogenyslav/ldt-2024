@@ -26,7 +26,6 @@ func (b *QueryDaoBuilder) New() *QueryDaoBuilder {
 		SessionID(uuid.New()).
 		Username("user").
 		Prompt("some prompt").
-		Command("").
 		CreatedAt(time.Now())
 }
 
@@ -55,11 +54,6 @@ func (b *QueryDaoBuilder) Username(v string) *QueryDaoBuilder {
 
 func (b *QueryDaoBuilder) Prompt(v string) *QueryDaoBuilder {
 	b.QueryDao.Prompt = v
-	return b
-}
-
-func (b *QueryDaoBuilder) Command(v string) *QueryDaoBuilder {
-	b.QueryDao.Command = v
 	return b
 }
 
