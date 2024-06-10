@@ -1,5 +1,20 @@
 basePath: /chat
 definitions:
+  model.FindOneResp:
+    properties:
+      content:
+        items:
+          $ref: '#/definitions/model.SessionContentDto'
+        type: array
+      editable:
+        type: boolean
+      id:
+        type: string
+      tg:
+        type: boolean
+      title:
+        type: string
+    type: object
   model.ListResp:
     properties:
       sessions:
@@ -27,6 +42,21 @@ definitions:
       id:
         type: string
     type: object
+  model.QueryDto:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      product:
+        type: string
+      prompt:
+        type: string
+      status:
+        type: string
+      type:
+        type: string
+    type: object
   model.RenameReq:
     properties:
       id:
@@ -38,6 +68,22 @@ definitions:
     required:
     - id
     - title
+    type: object
+  model.ResponseDto:
+    properties:
+      body:
+        type: string
+      created_at:
+        type: string
+      status:
+        type: string
+    type: object
+  model.SessionContentDto:
+    properties:
+      query:
+        $ref: '#/definitions/model.QueryDto'
+      response:
+        $ref: '#/definitions/model.ResponseDto'
     type: object
   model.SessionDto:
     properties:
@@ -149,7 +195,7 @@ paths:
         "200":
           description: Информация о сессии
           schema:
-            type: string
+            $ref: '#/definitions/model.FindOneResp'
         "400":
           description: Неверное значение ID
           schema:

@@ -16,7 +16,7 @@ import (
 // @Produce json
 // @Param Authorization header string true "access token"
 // @Param id path string true "UUID сессии"
-// @Success 200 {object} string "Информация о сессии"
+// @Success 200 {object} model.FindOneResp "Информация о сессии"
 // @Failure 400 {object} string "Неверное значение ID"
 // @Router /session/{id} [get]
 func (h *Handler) FindOne(c *fiber.Ctx) error {
