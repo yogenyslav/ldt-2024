@@ -23,6 +23,7 @@ docker_remove: docker_down
 	docker volume rm ${BASE_IMAGE}_jaeger_data
 	docker volume rm ${BASE_IMAGE}_redis_data
 	docker volume rm ${BASE_IMAGE}_redis_conf
+	docker volume rm ${BASE_IMAGE}_prompter_data
 	docker image rm chat
 	docker image rm api
 	docker image rm bot
