@@ -4,6 +4,7 @@ import Chat from './pages/Chat';
 import { RequireAuth } from './auth/RequireAuth';
 import { AuthProvider } from './auth/AuthProvider';
 import { RequireUnauth } from './auth/RequireUnauth';
+import { Dashboard } from './components/Dashboard';
 
 function App() {
     return (
@@ -22,7 +23,9 @@ function App() {
                         path='/chat'
                         element={
                             <RequireAuth>
-                                <Chat />
+                                <Dashboard>
+                                    <Chat />
+                                </Dashboard>
                             </RequireAuth>
                         }
                     />
@@ -30,7 +33,9 @@ function App() {
                         path='*'
                         element={
                             <RequireAuth>
-                                <Chat />
+                                <Dashboard>
+                                    <Chat />
+                                </Dashboard>
                             </RequireAuth>
                         }
                     />
