@@ -120,7 +120,6 @@ func (s *Server) Run() {
 	chatController := cc.New(chatRepo, pb.NewPrompterClient(apiClient.GetConn()), s.kc, s.cfg.KeyCloak.Realm, s.cfg.Server.CipherKey, s.tracer)
 	chatHandler := ch.New(chatController, s.tracer)
 	wsConfig := websocket.Config{
-		Origins: s.cfg.Server.CorsOrigins,
 		RecoverHandler: func(conn *websocket.Conn) {
 			if e := recover(); e != nil {
 				err = conn.WriteJSON(ch.ErrorResponse{
