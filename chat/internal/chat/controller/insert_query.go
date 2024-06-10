@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
@@ -79,6 +80,8 @@ func (ctrl *Controller) InsertQuery(ctx context.Context, params model.QueryCreat
 	query.ID = queryID
 	query.Type = shared.QueryType(meta.GetType()).ToString()
 	query.Product = meta.GetProduct()
+	query.Status = shared.StatusPending.ToString()
+	query.CreatedAt = time.Now()
 
 	return query, nil
 }

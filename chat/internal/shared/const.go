@@ -59,15 +59,15 @@ func (t QueryType) ToString() string {
 type QueryCommand string
 
 const (
-	CommandValid   = "valid"
-	CommandInvalid = "invalid"
-	CommandCancel  = "cancel"
+	CommandValid   QueryCommand = "valid"
+	CommandInvalid QueryCommand = "invalid"
+	CommandCancel  QueryCommand = "cancel"
 )
 
 type QueryStatus int8
 
 const (
-	_ = iota
+	_ QueryStatus = iota
 	StatusPending
 	StatusValid
 )
