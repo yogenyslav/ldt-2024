@@ -3,7 +3,6 @@ package controller
 import (
 	"context"
 
-	"github.com/yogenyslav/ldt-2024/chat/internal/chat/model"
 	"github.com/yogenyslav/ldt-2024/chat/internal/shared"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
@@ -21,8 +20,5 @@ func (ctrl *Controller) UpdateStatus(ctx context.Context, queryID int64, status 
 	)
 	defer span.End()
 
-	return ctrl.repo.UpdateQuery(ctx, model.QueryDao{
-		ID:     queryID,
-		Status: status,
-	})
+	return ctrl.repo.UpdateQueryStatus(ctx, queryID, status)
 }

@@ -105,15 +105,33 @@ func (r *Repo) FindQueryPrompt(ctx context.Context, id int64) (string, error) {
 	return prompt, err
 }
 
-const updateQuery = `
+const updateQueryPrompt = `
 	update chat.query
-	set prompt = $2, status = $3
+	set prompt = $2
 	where id = $1;
 `
 
-// UpdateQuery updates query by id.
-func (r *Repo) UpdateQuery(ctx context.Context, params model.QueryDao) error {
-	tag, err := r.pg.Exec(ctx, updateQuery, params.ID, params.Prompt, params.Status)
+// UpdateQueryPrompt updates query prompt by id.
+func (r *Repo) UpdateQueryPrompt(ctx context.Context, id int64, prompt string) error {
+	tag, err := r.pg.Exec(ctx, updateQueryPrompt, id, prompt)
+	if err != nil {
+		return shared.ErrUpdateQuery
+	}
+	if tag.RowsAffected() == 0 {
+		return shared.ErrNoQueryWithID
+	}
+	return nil
+}
+
+const updateQueryStatus = `
+	update chat.query
+	set status = $2
+	where id = $1;
+`
+
+// UpdateQueryStatus updates query status by id.
+func (r *Repo) UpdateQueryStatus(ctx context.Context, id int64, status shared.QueryStatus) error {
+	tag, err := r.pg.Exec(ctx, updateQueryStatus, id, status)
 	if err != nil {
 		return shared.ErrUpdateQuery
 	}

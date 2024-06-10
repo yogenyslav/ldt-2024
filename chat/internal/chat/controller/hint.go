@@ -38,9 +38,8 @@ func (ctrl *Controller) Hint(ctx context.Context, queryID int64, params model.Qu
 
 	log.Debug().Str("initial prompt", prompt).Msg("adding hint")
 
-	return ctrl.repo.UpdateQuery(ctx, model.QueryDao{
-		ID:     queryID,
-		Prompt: prompt + "\nhint: " + params.Prompt,
-		Status: shared.StatusPending,
-	})
+	if err := ctrl.repo.UpdateQueryPrompt(ctx, queryID, prompt+"\nhint: "+params.Prompt); err != nil {
+		return err
+	}
+	return ctrl.repo.UpdateQueryStatus(ctx, queryID, shared.StatusPending)
 }
