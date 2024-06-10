@@ -18,8 +18,10 @@ func (ctrl *Controller) Predict(ctx context.Context, out chan<- ch.Response, can
 		return
 	}
 
-	cnt := 0
+	ctx, cancelf := context.WithCancel(ctx)
+	defer cancelf()
 
+	cnt := 0
 	for {
 		select {
 		case <-cancel:
@@ -34,7 +36,7 @@ func (ctrl *Controller) Predict(ctx context.Context, out chan<- ch.Response, can
 				}
 			}
 			return
-		case <-time.After(time.Second * 10):
+		case <-ctx.Done():
 			out <- ch.Response{
 				Err: nil,
 				Msg: "finished",
@@ -52,6 +54,9 @@ func (ctrl *Controller) Predict(ctx context.Context, out chan<- ch.Response, can
 			out <- ch.Response{
 				Err: nil,
 				Msg: fmt.Sprintf("token %d", cnt),
+			}
+			if cnt >= 10 {
+				cancelf()
 			}
 		}
 	}
