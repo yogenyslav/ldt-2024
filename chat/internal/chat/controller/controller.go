@@ -16,7 +16,9 @@ type chatRepo interface {
 	InsertQuery(ctx context.Context, params model.QueryDao) (int64, error)
 	InsertResponse(ctx context.Context, params model.ResponseDao) error
 	UpdateQueryMeta(ctx context.Context, params model.QueryMeta, id int64) error
-	UpdateResponse(ctx context.Context, id int64, params model.ResponseDao) error
+	UpdateResponse(ctx context.Context, params model.ResponseDao) error
+	FindQueryPrompt(ctx context.Context, id int64) (string, error)
+	UpdateQuery(ctx context.Context, params model.QueryDao) error
 }
 
 // Controller is a struct that implements chat business logic.

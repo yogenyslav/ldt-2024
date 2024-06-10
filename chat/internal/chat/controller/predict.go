@@ -22,8 +22,9 @@ func (ctrl *Controller) Predict(ctx context.Context, out chan<- ch.Response, can
 	)
 	defer span.End()
 
-	if err := ctrl.repo.UpdateResponse(ctx, queryID, model.ResponseDao{
-		Status: shared.StatusProcessing,
+	if err := ctrl.repo.UpdateResponse(ctx, model.ResponseDao{
+		QueryID: queryID,
+		Status:  shared.StatusProcessing,
 	}); err != nil {
 		out <- ch.Response{
 			Err: err,
@@ -45,9 +46,10 @@ func (ctrl *Controller) Predict(ctx context.Context, out chan<- ch.Response, can
 				Msg:    "predict canceled",
 				Finish: true,
 			}
-			if err := ctrl.repo.UpdateResponse(ctx, queryID, model.ResponseDao{
-				Status: shared.StatusCanceled,
-				Body:   buff.String(),
+			if err := ctrl.repo.UpdateResponse(ctx, model.ResponseDao{
+				QueryID: queryID,
+				Status:  shared.StatusCanceled,
+				Body:    buff.String(),
 			}); err != nil {
 				out <- ch.Response{
 					Err:    err,
@@ -62,9 +64,10 @@ func (ctrl *Controller) Predict(ctx context.Context, out chan<- ch.Response, can
 				Msg:    "finished",
 				Finish: true,
 			}
-			if err := ctrl.repo.UpdateResponse(ctx, queryID, model.ResponseDao{
-				Status: shared.StatusSuccess,
-				Body:   buff.String(),
+			if err := ctrl.repo.UpdateResponse(ctx, model.ResponseDao{
+				QueryID: queryID,
+				Status:  shared.StatusSuccess,
+				Body:    buff.String(),
 			}); err != nil {
 				out <- ch.Response{
 					Err:    err,

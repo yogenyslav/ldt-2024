@@ -14,6 +14,8 @@ var (
 	ErrInvalidUUID = errors.New("invalid uuid")
 	// ErrWsProtocolRequired is an error when server requirement for ws is not met.
 	ErrWsProtocolRequired = errors.New("upgrade to websocket is required")
+	// ErrEmptyQueryHint is an error when get hint for the query with empty prompt value.
+	ErrEmptyQueryHint = errors.New("query hint can't be empty")
 )
 
 // 401
@@ -30,6 +32,8 @@ var (
 	ErrNoSessionWithID = errors.New("no session with such id found")
 	// ErrNoResponseWithID is an error when response with requested id wasn't found.
 	ErrNoResponseWithID = errors.New("no response with such id found")
+	// ErrNoQueryWithID is an error when query with requested id wasn't found.
+	ErrNoQueryWithID = errors.New("no query with such id found")
 )
 
 // 500
@@ -62,4 +66,8 @@ var (
 	ErrCreateResponse = errors.New("failed to create response")
 	// ErrUpdateResponse is an error when failed to update response.
 	ErrUpdateResponse = errors.New("failed to update response")
+	// ErrUpdateQuery is an error when failed to update query.
+	ErrUpdateQuery = errors.New("failed to update query")
+	// ErrGetQuery is an error when failed to get query.
+	ErrGetQuery = errors.New("failed to get query")
 )

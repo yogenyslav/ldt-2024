@@ -38,8 +38,8 @@ func (r *Repo) RollbackTx(ctx context.Context) error {
 }
 
 const insertQuery = `
-	insert into chat.query(prompt, command, username, session_id)
-	values ($1, $2, $3, $4)
+	insert into chat.query(prompt, username, session_id)
+	values ($1, $3, $4)
 	returning id;
 `
 
@@ -47,7 +47,7 @@ const insertQuery = `
 func (r *Repo) InsertQuery(ctx context.Context, params model.QueryDao) (int64, error) {
 	var id int64
 
-	err := r.pg.QueryTx(ctx, &id, insertQuery, params.Prompt, params.Command, params.Username, params.SessionID)
+	err := r.pg.QueryTx(ctx, &id, insertQuery, params.Prompt, params.Username, params.SessionID)
 	return id, err
 }
 
@@ -81,13 +81,44 @@ const updateResponse = `
 `
 
 // UpdateResponse updates response status by query id.
-func (r *Repo) UpdateResponse(ctx context.Context, id int64, params model.ResponseDao) error {
-	tag, err := r.pg.Exec(ctx, updateResponse, id, params.Body, params.Status)
+func (r *Repo) UpdateResponse(ctx context.Context, params model.ResponseDao) error {
+	tag, err := r.pg.Exec(ctx, updateResponse, params.QueryID, params.Body, params.Status)
 	if err != nil {
 		return shared.ErrUpdateResponse
 	}
 	if tag.RowsAffected() == 0 {
 		return shared.ErrNoResponseWithID
+	}
+	return nil
+}
+
+const findQueryPrompt = `
+	select prompt
+	from chat.query
+	where id = $1;
+`
+
+// FindQueryPrompt finds query prompt by id.
+func (r *Repo) FindQueryPrompt(ctx context.Context, id int64) (string, error) {
+	var prompt string
+	err := r.pg.Query(ctx, &prompt, findQueryPrompt, id)
+	return prompt, err
+}
+
+const updateQuery = `
+	update chat.query
+	set prompt = $2, status = $3
+	where id = $1;
+`
+
+// UpdateQuery updates query by id.
+func (r *Repo) UpdateQuery(ctx context.Context, params model.QueryDao) error {
+	tag, err := r.pg.Exec(ctx, updateQuery, params.ID, params.Prompt, params.Status)
+	if err != nil {
+		return shared.ErrUpdateQuery
+	}
+	if tag.RowsAffected() == 0 {
+		return shared.ErrNoQueryWithID
 	}
 	return nil
 }

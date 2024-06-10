@@ -9,6 +9,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
 	"github.com/yogenyslav/ldt-2024/chat/internal/chat/model"
+	"github.com/yogenyslav/ldt-2024/chat/internal/shared"
 )
 
 // Chat handles chat ws functional.
@@ -54,6 +55,7 @@ func (h *Handler) Chat(c *websocket.Conn) {
 	var (
 		validate = make(chan int64, 1)
 		out      = make(chan Response)
+		hint     = make(chan int64, 1)
 		cancel   = make(chan struct{}, 1)
 	)
 
@@ -64,20 +66,42 @@ func (h *Handler) Chat(c *websocket.Conn) {
 			return
 		}
 
-		if req.Command == "cancel" {
+		if req.Command == shared.CommandCancel {
 			cancel <- struct{}{}
 			log.Debug().Msg("predict was canceled")
 			continue
 		}
 
 		select {
+		case queryID := <-hint:
+			log.Debug().Msg("processing hint")
+			if err := h.ctrl.Hint(ctx, queryID, req); err != nil {
+				respondRaw(c, "failed to process hint", err)
+				hint <- queryID
+				continue
+			}
+			validate <- queryID
+			continue
 		case queryID := <-validate:
-			if req.Command == "valid" {
+			if req.Command == shared.CommandValid {
 				// for debug purposes
 				log.Debug().Msg("extracted prompt is valid")
 				go h.ctrl.Predict(ctx, out, cancel, queryID)
-			} else {
+				if err := h.ctrl.UpdateStatus(ctx, queryID, shared.StatusValid); err != nil {
+					respondRaw(c, "failed to update status to valid", err)
+					validate <- queryID
+					cancel <- struct{}{}
+					continue
+				}
+			} else if req.Command == shared.CommandInvalid {
 				log.Debug().Msg("extracted prompt is invalid")
+				if err := h.ctrl.UpdateStatus(ctx, queryID, shared.StatusInvalid); err != nil {
+					respondRaw(c, "failed to update status to invalid", err)
+					validate <- queryID
+					continue
+				}
+				hint <- queryID
+				continue
 			}
 		default:
 			queryID, err := h.ctrl.InsertQuery(ctx, req, username, sessionID)

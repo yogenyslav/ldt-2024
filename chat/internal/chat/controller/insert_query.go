@@ -20,7 +20,7 @@ func (ctrl *Controller) InsertQuery(ctx context.Context, params model.QueryCreat
 		"Controller.InsertQuery",
 		trace.WithAttributes(
 			attribute.String("username", username),
-			attribute.String("query", params.Prompt+params.Command),
+			attribute.String("query", params.Prompt),
 			attribute.String("sessionID", sessionID.String()),
 		),
 	)
@@ -37,7 +37,6 @@ func (ctrl *Controller) InsertQuery(ctx context.Context, params model.QueryCreat
 	queryID, err := ctrl.repo.InsertQuery(tx, model.QueryDao{
 		SessionID: sessionID,
 		Prompt:    params.Prompt,
-		Command:   params.Command,
 		Username:  username,
 	})
 	if err != nil {
