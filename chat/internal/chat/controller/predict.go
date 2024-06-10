@@ -53,7 +53,7 @@ func (ctrl *Controller) Predict(ctx context.Context, out chan<- ch.Response, can
 			time.Sleep(time.Second * 1)
 			out <- ch.Response{
 				Err: nil,
-				Msg: fmt.Sprintf("token %d", cnt),
+				Msg: fmt.Sprintf("chunk %d", cnt),
 			}
 			if cnt >= 10 {
 				cancelf()

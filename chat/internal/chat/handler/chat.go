@@ -86,21 +86,23 @@ func (h *Handler) Chat(c *websocket.Conn) {
 				return
 			}
 			validate <- queryID
+			continue
 		}
 
-	read:
-		for {
-			select {
-			case chunk := <-out:
-				if chunk.Msg == "finished" {
-					log.Debug().Msg("predict finished")
-					break read
+		go func() {
+			for {
+				select {
+				case chunk := <-out:
+					if chunk.Msg == "finished" {
+						log.Debug().Msg("predict finished")
+						return
+					}
+					respond(c, chunk)
+				default:
+					time.Sleep(time.Second * 1)
+					log.Debug().Msg("waiting for messages...")
 				}
-				respond(c, chunk)
-			default:
-				time.Sleep(time.Second * 1)
-				log.Debug().Msg("waiting for messages...")
 			}
-		}
+		}()
 	}
 }
