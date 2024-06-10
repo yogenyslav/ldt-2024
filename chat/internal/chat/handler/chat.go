@@ -93,11 +93,11 @@ func (h *Handler) Chat(c *websocket.Conn) {
 			for {
 				select {
 				case chunk := <-out:
-					if chunk.Msg == "finished" {
+					respond(c, chunk)
+					if chunk.Finish {
 						log.Debug().Msg("predict finished")
 						return
 					}
-					respond(c, chunk)
 				default:
 					time.Sleep(time.Second * 1)
 					log.Debug().Msg("waiting for messages...")

@@ -6,7 +6,6 @@ import (
 	"github.com/Nerzal/gocloak/v13"
 	"github.com/yogenyslav/ldt-2024/chat/internal/api/pb"
 	"github.com/yogenyslav/ldt-2024/chat/internal/chat/model"
-	"github.com/yogenyslav/ldt-2024/chat/internal/shared"
 	"go.opentelemetry.io/otel/trace"
 )
 
@@ -17,7 +16,7 @@ type chatRepo interface {
 	InsertQuery(ctx context.Context, params model.QueryDao) (int64, error)
 	InsertResponse(ctx context.Context, params model.ResponseDao) error
 	UpdateQueryMeta(ctx context.Context, params model.QueryMeta, id int64) error
-	UpdateResponseStatus(ctx context.Context, id int64, status shared.ResponseStatus) error
+	UpdateResponse(ctx context.Context, id int64, params model.ResponseDao) error
 }
 
 // Controller is a struct that implements chat business logic.

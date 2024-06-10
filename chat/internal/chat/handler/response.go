@@ -7,15 +7,20 @@ import (
 
 // Response is a struct for websocket error responses.
 type Response struct {
-	Err error  `json:"err,omitempty"`
-	Msg string `json:"msg"`
+	Err    error  `json:"err,omitempty"`
+	Msg    string `json:"msg"`
+	Finish bool   `json:"finish"`
 }
 
 func respondRaw(c *websocket.Conn, msg string, err error) {
-	if e := c.WriteJSON(Response{
+	resp := Response{
 		Msg: msg,
 		Err: err,
-	}); e != nil {
+	}
+	if err != nil {
+		resp.Finish = true
+	}
+	if e := c.WriteJSON(resp); e != nil {
 		log.Warn().Err(e).Msg("failed to write response")
 	}
 }

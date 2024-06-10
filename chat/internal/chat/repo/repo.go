@@ -74,15 +74,15 @@ func (r *Repo) UpdateQueryMeta(ctx context.Context, params model.QueryMeta, id i
 	return err
 }
 
-const updateResponseStatus = `
+const updateResponse = `
 	update chat.response
-	set status = $2
+	set body = $2, status = $3
 	where query_id = $1;
 `
 
-// UpdateResponseStatus updates response status by query id.
-func (r *Repo) UpdateResponseStatus(ctx context.Context, id int64, status shared.ResponseStatus) error {
-	tag, err := r.pg.Exec(ctx, updateResponseStatus, id, status)
+// UpdateResponse updates response status by query id.
+func (r *Repo) UpdateResponse(ctx context.Context, id int64, params model.ResponseDao) error {
+	tag, err := r.pg.Exec(ctx, updateResponse, id, params.Body, params.Status)
 	if err != nil {
 		return shared.ErrUpdateResponse
 	}
