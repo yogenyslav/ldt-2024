@@ -14,6 +14,8 @@ import (
 )
 
 // Predict get prediction for query.
+//
+//nolint:funlen // will be refactored soon
 func (ctrl *Controller) Predict(ctx context.Context, out chan<- ch.Response, cancel <-chan struct{}, queryID int64) {
 	ctx, span := ctrl.tracer.Start(
 		ctx,

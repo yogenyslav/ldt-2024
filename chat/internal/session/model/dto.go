@@ -33,6 +33,7 @@ type RenameReq struct {
 
 // FindOneResp is a model for find one session request.
 type FindOneResp struct {
+	Title    string              `json:"title"`
 	Content  []SessionContentDto `json:"content"`
 	Editable bool                `json:"editable"`
 	Tg       bool                `json:"tg"`

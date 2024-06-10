@@ -13,7 +13,7 @@ type sessionRepo interface {
 	List(ctx context.Context, username string) ([]model.SessionDao, error)
 	UpdateTitle(ctx context.Context, params model.RenameReq) error
 	DeleteOne(ctx context.Context, id uuid.UUID) error
-	FindStatus(ctx context.Context, id uuid.UUID) (model.SessionStatus, error)
+	FindMeta(ctx context.Context, id uuid.UUID) (model.SessionMeta, error)
 	FindContent(ctx context.Context, id uuid.UUID) ([]model.SessionContentDao, error)
 }
 

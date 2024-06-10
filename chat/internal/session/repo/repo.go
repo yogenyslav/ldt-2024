@@ -80,16 +80,16 @@ func (r *Repo) DeleteOne(ctx context.Context, id uuid.UUID) error {
 	return nil
 }
 
-const findStatus = `
-	select username, is_deleted, tg
+const findMeta = `
+	select username, title, is_deleted, tg
 	from chat.session
 	where id = $1;
 `
 
-// FindStatus returns the username of the session creator, status (is_deleted) and tg flag.
-func (r *Repo) FindStatus(ctx context.Context, id uuid.UUID) (model.SessionStatus, error) {
-	var status model.SessionStatus
-	err := r.pg.Query(ctx, &status, findStatus, id)
+// FindMeta returns session meta info.
+func (r *Repo) FindMeta(ctx context.Context, id uuid.UUID) (model.SessionMeta, error) {
+	var status model.SessionMeta
+	err := r.pg.Query(ctx, &status, findMeta, id)
 	return status, err
 }
 
