@@ -74,4 +74,5 @@ message ExtractedPrompt {
   };
   QueryType type = 1;
   string product = 2;
+  string period = 3;
 }

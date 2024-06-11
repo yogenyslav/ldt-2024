@@ -10,6 +10,7 @@ import (
 type QueryDto struct {
 	CreatedAt time.Time `json:"created_at"`
 	Prompt    string    `json:"prompt"`
+	Period    string    `json:"period"`
 	Product   string    `json:"product"`
 	Type      string    `json:"type"`
 	Status    string    `json:"status"`
@@ -32,5 +33,6 @@ type QueryCreateReq struct {
 // QueryMeta internal model for extracted metadata from query.
 type QueryMeta struct {
 	Product string
+	Period  string
 	Type    shared.QueryType
 }

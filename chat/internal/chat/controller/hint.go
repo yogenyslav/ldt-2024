@@ -57,6 +57,7 @@ func (ctrl *Controller) Hint(ctx context.Context, queryID int64, params model.Qu
 		Status:  shared.StatusPending,
 		Product: meta.GetProduct(),
 		Type:    shared.QueryType(meta.GetType()),
+		Period:  meta.GetPeriod(),
 	}); err != nil {
 		log.Error().Err(err).Msg("failed to update query")
 		return query, err
@@ -68,6 +69,7 @@ func (ctrl *Controller) Hint(ctx context.Context, queryID int64, params model.Qu
 	query.Product = meta.GetProduct()
 	query.Type = shared.QueryType(meta.GetType()).ToString()
 	query.CreatedAt = time.Now()
+	query.Period = meta.GetPeriod()
 
 	return query, nil
 }

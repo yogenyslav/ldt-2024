@@ -89,6 +89,9 @@
         },
         "product": {
           "type": "string"
+        },
+        "period": {
+          "type": "string"
         }
       },
       "description": "Metadata from raw prompt that is passed to predictor",

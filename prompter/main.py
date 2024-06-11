@@ -17,7 +17,7 @@ class Prompter(prompter_pb2_grpc.PrompterServicer):
         # prompter action here
         print(f"got prompt {request.prompt}")
         output = self.saiga.process_request(request.prompt)
-        return ExtractedPrompt(type=output.type, product=output.product)
+        return ExtractedPrompt(type=output.type, product=output.product, period=output.period)
 
 
 def serve():

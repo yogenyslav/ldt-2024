@@ -64,13 +64,13 @@ func (r *Repo) InsertResponse(ctx context.Context, params model.ResponseDao) err
 
 const updateQueryMeta = `
 	update chat.query
-	set product = $2, type = $3
+	set product = $2, type = $3, period = $4
 	where id = $1;
 `
 
 // UpdateQueryMeta updates metadata for query after passing through prompter.
 func (r *Repo) UpdateQueryMeta(ctx context.Context, params model.QueryMeta, id int64) error {
-	_, err := r.pg.ExecTx(ctx, updateQueryMeta, id, params.Product, params.Type)
+	_, err := r.pg.ExecTx(ctx, updateQueryMeta, id, params.Product, params.Type, params.Period)
 	return err
 }
 
@@ -107,13 +107,13 @@ func (r *Repo) FindQueryPrompt(ctx context.Context, id int64) (string, error) {
 
 const updateQuery = `
 	update chat.query
-	set prompt = $2, status = $3, product = $4, type = $5
+	set prompt = $2, status = $3, product = $4, type = $5, period = $6
 	where id = $1;
 `
 
 // UpdateQuery updates query by id.
 func (r *Repo) UpdateQuery(ctx context.Context, params model.QueryDao) error {
-	tag, err := r.pg.Exec(ctx, updateQuery, params.ID, params.Prompt, params.Status, params.Product, params.Type)
+	tag, err := r.pg.Exec(ctx, updateQuery, params.ID, params.Prompt, params.Status, params.Product, params.Type, params.Period)
 	if err != nil {
 		return shared.ErrUpdateQuery
 	}

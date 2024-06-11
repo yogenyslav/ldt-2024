@@ -65,6 +65,7 @@ func (ctrl *Controller) InsertQuery(ctx context.Context, params model.QueryCreat
 	if err := ctrl.repo.UpdateQueryMeta(tx, model.QueryMeta{
 		Product: meta.GetProduct(),
 		Type:    shared.QueryType(meta.GetType()),
+		Period:  meta.GetPeriod(),
 	}, queryID); err != nil {
 		log.Error().Err(err).Msg("failed to update query metadata")
 		return query, err
@@ -82,6 +83,7 @@ func (ctrl *Controller) InsertQuery(ctx context.Context, params model.QueryCreat
 	query.Product = meta.GetProduct()
 	query.Status = shared.StatusPending.ToString()
 	query.CreatedAt = time.Now()
+	query.Period = meta.GetPeriod()
 
 	return query, nil
 }
