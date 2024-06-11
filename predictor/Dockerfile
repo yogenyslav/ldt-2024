@@ -31,7 +31,7 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 COPY . .
 
 # Expose the port that the application listens on. CHANGE PORT <---------------------------------------------------------------------------------------------------
-EXPOSE 9990 
+EXPOSE 9980 
 
 # Run the application.
 CMD python3 main.py

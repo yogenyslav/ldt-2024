@@ -78,6 +78,8 @@ proto:
 				 	--openapiv2_out ./api/third_party/OpenAPI/api
 	@python -m grpc_tools.protoc -Iproto --python_out=prompter --pyi_out=prompter --grpc_python_out=prompter \
  					proto/api/prompter.proto
+	@python -m grpc_tools.protoc -Iproto --python_out=predictor --pyi_out=predictor --grpc_python_out=predictor \
+     					proto/api/predictor.proto
 
 .PHONY: tests
 tests:
