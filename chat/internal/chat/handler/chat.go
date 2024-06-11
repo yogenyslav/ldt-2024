@@ -17,8 +17,6 @@ import (
 //
 //nolint:funlen // will be soon refactored
 func (h *Handler) Chat(c *websocket.Conn) { //nolint:gocyclo // will be soon refactored
-	ctx := context.Background()
-
 	log.Info().Str("addr", c.LocalAddr().String()).Msg("new conn")
 	c.SetCloseHandler(func(code int, text string) error {
 		log.Info().Int("code", code).Str("text", text).Msg("conn closed")
@@ -40,7 +38,7 @@ func (h *Handler) Chat(c *websocket.Conn) { //nolint:gocyclo // will be soon ref
 		return
 	}
 
-	username, authErr := h.ctrl.Authorize(ctx, string(msg))
+	ctx, username, authErr := h.ctrl.Authorize(context.Background(), string(msg))
 	if authErr != nil {
 		respondRaw(c, "unauthorized", authErr)
 		return
