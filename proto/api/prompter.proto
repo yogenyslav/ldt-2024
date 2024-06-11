@@ -15,16 +15,6 @@ option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
       url: "https://github.com/grpc-ecosystem/grpc-gateway/blob/main/LICENSE";
     };
   }
-  security_definitions: {
-    security: {
-      key: "ApiKeyAuth";
-      value: {
-        type: TYPE_API_KEY;
-        in: IN_HEADER;
-        name: "Authorization";
-      }
-    }
-  }
 };
 
 service Prompter {
@@ -32,6 +22,14 @@ service Prompter {
     option (google.api.http) = {
       post: "/api/v1/prompter/extract"
       body: "*"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      security: {
+        security_requirement: {
+          key: "Authorization";
+          value: {}
+        }
+      }
     };
   }
 }
