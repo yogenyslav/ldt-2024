@@ -6,6 +6,7 @@ import (
 	"github.com/Nerzal/gocloak/v13"
 	"github.com/gofiber/fiber/v2"
 	"github.com/yogenyslav/ldt-2024/chat/internal/shared"
+	"github.com/yogenyslav/ldt-2024/chat/pkg"
 	"github.com/yogenyslav/ldt-2024/chat/pkg/secure"
 )
 
@@ -28,6 +29,7 @@ func JWT(kc *gocloak.GoCloak, realm, cipher string) fiber.Handler {
 		}
 
 		c.Locals(shared.UsernameKey, *userInfo.PreferredUsername)
+		c.SetUserContext(pkg.PushToken(c.UserContext(), authToken))
 		return c.Next()
 	}
 }

@@ -4,6 +4,7 @@ go 1.22.2
 
 require (
 	github.com/Nerzal/gocloak/v13 v13.9.0
+	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.1.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.19.0
 	github.com/ilyakaznacheev/cleanenv v1.5.0
 	github.com/pkg/errors v0.9.1

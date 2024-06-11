@@ -13,12 +13,16 @@ import (
 	"syscall"
 
 	"github.com/Nerzal/gocloak/v13"
+	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/auth"
+	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/rs/cors"
 	"github.com/rs/zerolog/log"
 	"github.com/yogenyslav/ldt-2024/api/config"
 	ac "github.com/yogenyslav/ldt-2024/api/internal/api/auth/controller"
 	ah "github.com/yogenyslav/ldt-2024/api/internal/api/auth/handler"
+	authmw "github.com/yogenyslav/ldt-2024/api/internal/api/auth/middleware"
+	"github.com/yogenyslav/ldt-2024/api/internal/api/middleware"
 	"github.com/yogenyslav/ldt-2024/api/internal/api/pb"
 	pc "github.com/yogenyslav/ldt-2024/api/internal/api/prompter/controller"
 	ph "github.com/yogenyslav/ldt-2024/api/internal/api/prompter/handler"
@@ -46,13 +50,24 @@ type Server struct {
 	srv      *grpc.Server
 	pg       storage.SQLDatabase
 	mongo    storage.MongoDatabase
+	kc       *gocloak.GoCloak
 	exporter sdktrace.SpanExporter
 	tracer   trace.Tracer
 }
 
 // New creates a new Server instance.
 func New(cfg *config.Config) *Server {
+	kc := gocloak.NewClient(cfg.KeyCloak.URL)
+
+	logOpts := []logging.Option{
+		logging.WithLogOnEvents(logging.StartCall, logging.FinishCall),
+	}
+
 	var grpcOpts []grpc.ServerOption
+	grpcOpts = append(grpcOpts, grpc.ChainUnaryInterceptor(
+		logging.UnaryServerInterceptor(middleware.InterceptorLogger(), logOpts...),
+		auth.UnaryServerInterceptor(authmw.JWT(kc, cfg.KeyCloak.Realm)),
+	))
 	srv := grpc.NewServer(grpcOpts...)
 
 	exporter := tracing.MustNewExporter(context.Background(), cfg.Jaeger.URL())
@@ -65,6 +80,7 @@ func New(cfg *config.Config) *Server {
 		srv:      srv,
 		pg:       postgres.MustNew(cfg.Postgres, tracer),
 		mongo:    mongo.MustNew(cfg.Mongo, tracer),
+		kc:       kc,
 		exporter: exporter,
 		tracer:   tracer,
 	}
@@ -83,7 +99,7 @@ func (s *Server) Run() {
 	m := metrics.New()
 	m.Collect()
 
-	authController := ac.New(gocloak.NewClient(s.cfg.KeyCloak.URL), s.cfg.KeyCloak, s.tracer)
+	authController := ac.New(s.kc, s.cfg.KeyCloak, s.tracer)
 	authHandler := ah.New(authController, s.tracer, m)
 	pb.RegisterAuthServiceServer(s.srv, authHandler)
 

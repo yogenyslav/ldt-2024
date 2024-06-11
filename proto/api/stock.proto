@@ -8,10 +8,39 @@ import "google/protobuf/empty.proto";
 
 option go_package="internal/api/pb";
 
+option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
+  info: {
+    title: "API"
+    description: "Документация к API-сервису команды misis.tech"
+    license: {
+      name: "BSD 3-Clause License";
+      url: "https://github.com/grpc-ecosystem/grpc-gateway/blob/main/LICENSE";
+    };
+  }
+  security_definitions: {
+    security: {
+      key: "Authorization";
+      value: {
+        type: TYPE_API_KEY;
+        in: IN_HEADER;
+        name: "Authorization";
+      }
+    }
+  }
+};
+
 service Stock {
   rpc ListProducts(google.protobuf.Empty) returns (ListProductsResp) {
     option (google.api.http) = {
       get: "/api/v1/stock/list_products"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      security: {
+        security_requirement: {
+          key: "Authorization";
+          value: {}
+        }
+      }
     };
   }
 }
