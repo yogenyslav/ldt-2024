@@ -61,7 +61,10 @@ func New(cfg *config.Config) *Server {
 
 	app.Use(logger.New())
 	app.Use(cors.New(cors.Config{
-		AllowOrigins: strings.Join(cfg.Server.CorsOrigins, ","),
+		AllowOrigins:     strings.Join(cfg.Server.CorsOrigins, ","),
+		AllowMethods:     "GET,POST,HEAD,PUT,DELETE,PATCH,OPTIONS",
+		AllowHeaders:     "Access-Control-Allow-Origin,Authorization,Origin,Accept,Content-Type,ngrok-skip-browser-warning",
+		AllowCredentials: true,
 	}))
 	app.Use(otelfiber.Middleware())
 	app.Use(recovermw.New())

@@ -9,12 +9,13 @@ from pathlib import Path
 class Prompter(prompter_pb2_grpc.PrompterServicer):
 
     def __init__(self):
-        
+
         self.prompts_path = Path(__file__).parent / "prompts.json"
         self.saiga = SaigaPrompter(prompts_path=self.prompts_path)
-        
+
     def Extract(self, request: ExtractReq, context: ServicerContext) -> ExtractedPrompt:
         # prompter action here
+        print(f"got prompt {request.prompt}")
         output = self.saiga.process_request(request.prompt)
         return ExtractedPrompt(type=output.type, product=output.product)
 
