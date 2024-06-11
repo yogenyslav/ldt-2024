@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+package api;
+
+import "google/api/annotations.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+import "google/protobuf/empty.proto";
+
+option go_package="internal/api/pb";
+
+service Stock {
+  rpc ListProducts(google.protobuf.Empty) returns (ListProductsResp) {
+    option (google.api.http) = {
+      get: "/api/v1/stock/list_products"
+    };
+  }
+}
+
+message ListProductsResp {
+  option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_schema) = {
+    json_schema: {
+      title: "List products response"
+      description: "Response model for list products request"
+      required: ["products"]
+    }
+  };
+  repeated Product products = 1;
+}
+
+message Product {
+  option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_schema) = {
+    json_schema: {
+      title: "Product"
+      description: "Model describing product entity"
+      required: ["name_spgz", "final_name_kpgz", "final_code_kpgz", "depth3_code_kpgz", "id"]
+    }
+  };
+  string name_spgz = 1;
+  string final_name_kpgz = 2;
+  string final_code_kpgz = 3;
+  string depth3_code_kpgz = 4;
+  int64  id = 5;
+}

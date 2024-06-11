@@ -4,3 +4,4 @@ vendor
 **/config.yaml
 **/config_test.yaml
 **/.venv
+data
