@@ -13,7 +13,7 @@ service Predictor {
 }
 
 message PrepareDataReq {
-  string source = 1;
+  repeated string sources = 1;
 }
 
 message PredictReq {
