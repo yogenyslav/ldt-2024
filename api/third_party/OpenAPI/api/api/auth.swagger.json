@@ -1,7 +1,7 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "API prompter",
+    "title": "API",
     "description": "Документация к API-сервису команды misis.tech",
     "version": "version not set",
     "license": {

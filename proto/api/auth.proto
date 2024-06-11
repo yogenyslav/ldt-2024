@@ -9,7 +9,7 @@ option go_package="internal/api/pb";
 
 option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
   info: {
-    title: "API prompter"
+    title: "API"
     description: "Документация к API-сервису команды misis.tech"
     license: {
       name: "BSD 3-Clause License";
