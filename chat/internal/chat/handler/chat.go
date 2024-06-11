@@ -16,8 +16,7 @@ import (
 // Chat handles chat ws functional.
 //
 //nolint:funlen // will be soon refactored
-//nolint:gocyclo // will be soon refactored
-func (h *Handler) Chat(c *websocket.Conn) {
+func (h *Handler) Chat(c *websocket.Conn) { //nolint:gocyclo // will be soon refactored
 	ctx := context.Background()
 
 	log.Info().Str("addr", c.LocalAddr().String()).Msg("new conn")
@@ -28,7 +27,6 @@ func (h *Handler) Chat(c *websocket.Conn) {
 	defer func() {
 		if err := c.Close(); err != nil {
 			log.Warn().Err(err).Msg("failed to close websocket conn")
-			return
 		}
 	}()
 
@@ -53,6 +51,11 @@ func (h *Handler) Chat(c *websocket.Conn) {
 		respondRaw(c, "invalid session uuid", uuidErr)
 		return
 	}
+	defer func() {
+		if err := h.ctrl.SessionCleanup(ctx, sessionID); err != nil {
+			log.Error().Err(err).Msg("failed to cleanup session")
+		}
+	}()
 
 	var (
 		validate = make(chan int64, 1)

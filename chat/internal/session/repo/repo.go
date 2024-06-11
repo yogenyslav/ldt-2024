@@ -115,3 +115,16 @@ func (r *Repo) FindContent(ctx context.Context, id uuid.UUID) ([]model.SessionCo
 	err := r.pg.QuerySlice(ctx, &content, findContent, id)
 	return content, err
 }
+
+const sessionClenaup = `
+	select count(id)
+	from chat.query
+	where session_id = $1;
+`
+
+// SessionContentEmpty checks if session content is empty.
+func (r *Repo) SessionContentEmpty(ctx context.Context, sessionID uuid.UUID) (bool, error) {
+	var count int64
+	err := r.pg.Query(ctx, &count, sessionClenaup, sessionID)
+	return count == 0, err
+}

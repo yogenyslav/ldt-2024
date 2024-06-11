@@ -35,15 +35,15 @@ func (ctrl *Controller) InsertQuery(ctx context.Context, params model.QueryCreat
 		return query, shared.ErrEmptyQueryHint
 	}
 
-	tx, err := ctrl.repo.BeginTx(ctx)
+	tx, err := ctrl.cr.BeginTx(ctx)
 	if err != nil {
 		return query, shared.ErrBeginTx
 	}
 	defer func() {
-		_ = ctrl.repo.RollbackTx(tx) //nolint:errcheck // transaction is either properly closed or nothing can be done
+		_ = ctrl.cr.RollbackTx(tx) //nolint:errcheck // transaction is either properly closed or nothing can be done
 	}()
 
-	queryID, err := ctrl.repo.InsertQuery(tx, model.QueryDao{
+	queryID, err := ctrl.cr.InsertQuery(tx, model.QueryDao{
 		SessionID: sessionID,
 		Prompt:    params.Prompt,
 		Username:  username,
@@ -62,7 +62,7 @@ func (ctrl *Controller) InsertQuery(ctx context.Context, params model.QueryCreat
 		return query, err
 	}
 
-	if err := ctrl.repo.UpdateQueryMeta(tx, model.QueryMeta{
+	if err := ctrl.cr.UpdateQueryMeta(tx, model.QueryMeta{
 		Product: meta.GetProduct(),
 		Type:    shared.QueryType(meta.GetType()),
 		Period:  meta.GetPeriod(),
@@ -74,7 +74,7 @@ func (ctrl *Controller) InsertQuery(ctx context.Context, params model.QueryCreat
 	if err := ctrl.InsertResponse(tx, queryID); err != nil {
 		return query, err
 	}
-	if err := ctrl.repo.CommitTx(tx); err != nil {
+	if err := ctrl.cr.CommitTx(tx); err != nil {
 		return query, shared.ErrCommitTx
 	}
 

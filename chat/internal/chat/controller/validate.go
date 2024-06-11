@@ -20,5 +20,5 @@ func (ctrl *Controller) UpdateStatus(ctx context.Context, queryID int64, status 
 	)
 	defer span.End()
 
-	return ctrl.repo.UpdateQueryStatus(ctx, queryID, status)
+	return ctrl.cr.UpdateQueryStatus(ctx, queryID, status)
 }

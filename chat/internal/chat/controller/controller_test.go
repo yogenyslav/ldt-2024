@@ -15,6 +15,7 @@ import (
 	"github.com/yogenyslav/ldt-2024/chat/internal/chat/controller/mocks"
 	"github.com/yogenyslav/ldt-2024/chat/internal/chat/model"
 	cr "github.com/yogenyslav/ldt-2024/chat/internal/chat/repo"
+	sr "github.com/yogenyslav/ldt-2024/chat/internal/session/repo"
 	"github.com/yogenyslav/ldt-2024/chat/internal/shared"
 	"github.com/yogenyslav/ldt-2024/chat/tests/database"
 	"github.com/yogenyslav/pkg/infrastructure/tracing"
@@ -44,8 +45,10 @@ func TestController_InsertQuery(t *testing.T) {
 	prompter := mocks.NewMockPrompterClient(ctrl)
 	defer ctrl.Finish()
 
-	repo := cr.New(pg)
-	controller := New(repo, prompter, kc, cfg.KeyCloak.Realm, cfg.Server.CipherKey, tracer)
+	chatRepository := cr.New(pg)
+	sessionRepository := sr.New(pg)
+
+	controller := New(chatRepository, sessionRepository, prompter, kc, cfg.KeyCloak.Realm, cfg.Server.CipherKey, tracer)
 
 	defer database.TruncateTable(t, ctx, pg, "chat.query")
 
@@ -96,8 +99,9 @@ func TestController_InsertResponse(t *testing.T) {
 	prompter := mocks.NewMockPrompterClient(ctrl)
 	defer ctrl.Finish()
 
-	repo := cr.New(pg)
-	controller := New(repo, prompter, kc, cfg.KeyCloak.Realm, cfg.Server.CipherKey, tracer)
+	chatRepository := cr.New(pg)
+	sessionRepository := sr.New(pg)
+	controller := New(chatRepository, sessionRepository, prompter, kc, cfg.KeyCloak.Realm, cfg.Server.CipherKey, tracer)
 
 	defer database.TruncateTable(t, ctx, pg, "chat.response")
 
@@ -113,14 +117,14 @@ func TestController_InsertResponse(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			tx, err := repo.BeginTx(ctx)
+			tx, err := chatRepository.BeginTx(ctx)
 			require.NoError(t, err)
 
 			err = controller.InsertResponse(tx, tt.queryID)
 			if assert.NoError(t, err) {
-				require.NoError(t, repo.CommitTx(tx))
+				require.NoError(t, chatRepository.CommitTx(tx))
 			} else {
-				require.NoError(t, repo.RollbackTx(tx))
+				require.NoError(t, chatRepository.RollbackTx(tx))
 			}
 		})
 	}

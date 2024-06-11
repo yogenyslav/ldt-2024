@@ -120,7 +120,15 @@ func (s *Server) Run() {
 	session.SetupSessionRoutes(s.app, sessionHandler, s.kc, s.cfg.KeyCloak.Realm, s.cfg.Server.CipherKey)
 
 	chatRepo := cr.New(s.pg)
-	chatController := cc.New(chatRepo, pb.NewPrompterClient(apiClient.GetConn()), s.kc, s.cfg.KeyCloak.Realm, s.cfg.Server.CipherKey, s.tracer)
+	chatController := cc.New(
+		chatRepo,
+		sessionRepo,
+		pb.NewPrompterClient(apiClient.GetConn()),
+		s.kc,
+		s.cfg.KeyCloak.Realm,
+		s.cfg.Server.CipherKey,
+		s.tracer,
+	)
 	chatHandler := ch.New(chatController, s.tracer)
 	wsConfig := websocket.Config{
 		RecoverHandler: func(conn *websocket.Conn) {

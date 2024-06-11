@@ -32,7 +32,7 @@ func (ctrl *Controller) Hint(ctx context.Context, queryID int64, params model.Qu
 		return query, shared.ErrEmptyQueryHint
 	}
 
-	prompt, err := ctrl.repo.FindQueryPrompt(ctx, queryID)
+	prompt, err := ctrl.cr.FindQueryPrompt(ctx, queryID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return query, shared.ErrNoQueryWithID
@@ -51,7 +51,7 @@ func (ctrl *Controller) Hint(ctx context.Context, queryID int64, params model.Qu
 		return query, err
 	}
 
-	if err := ctrl.repo.UpdateQuery(ctx, model.QueryDao{
+	if err := ctrl.cr.UpdateQuery(ctx, model.QueryDao{
 		ID:      queryID,
 		Prompt:  newPrompt,
 		Status:  shared.StatusPending,

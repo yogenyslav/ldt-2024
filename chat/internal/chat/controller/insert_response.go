@@ -17,7 +17,7 @@ func (ctrl *Controller) InsertResponse(ctx context.Context, queryID int64) error
 	)
 	defer span.End()
 
-	if err := ctrl.repo.InsertResponse(ctx, model.ResponseDao{
+	if err := ctrl.cr.InsertResponse(ctx, model.ResponseDao{
 		QueryID: queryID,
 	}); err != nil {
 		return shared.ErrCreateResponse
