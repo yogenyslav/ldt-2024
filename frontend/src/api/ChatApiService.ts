@@ -6,7 +6,7 @@ import {
     GetSessionsResponse,
     RenameSessionParams,
 } from './models';
-import { get, post, del } from './http';
+import { get, post, del, put } from './http';
 
 class ChatApiService {
     public async createSession() {
@@ -22,7 +22,7 @@ class ChatApiService {
     }
 
     public async renameSession({ id, title }: RenameSessionParams) {
-        await post(`/chat/session/rename`, { id, title });
+        await put(`/chat/session/rename`, { id, title });
     }
 
     public async deleteSession({ id }: DeleteSessionParams) {

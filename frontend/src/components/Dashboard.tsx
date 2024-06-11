@@ -13,14 +13,8 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/auth';
 import SessionsHistory from './SessionsHistory';
-
-const menuItems = [
-    {
-        icon: SquarePen,
-        title: 'Новый чат',
-        to: '/',
-    },
-];
+import { LoaderButton } from './ui/loader-button';
+import { useStores } from '@/hooks/useStores';
 
 type DashboardProps = {
     children: React.ReactNode;
@@ -44,12 +38,14 @@ export function Dashboard({ children }: DashboardProps) {
                                 <span className=''>misis.tech</span>
                             </Link>
                         </div>
-                        <div className='flex-1'>
+                        <div className='flex-1 overflow-y-scroll'>
                             <nav className='grid items-start px-2 text-sm font-medium lg:px-4'>
                                 <Navigation />
                             </nav>
 
-                            <SessionsHistory />
+                            <div className='p-6'>
+                                <SessionsHistory />
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -76,10 +72,10 @@ export function Dashboard({ children }: DashboardProps) {
                                         misis.tech
                                     </Link>
 
-                                    <SessionsHistory />
+                                    <Navigation />
                                 </nav>
 
-                                <Navigation />
+                                <SessionsHistory />
                             </SheetContent>
                         </Sheet>
                         <div className='w-full flex-1'>
@@ -126,18 +122,17 @@ export function Dashboard({ children }: DashboardProps) {
 }
 
 const Navigation = () => {
+    const { rootStore } = useStores();
+
     return (
         <>
-            {menuItems.map((item, index) => (
-                <Link
-                    key={index}
-                    to={item.to}
-                    className='flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary'
-                >
-                    <item.icon className='h-4 w-4' />
-                    {item.title}
-                </Link>
-            ))}
+            <LoaderButton
+                onClick={() => rootStore.createSession()}
+                className='flex items-center gap-3 rounded-lg px-3 py-2 my-2 text-muted-foreground transition-all hover:text-secondary hover:bg-slate-200 bg-slate-200'
+            >
+                <SquarePen className='h-4 w-4' />
+                Новый чат
+            </LoaderButton>
         </>
     );
 };

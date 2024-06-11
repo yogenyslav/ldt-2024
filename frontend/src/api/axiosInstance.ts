@@ -1,7 +1,5 @@
 import axios from 'axios';
 import { API_URL } from '@/config';
-import { AuthContext, useAuth } from '@/auth';
-import { useContext } from 'react';
 import { LOCAL_STORAGE_KEY } from '@/auth/AuthProvider';
 
 const axiosInstance = axios.create({

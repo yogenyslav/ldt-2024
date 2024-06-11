@@ -64,3 +64,11 @@
         }
     }
 }
+
+@media screen and (max-width: 768px) {
+    .session-history-item {
+        &__delete-button {
+            display: block;
+        }
+    }
+}
