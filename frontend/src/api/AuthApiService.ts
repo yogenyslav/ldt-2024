@@ -5,7 +5,7 @@ import { LoginParams, LoginResponse } from './models';
 
 class AuthApiService {
     public async login(body: LoginParams) {
-        const response = await axios.post<LoginResponse>(`${API_URL}/api/v1/auth/login`, body);
+        const response = await axios.post<LoginResponse>(`${API_URL}/chat/auth/login`, body);
 
         return response.data;
     }

@@ -1,11 +1,26 @@
 import ModelMessage from '@/components/ModelMessage';
 import UserMessage from '@/components/UserMessage';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { ArrowUpIcon, ClipboardIcon } from 'lucide-react';
+import { useToast } from '@/components/ui/use-toast';
+import { useStores } from '@/hooks/useStores';
+import { ArrowUpIcon } from 'lucide-react';
+import { useEffect } from 'react';
 
 const Chat = () => {
+    const { rootStore } = useStores();
+    const { toast } = useToast();
+
+    useEffect(() => {
+        rootStore.getSessions().catch(() => {
+            toast({
+                title: 'Ошибка',
+                description: 'Не удалось загрузить сессии',
+                variant: 'destructive',
+            });
+        });
+    }, [rootStore, toast]);
+
     return (
         <>
             <div className='flex items-center'>

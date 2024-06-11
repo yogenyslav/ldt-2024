@@ -3,7 +3,7 @@ import { AuthContext } from '.';
 import { ReactNode, useEffect, useState } from 'react';
 import AuthApiService from '@/api/AuthApiService';
 
-const LOCAL_STORAGE_KEY = 'authUser';
+export const LOCAL_STORAGE_KEY = 'authUser';
 const EXPIRATION_TIME = 24 * 60 * 60 * 1000; // 24 hours
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -33,6 +33,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const login = async (params: LoginParams, callback: VoidFunction) => {
         const response = await AuthApiService.login(params);
+
         setUser(response);
         callback();
 
@@ -41,6 +42,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const logout = (callback: VoidFunction) => {
         setUser(null);
+
         localStorage.removeItem(LOCAL_STORAGE_KEY);
         callback();
     };

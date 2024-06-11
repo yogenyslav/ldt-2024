@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { LoaderButton } from '@/components/ui/loader-button';
+import { useToast } from '@/components/ui/use-toast';
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
@@ -10,6 +11,7 @@ export function Login() {
     const navigate = useNavigate();
     const location = useLocation();
     const auth = useAuth();
+    const { toast } = useToast();
     const [loading, setLoading] = useState<boolean>(false);
 
     const from = location.state?.from?.pathname || '/';
@@ -26,7 +28,13 @@ export function Login() {
         auth.login({ username: login, password }, () => {
             navigate(from, { replace: true });
         })
-            .catch(() => {})
+            .catch(() => {
+                toast({
+                    title: 'Ошибка',
+                    description: 'Ошибка аутентификации. Попробуйте еще раз.',
+                    variant: 'destructive',
+                });
+            })
             .finally(() => {
                 setLoading(false);
             });
