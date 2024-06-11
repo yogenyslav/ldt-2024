@@ -150,14 +150,16 @@ func (s *Server) listenGateway() {
 	if err = pb.RegisterPrompterHandler(ctx, mux, conn); err != nil {
 		log.Panic().Err(err).Msg("failed to register the prompter gateway")
 	}
+	if err = pb.RegisterStockHandler(ctx, mux, conn); err != nil {
+		log.Panic().Err(err).Msg("failed to register the stocj gateway")
+	}
 
 	withCors := cors.New(cors.Options{
 		AllowOriginFunc:  func(origin string) bool { return true },
 		AllowedMethods:   []string{"GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"},
-		AllowedHeaders:   []string{"ACCEPT", "Authorization", "Content-Type", "X-CSRF-Token"},
+		AllowedHeaders:   []string{"ACCEPT", "Authorization", "Content-Type", "X-CSRF-Token", "Access-Control-Allow-Origin", "Origin", "Accept", "ngrok-skip-browser-warning"},
 		ExposedHeaders:   []string{"Link"},
 		AllowCredentials: true,
-		MaxAge:           300,
 	}).Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log.Debug().Str("path", r.URL.Path).Msg("incoming request")
 		if strings.HasPrefix(r.URL.Path, "/api/v1") {
