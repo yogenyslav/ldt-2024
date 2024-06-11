@@ -15,5 +15,5 @@ func PushSpan(ctx context.Context, span trace.Span) context.Context {
 
 // PushToken pushes access token to the context.
 func PushToken(ctx context.Context, token string) context.Context {
-	return metadata.AppendToOutgoingContext(ctx, "authorization", token)
+	return metadata.AppendToOutgoingContext(ctx, "authorization", "bearer "+token)
 }
