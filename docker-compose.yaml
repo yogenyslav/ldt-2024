@@ -5,6 +5,7 @@ volumes:
   redis_data:
   redis_conf:
   prompter_data:
+  mongo_data:
 
 services:
   jaeger:
@@ -88,6 +89,16 @@ services:
     volumes:
       - redis_data:/data
       - redis_conf:/usr/local/etc/redis/redis.conf
+
+  mongo:
+    image: mongo:5.0
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./data:/data/csv
+      - mongo_data:/data/db
+      - mongo_data:/data/configdb
 
   prompter:
     build:

@@ -13,6 +13,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+// Extract handler for api extract method.
 func (h *Handler) Extract(c context.Context, in *pb.ExtractReq) (*pb.ExtractedPrompt, error) {
 	ctx, err := pkg.GetTraceCtx(c)
 	if err != nil {

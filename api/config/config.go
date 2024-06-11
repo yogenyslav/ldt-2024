@@ -7,6 +7,7 @@ import (
 	"github.com/yogenyslav/ldt-2024/api/pkg/client"
 	"github.com/yogenyslav/pkg/infrastructure/prom"
 	"github.com/yogenyslav/pkg/infrastructure/tracing"
+	"github.com/yogenyslav/pkg/storage/mongo"
 	"github.com/yogenyslav/pkg/storage/postgres"
 )
 
@@ -18,6 +19,7 @@ type Config struct {
 	Prometheus *prom.Config             `yaml:"prometheus"`
 	KeyCloak   *KeyCloakConfig          `yaml:"keycloak"`
 	Prompter   *client.GrpcClientConfig `yaml:"prompter"`
+	Mongo      *mongo.Config            `yaml:"mongo"`
 }
 
 // KeyCloakConfig holds the configuration for Keycloak.
