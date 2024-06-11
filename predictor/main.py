@@ -1,3 +1,6 @@
+import os
+
+import pymongo
 from api import predictor_pb2_grpc
 from api.predictor_pb2 import (
     PredictReq,
@@ -9,7 +12,12 @@ from api.predictor_pb2 import (
 from grpc import ServicerContext, server
 from concurrent import futures
 from pathlib import Path
+from dotenv import load_dotenv
 
+load_dotenv(".env")
+
+mongo_url = f"mongodb://{os.getenv('MONGO_HOST')}:{os.getenv('MONGO_PORT')}/{os.getenv('MONGO_DB')}"
+mongo_client = pymongo.MongoClient(mongo_url)
 
 class Predictor(predictor_pb2_grpc.PredictorServicer):
     def __init__(self):
