@@ -65,8 +65,8 @@ func New(cfg *config.Config) *Server {
 
 	var grpcOpts []grpc.ServerOption
 	grpcOpts = append(grpcOpts, grpc.ChainUnaryInterceptor(
-		auth.UnaryServerInterceptor(authmw.JWT(kc, cfg.KeyCloak.Realm)),
 		logging.UnaryServerInterceptor(middleware.InterceptorLogger(), logOpts...),
+		auth.UnaryServerInterceptor(authmw.JWT(kc, cfg.KeyCloak.Realm)),
 	))
 	srv := grpc.NewServer(grpcOpts...)
 
