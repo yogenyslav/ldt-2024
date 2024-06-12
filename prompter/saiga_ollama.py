@@ -4,6 +4,7 @@ import os
 from dataclasses import dataclass
 from api.prompter_pb2 import QueryType
 from dotenv import load_dotenv
+from enum import Enum
 
 load_dotenv(".env")
 
@@ -13,6 +14,11 @@ class SaigaOutput:
     type: QueryType
     product: str | None = None
     period: str | None = None
+
+class PromptType(Enum):
+    CLASSFIER = "classifier"
+    PRODUCT_EXTRACTOR = "product_extractor"
+    TIME_NORMALIZER = "time_normalizer"
 
 
 class Conversation:
@@ -48,22 +54,27 @@ class SaigaPrompter:
         prompts_path: str = "./prompts.json",
     ) -> SaigaOutput:
         host = os.getenv("OLLAMA_HOST")
-        print(host)
         self.client = ollama.Client(host=host)
         self.prompts = json.load(open(prompts_path))
 
     def generate(self, prompt: str):
-        print(prompt)
         output = self.client.generate(model="saiga", prompt=prompt, stream=False)
-        print(output)
-        print(type(output))
         return output["response"]
 
-    def generate_response(self, prompt: str):
+    def generate(self, prompt: str, temp: float = 0.8):
+        output = self.client.chat(
+            model="saiga", 
+            messages=[{"role": "user", "content": prompt}],
+            stream=False,
+            options={"temperature": temp})
+        return output["message"]["content"]
+    
+    def generate_response(self, prompt: str, request_type: PromptType):
         conversation = Conversation()
         conversation.add_user_message(prompt)
         prompt = conversation.get_prompt()
-        response = self.generate(prompt)
+        temp = 0.9 if request_type == PromptType.TIME_NORMALIZER else 0.8
+        response = self.generate(prompt, temp)
         return response
 
     def process_request(self, request: str):
@@ -72,7 +83,7 @@ class SaigaPrompter:
 
         inp = self.prompts["classifier"].format(request=request)
 
-        classifier_outp = self.generate_response(inp)
+        classifier_outp = self.generate_response(inp, PromptType.CLASSFIER)
 
         if "склад" in classifier_outp.lower():
             saiga_output.type = QueryType.STOCK
@@ -85,7 +96,7 @@ class SaigaPrompter:
 
         if saiga_output.type != QueryType.UNDEFINED:
             inp = self.prompts["product_extractor"].format(request=request)
-            outp = self.generate_response(inp)
+            outp = self.generate_response(inp, PromptType.PRODUCT_EXTRACTOR)
             if not ("Название продукта" in outp and "Период прогнозирования" in outp):
                 saiga_output.type = QueryType.UNDEFINED
             else:
@@ -99,7 +110,7 @@ class SaigaPrompter:
         if saiga_output.type == QueryType.PREDICTION:
 
             inp = self.prompts["time_normalizer"].format(request=saiga_output.period)
-            outp = self.generate_response(inp)
+            outp = self.generate_response(inp, PromptType.TIME_NORMALIZER)
             if "Период (в месяцах):" not in outp:
                 saiga_output.type = QueryType.UNDEFINED
             else:
