@@ -1,5 +1,3 @@
-import ModelMessage from '@/components/ModelMessage';
-import UserMessage from '@/components/UserMessage';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
@@ -7,34 +5,51 @@ import { useToast } from '@/components/ui/use-toast';
 import { useStores } from '@/hooks/useStores';
 import { ArrowUpIcon, FilePenIcon } from 'lucide-react';
 import { observer } from 'mobx-react-lite';
-import { ChangeEvent, useEffect, useRef } from 'react';
+import { ChangeEvent, KeyboardEvent, useEffect, useRef, useState } from 'react';
 import debounce from 'lodash/debounce';
+import { useNavigate, useParams } from 'react-router-dom';
+import { Pages } from '@/router/constants';
+import Conversation from '@/components/Conversation';
 
 const Chat = observer(() => {
     const { rootStore } = useStores();
     const { toast } = useToast();
+    const { sessionId } = useParams();
+    const navigate = useNavigate();
+    const [message, setMessage] = useState('');
 
     const titleInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
-        if (!rootStore.activeSessionId) {
-            // rootStore.createSession().catch(() => {
-            //     toast({
-            //         title: 'Ошибка',
-            //         description: 'Не удалось создать сессию',
-            //         variant: 'destructive',
-            //     });
-            // });
+        console.log('sessionId', sessionId);
+
+        if (!sessionId) {
+            rootStore
+                .createSession()
+                .then(() => {
+                    rootStore.getSessions();
+                })
+                .catch(() => {
+                    toast({
+                        title: 'Ошибка',
+                        description: 'Не удалось создать сессию',
+                        variant: 'destructive',
+                    });
+                });
         } else {
-            rootStore.getSession({ id: rootStore.activeSessionId }).catch(() => {
+            rootStore.setActiveSessionId(sessionId);
+
+            rootStore.getSession({ id: sessionId }).catch(() => {
                 toast({
                     title: 'Ошибка',
                     description: 'Не удалось загрузить сессию',
                     variant: 'destructive',
                 });
+
+                navigate(`/${Pages.Chat}`, { replace: true });
             });
         }
-    }, [rootStore.activeSessionId, rootStore, toast]);
+    }, [rootStore, toast, sessionId, navigate]);
 
     useEffect(() => {
         rootStore.getSessions().catch(() => {
@@ -45,6 +60,22 @@ const Chat = observer(() => {
             });
         });
     }, [rootStore, toast]);
+
+    const handleKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
+        if (event.key === 'Enter' && !event.shiftKey) {
+            event.preventDefault();
+            sendMessage();
+        }
+    };
+
+    const sendMessage = () => {
+        if (message.trim()) {
+            rootStore.sendMessage({
+                prompt: message.trim(),
+            });
+            setMessage('');
+        }
+    };
 
     const debouncedRenameSession = debounce((sessionId: string, title: string) => {
         rootStore
@@ -112,31 +143,35 @@ const Chat = observer(() => {
                                   </div>
                               </div>
                           ))
-                        : rootStore.activeSession?.content.map((content, i) => (
-                              <div key={i}>
-                                  {content.query && <UserMessage message={content.query.prompt} />}
-
-                                  {content.response && (
-                                      <ModelMessage message={content.response.body} />
-                                  )}
-                              </div>
+                        : rootStore.activeDisplayedSession?.messages.map((conversation, i) => (
+                              <Conversation
+                                  key={i}
+                                  conversation={conversation}
+                                  isLastConversation={
+                                      i ===
+                                      (rootStore.activeDisplayedSession?.messages.length || 0) - 1
+                                  }
+                              />
                           ))}
                 </div>
 
                 <div className='max-w-5xl w-full sticky bottom-0 mx-auto py-4 flex flex-col gap-2 px-4 dark:bg-[#0f172a]'>
                     <div className='relative'>
                         <Textarea
+                            onChange={(e) => setMessage(e.target.value)}
+                            onKeyDown={(event) => handleKeyDown(event)}
+                            value={message}
                             placeholder='Напишите в чат...'
                             name='message'
                             id='message'
                             rows={1}
-                            className='min-h-[48px] rounded-2xl resize-none p-4 border border-gray-200 border-neutral-400 shadow-sm pr-16 dark:border-gray-800'
+                            className='min-h-[48px] rounded-2xl resize-none p-4 border border-gray-300 shadow-sm pr-16 dark:border-gray-800'
                         />
                         <Button
                             type='submit'
                             size='icon'
                             className='absolute top-3 right-3 w-8 h-8'
-                            disabled
+                            onClick={sendMessage}
                         >
                             <ArrowUpIcon className='w-4 h-4' />
                             <span className='sr-only'>Отправить</span>

@@ -23,7 +23,7 @@ function App() {
                         }
                     />
                     <Route
-                        path='/chat'
+                        path='/chat/:sessionId'
                         element={
                             <RequireAuth>
                                 <Dashboard>

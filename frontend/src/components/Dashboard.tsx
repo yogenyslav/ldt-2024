@@ -14,7 +14,6 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/auth';
 import SessionsHistory from './SessionsHistory';
 import { LoaderButton } from './ui/loader-button';
-import { useStores } from '@/hooks/useStores';
 
 type DashboardProps = {
     children: React.ReactNode;
@@ -122,17 +121,14 @@ export function Dashboard({ children }: DashboardProps) {
 }
 
 const Navigation = () => {
-    const { rootStore } = useStores();
-
     return (
         <>
-            <LoaderButton
-                onClick={() => rootStore.createSession()}
-                className='flex items-center gap-3 rounded-lg px-3 py-2 my-2 text-muted-foreground transition-all hover:text-secondary hover:bg-slate-200 bg-slate-200'
-            >
-                <SquarePen className='h-4 w-4' />
-                Новый чат
-            </LoaderButton>
+            <Link to='/chat' className='flex items-center gap-2'>
+                <LoaderButton className='flex w-full items-center gap-3 rounded-lg px-3 py-2 my-2 text-muted-foreground transition-all hover:text-secondary hover:bg-slate-200 bg-slate-200'>
+                    <SquarePen className='h-4 w-4' />
+                    Новый чат
+                </LoaderButton>
+            </Link>
         </>
     );
 };

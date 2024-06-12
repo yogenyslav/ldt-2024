@@ -53,3 +53,68 @@ export interface RenameSessionParams {
 export interface DeleteSessionParams {
     id: string;
 }
+
+export interface WSOutcomingMessage {
+    prompt: string;
+    command?: ChatCommand;
+    period?: string;
+    product?: string;
+}
+
+export enum ChatCommand {
+    Valid = 'valid',
+    Invalid = 'invalid',
+    Cancel = 'cancel',
+}
+
+export enum IncomingMessageType {
+    Stock = 'STOCK',
+    Prediction = 'PREDICTION',
+    Undefined = 'UNDEFINED',
+}
+
+export enum IncomingMessageStatus {
+    Pending = 'PENDING',
+    Valid = 'VALID',
+}
+
+export interface WSMessage {
+    data: WSIncomingQuery | WSIncomingChunk;
+    finished: boolean;
+    chunk: boolean;
+}
+
+export interface WSIncomingQuery {
+    created_at: string;
+    prompt: string;
+    period: string;
+    product: string;
+    type: IncomingMessageType;
+    status: string;
+    id: number;
+}
+
+export interface WSIncomingChunk {
+    info: string;
+}
+
+export interface ChatConversation {
+    outcomingMessage?: DisplayedOutcomingMessage;
+    incomingMessage?: DisplayedIncomingMessage;
+}
+
+export interface DisplayedChat {
+    messages: ChatConversation[];
+}
+
+export interface DisplayedOutcomingMessage {
+    prompt: string;
+}
+
+export interface DisplayedIncomingMessage {
+    type: IncomingMessageType;
+    status: IncomingMessageStatus;
+    body: string;
+    product?: string;
+    period?: string;
+}
