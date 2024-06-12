@@ -44,11 +44,17 @@ const ModelMessage = ({ incomingMessage, isLastMessage }: ModelMessageProps) => 
                                             toast({
                                                 title: 'Введите уточняющий запрос',
                                                 description:
-                                                    'Например, "Получить запасы товара картофель""',
+                                                    'Например, "Получить запасы товара картофель"',
+                                            });
+
+                                            rootStore.sendMessage({
+                                                prompt: '',
+                                                command: ChatCommand.Invalid,
                                             });
 
                                             setShowInvalidButton(false);
                                             rootStore.setChatDisabled(false);
+                                            rootStore.setIsModelAnswering(false);
                                         }}
                                         variant='outline'
                                         className='flex-1'

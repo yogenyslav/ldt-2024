@@ -152,6 +152,10 @@ export class RootStore {
                 if (wsMessage.finish || !wsMessage.chunk) {
                     this.isModelAnswering = false;
                 }
+
+                if (wsMessage.finish) {
+                    this.isChatDisabled = false;
+                }
             });
         };
 
@@ -236,11 +240,12 @@ export class RootStore {
     }
 
     private isInvalidCommandRequired() {
-        return (
-            this.activeDisplayedSession?.messages.length &&
-            this.activeDisplayedSession.messages[this.activeDisplayedSession?.messages.length - 1]
-                .incomingMessage?.status === IncomingMessageStatus.Pending
-        );
+        return false;
+        // return (
+        //     this.activeDisplayedSession?.messages.length &&
+        //     this.activeDisplayedSession.messages[this.activeDisplayedSession?.messages.length - 1]
+        //         .incomingMessage?.status === IncomingMessageStatus.Pending
+        // );
     }
 
     setChatDisabled(isDisabled: boolean) {
