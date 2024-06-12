@@ -48,7 +48,7 @@ const SessionHistoryItem = ({ session }: Props) => {
         <Link to={`/chat/${session.id}`}>
             <div className='session-history-item bg-gray-100 hover:bg-gray-200 rounded-lg p-4 transition-colors duration-300 hover:cursor-pointer'>
                 <h3 className='text-sm font-medium mb-1'>
-                    {session.title || session.id.slice(0, 8) + '...'}
+                    {session.title || session.id.slice(0, 8)}...
                 </h3>
                 <div className='flex items-center justify-between'>
                     <p className='text-gray-500 text-sm'>

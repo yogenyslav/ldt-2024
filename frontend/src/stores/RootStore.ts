@@ -26,6 +26,8 @@ export class RootStore {
     activeSession: ChatSession | null = null;
     activeDisplayedSession: DisplayedChat | null = null;
     activeSessionLoading: boolean = false;
+    isChatDisabled: boolean = false;
+    isModelAnswering: boolean = false;
 
     websocket: WebSocket | null = null;
 
@@ -133,19 +135,26 @@ export class RootStore {
         this.websocket.onmessage = (event) => {
             const wsMessage: WSMessage = JSON.parse(event.data);
 
-            console.log(wsMessage);
-
             runInAction(() => {
                 const data = wsMessage.data;
 
-                if (wsMessage.finished) {
-                    return;
+                console.log(wsMessage);
+
+                if (wsMessage.chunk && !wsMessage.finish) {
+                    // this.isModelAnswering = true;
+                    // this.isChatDisabled = true;
+
+                    this.processIncomingChunk(data as WSIncomingChunk);
+                } else if (!wsMessage.chunk && wsMessage.data) {
+                    this.processIncomingQuery(data as WSIncomingQuery);
                 }
 
-                if (wsMessage.chunk) {
-                    this.processIncomingChunk(data as WSIncomingChunk);
-                } else {
-                    this.processIncomingQuery(data as WSIncomingQuery);
+                if (wsMessage.finish || !wsMessage.chunk) {
+                    this.isModelAnswering = false;
+                }
+
+                if (wsMessage.finish) {
+                    this.isChatDisabled = false;
                 }
             });
         };
@@ -162,12 +171,18 @@ export class RootStore {
     sendMessage(message: WSOutcomingMessage) {
         console.log('sendMessage', message);
 
-        if (this.isInvalidCommandRequired() && !message.command) {
-            message.command = ChatCommand.Invalid;
-        }
+        this.setIsModelAnswering(true);
+        this.setChatDisabled(true);
 
         if (this.websocket && this.websocket.readyState === WebSocket.OPEN) {
             this.websocket.send(JSON.stringify(message));
+        }
+
+        if (this.isFirstMessageInSession()) {
+            this.renameSession({
+                id: this.activeSessionId as string,
+                title: message.prompt.slice(0, 25),
+            });
         }
 
         this.addMessageToActiveSession(message);
@@ -185,8 +200,6 @@ export class RootStore {
         }
 
         runInAction(() => {
-            console.log('addMessageToActiveSession', message);
-
             if (!this.activeDisplayedSession) {
                 this.activeDisplayedSession = { messages: [] };
             }
@@ -222,18 +235,32 @@ export class RootStore {
                 this.activeDisplayedSession.messages[lastMessageIndex].incomingMessage?.body;
 
             this.activeDisplayedSession.messages[lastMessageIndex].incomingMessage = {
-                body: lastMessageBody + info,
+                body: lastMessageBody ? lastMessageBody + info : info,
                 type: IncomingMessageType.Undefined,
                 status: IncomingMessageStatus.Valid,
             };
         }
     }
 
-    private isInvalidCommandRequired() {
-        return (
-            this.activeDisplayedSession?.messages.length &&
-            this.activeDisplayedSession.messages[this.activeDisplayedSession?.messages.length - 1]
-                .incomingMessage?.status === IncomingMessageStatus.Pending
-        );
+    setChatDisabled(isDisabled: boolean) {
+        this.isChatDisabled = isDisabled;
+    }
+
+    setIsModelAnswering(isAnswering: boolean) {
+        this.isModelAnswering = isAnswering;
+    }
+
+    cancelRequest() {
+        this.sendMessage({
+            prompt: '',
+            command: ChatCommand.Cancel,
+        });
+
+        this.setChatDisabled(false);
+        this.setIsModelAnswering(false);
+    }
+
+    private isFirstMessageInSession() {
+        return !this.activeDisplayedSession?.messages.length;
     }
 }

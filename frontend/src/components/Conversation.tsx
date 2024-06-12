@@ -9,8 +9,6 @@ type Props = {
 };
 
 const Conversation = observer(({ conversation, isLastConversation }: Props) => {
-    console.log(conversation);
-
     return (
         <div>
             {conversation.outcomingMessage && (

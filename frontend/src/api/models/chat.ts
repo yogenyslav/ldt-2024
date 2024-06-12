@@ -80,7 +80,7 @@ export enum IncomingMessageStatus {
 
 export interface WSMessage {
     data: WSIncomingQuery | WSIncomingChunk;
-    finished: boolean;
+    finish: boolean;
     chunk: boolean;
 }
 
