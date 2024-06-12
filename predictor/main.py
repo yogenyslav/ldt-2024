@@ -1,6 +1,7 @@
 import os
 import logging
 import re
+import json
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
@@ -11,9 +12,10 @@ from api.predictor_pb2 import (
     PredictReq,
     PredictResp,
     PrepareDataReq,
-    ClientIdentifier,
+    UniqueCode,
     UniqueCodesResp,
 )
+from google.protobuf.empty_pb2 import Empty
 from grpc import ServicerContext, server
 from concurrent import futures
 from pathlib import Path
@@ -31,10 +33,12 @@ mongo_url = f"mongodb://{os.getenv('MONGO_HOST')}:{os.getenv('MONGO_PORT')}/{os.
 mongo_client = pymongo.MongoClient(mongo_url)
 mongo_db = mongo_client[os.getenv("MONGO_DB")]
 
+
 def convert_to_datetime(iso_str):
     iso_str = iso_str.replace("Z", "+00:00")
     dt = datetime.strptime(iso_str, "%Y-%m-%dT%H:%M:%S.%f%z")
     return dt
+
 
 def parse_filename(filename):
     pattern = r".*на\s(\d{2}\.\d{2}\.\d{4})(?:г\.?)?\s*\(сч\.\s*(\d+)\).*\.xlsx"
@@ -57,7 +61,7 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
         self._code_matcher = ColbertMatcher(
             checkpoint_name="3rd_level_codes.8bits",
             collection_path="./matcher/collections/collection_3rd_level_codes.json",
-            category2code_path="./matcher/collections/category2code.json"
+            category2code_path="./matcher/collections/category2code.json",
         )
         self._name_matcher = ColbertMatcher(
             checkpoint_name="full_names_stocks.8bits",
@@ -196,7 +200,7 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
         return process_and_merge_stocks(stocks)
 
     def PrepareData(self, request: PrepareDataReq, context: ServicerContext):
-        print(self._code_matcher.match_to_3rd_level_code('вода'))
+        print(self._code_matcher.match_to_3rd_level_code("вода"))
         # в PrepareDataReq лежит путь до .csv/.xlsx файла
 
         logging.info(request.sources)
@@ -224,30 +228,38 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
         collection = mongo_db[collection_name]
         collection.insert_many(stocks.to_dict(orient="records"))
 
-        return ClientIdentifier(value="")
+        return Empty()
 
     def Predict(self, request: PredictReq, context: ServicerContext):
-        logging.info(
-            f"predict for ts={request.ts.ToJsonString()} months_count={request.months_count} segment={request.segment}"
-        )
-        # матчинг 
+        logging.info(f"predict for {str(request)}")
+        # матчинг
         collection_name = "codes"
         collection = mongo_db[collection_name]
-        code_info = collection.find_one({"code": request.segment},{'_id':False})
-        
-        if code_info is None:
-            pass #TODO
-        
-        start_dt = convert_to_datetime(request.ts.ToJsonString())
-        end_dt = start_dt + relativedelta(years=request.months_count//12, months=request.months_count%12)
-        forecast = [x for x in code_info['forecast'] if start_dt.timestamp() <= x['date'].timestamp() <= end_dt.timestamp() ]
-        code_info['forecast'] = forecast
-        
-        return PredictResp(predicts=[]) #TODO
+        code_info = collection.find_one({"code": request.segment}, {"_id": False})
 
-    def UniqueCodes(self, request: ClientIdentifier, context: ServicerContext):
-        logging.info(f"unique codes for {request.value}")
-        return UniqueCodesResp(codes=[])
+        if code_info is None:
+            pass  # TODO
+
+        start_dt = convert_to_datetime(request.ts.ToJsonString())
+        end_dt = start_dt + relativedelta(
+            years=request.months_count // 12, months=request.months_count % 12
+        )
+        forecast = [
+            x
+            for x in code_info["forecast"]
+            if start_dt.timestamp() <= x["date"].timestamp() <= end_dt.timestamp()
+        ]
+        code_info["forecast"] = forecast
+
+        return PredictResp(data=json.dumps(code_info).encode("utf-8"))  # TODO
+
+    def UniqueCodes(self, request: Empty, context: ServicerContext):
+        return UniqueCodesResp(
+            codes=[
+                UniqueCode(segment="test", name="test", regular=True),
+                UniqueCode(segment="test", name="test", regular=False),
+            ]
+        )
 
 
 def serve():
