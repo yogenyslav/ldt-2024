@@ -12,3 +12,4 @@ ollama/models
 ollama/model-q4_K.gguf
 .vscode
 __pycache__
+*.xlsx
