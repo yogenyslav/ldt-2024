@@ -4,7 +4,13 @@ from protoc_gen_openapiv2.options import annotations_pb2 as _annotations_pb2_1
 from google.protobuf.internal import containers as _containers
 from google.protobuf import descriptor as _descriptor
 from google.protobuf import message as _message
-from typing import ClassVar as _ClassVar, Iterable as _Iterable, Mapping as _Mapping, Optional as _Optional, Union as _Union
+from typing import (
+    ClassVar as _ClassVar,
+    Iterable as _Iterable,
+    Mapping as _Mapping,
+    Optional as _Optional,
+    Union as _Union,
+)
 
 DESCRIPTOR: _descriptor.FileDescriptor
 
@@ -22,13 +28,20 @@ class PredictReq(_message.Message):
     ts: _timestamp_pb2.Timestamp
     months_count: int
     segment: str
-    def __init__(self, ts: _Optional[_Union[_timestamp_pb2.Timestamp, _Mapping]] = ..., months_count: _Optional[int] = ..., segment: _Optional[str] = ...) -> None: ...
+    def __init__(
+        self,
+        ts: _Optional[_Union[_timestamp_pb2.Timestamp, _Mapping]] = ...,
+        months_count: _Optional[int] = ...,
+        segment: _Optional[str] = ...,
+    ) -> None: ...
 
 class PredictResp(_message.Message):
     __slots__ = ("predicts",)
     PREDICTS_FIELD_NUMBER: _ClassVar[int]
     predicts: _containers.RepeatedCompositeFieldContainer[Predict]
-    def __init__(self, predicts: _Optional[_Iterable[_Union[Predict, _Mapping]]] = ...) -> None: ...
+    def __init__(
+        self, predicts: _Optional[_Iterable[_Union[Predict, _Mapping]]] = ...
+    ) -> None: ...
 
 class Predict(_message.Message):
     __slots__ = ("ts", "price")
@@ -36,7 +49,11 @@ class Predict(_message.Message):
     PRICE_FIELD_NUMBER: _ClassVar[int]
     ts: _timestamp_pb2.Timestamp
     price: float
-    def __init__(self, ts: _Optional[_Union[_timestamp_pb2.Timestamp, _Mapping]] = ..., price: _Optional[float] = ...) -> None: ...
+    def __init__(
+        self,
+        ts: _Optional[_Union[_timestamp_pb2.Timestamp, _Mapping]] = ...,
+        price: _Optional[float] = ...,
+    ) -> None: ...
 
 class ClientIdentifier(_message.Message):
     __slots__ = ("value",)
@@ -48,7 +65,9 @@ class UniqueCodesResp(_message.Message):
     __slots__ = ("codes",)
     CODES_FIELD_NUMBER: _ClassVar[int]
     codes: _containers.RepeatedCompositeFieldContainer[UniqueCode]
-    def __init__(self, codes: _Optional[_Iterable[_Union[UniqueCode, _Mapping]]] = ...) -> None: ...
+    def __init__(
+        self, codes: _Optional[_Iterable[_Union[UniqueCode, _Mapping]]] = ...
+    ) -> None: ...
 
 class UniqueCode(_message.Message):
     __slots__ = ("segment", "regular")

@@ -25,7 +25,14 @@ WORKDIR /app
 RUN --mount=type=cache,target=/root/.cache/pip \
     --mount=type=bind,source=requirements.txt,target=requirements.txt \
     python -m pip install -r requirements.txt
+RUN apt update && apt install -y git
+RUN apt-get update && apt-get install -y \
+    g++ \
+    build-essential \
+    --no-install-recommends && \
+    rm -rf /var/lib/apt/lists/*
 
+ENV CUDA_VISIBLE_DEVICES=""
 
 # Copy the source code into the container.
 COPY . .

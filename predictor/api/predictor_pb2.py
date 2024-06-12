@@ -7,6 +7,7 @@ from google.protobuf import descriptor as _descriptor
 from google.protobuf import descriptor_pool as _descriptor_pool
 from google.protobuf import symbol_database as _symbol_database
 from google.protobuf.internal import builder as _builder
+
 # @@protoc_insertion_point(imports)
 
 _sym_db = _symbol_database.Default()
@@ -14,30 +15,34 @@ _sym_db = _symbol_database.Default()
 
 from google.protobuf import timestamp_pb2 as google_dot_protobuf_dot_timestamp__pb2
 from google.api import annotations_pb2 as google_dot_api_dot_annotations__pb2
-from protoc_gen_openapiv2.options import annotations_pb2 as protoc__gen__openapiv2_dot_options_dot_annotations__pb2
+from protoc_gen_openapiv2.options import (
+    annotations_pb2 as protoc__gen__openapiv2_dot_options_dot_annotations__pb2,
+)
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x13\x61pi/predictor.proto\x12\x03\x61pi\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1cgoogle/api/annotations.proto\x1a.protoc-gen-openapiv2/options/annotations.proto\"!\n\x0ePrepareDataReq\x12\x0f\n\x07sources\x18\x01 \x03(\t\"[\n\nPredictReq\x12&\n\x02ts\x18\x01 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x14\n\x0cmonths_count\x18\x02 \x01(\x03\x12\x0f\n\x07segment\x18\x03 \x01(\t\"-\n\x0bPredictResp\x12\x1e\n\x08predicts\x18\x01 \x03(\x0b\x32\x0c.api.Predict\"@\n\x07Predict\x12&\n\x02ts\x18\x01 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\r\n\x05price\x18\x02 \x01(\x02\"!\n\x10\x43lientIdentifier\x12\r\n\x05value\x18\x01 \x01(\t\"1\n\x0fUniqueCodesResp\x12\x1e\n\x05\x63odes\x18\x01 \x03(\x0b\x32\x0f.api.UniqueCode\".\n\nUniqueCode\x12\x0f\n\x07segment\x18\x01 \x01(\t\x12\x0f\n\x07regular\x18\x02 \x01(\x08\x32\xb6\x01\n\tPredictor\x12;\n\x0bPrepareData\x12\x13.api.PrepareDataReq\x1a\x15.api.ClientIdentifier\"\x00\x12.\n\x07Predict\x12\x0f.api.PredictReq\x1a\x10.api.PredictResp\"\x00\x12<\n\x0bUniqueCodes\x12\x15.api.ClientIdentifier\x1a\x14.api.UniqueCodesResp\"\x00\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(
+    b'\n\x13\x61pi/predictor.proto\x12\x03\x61pi\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1cgoogle/api/annotations.proto\x1a.protoc-gen-openapiv2/options/annotations.proto"!\n\x0ePrepareDataReq\x12\x0f\n\x07sources\x18\x01 \x03(\t"[\n\nPredictReq\x12&\n\x02ts\x18\x01 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x14\n\x0cmonths_count\x18\x02 \x01(\x03\x12\x0f\n\x07segment\x18\x03 \x01(\t"-\n\x0bPredictResp\x12\x1e\n\x08predicts\x18\x01 \x03(\x0b\x32\x0c.api.Predict"@\n\x07Predict\x12&\n\x02ts\x18\x01 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\r\n\x05price\x18\x02 \x01(\x02"!\n\x10\x43lientIdentifier\x12\r\n\x05value\x18\x01 \x01(\t"1\n\x0fUniqueCodesResp\x12\x1e\n\x05\x63odes\x18\x01 \x03(\x0b\x32\x0f.api.UniqueCode".\n\nUniqueCode\x12\x0f\n\x07segment\x18\x01 \x01(\t\x12\x0f\n\x07regular\x18\x02 \x01(\x08\x32\xb6\x01\n\tPredictor\x12;\n\x0bPrepareData\x12\x13.api.PrepareDataReq\x1a\x15.api.ClientIdentifier"\x00\x12.\n\x07Predict\x12\x0f.api.PredictReq\x1a\x10.api.PredictResp"\x00\x12<\n\x0bUniqueCodes\x12\x15.api.ClientIdentifier\x1a\x14.api.UniqueCodesResp"\x00\x62\x06proto3'
+)
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
-_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'api.predictor_pb2', _globals)
+_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, "api.predictor_pb2", _globals)
 if not _descriptor._USE_C_DESCRIPTORS:
-  DESCRIPTOR._loaded_options = None
-  _globals['_PREPAREDATAREQ']._serialized_start=139
-  _globals['_PREPAREDATAREQ']._serialized_end=172
-  _globals['_PREDICTREQ']._serialized_start=174
-  _globals['_PREDICTREQ']._serialized_end=265
-  _globals['_PREDICTRESP']._serialized_start=267
-  _globals['_PREDICTRESP']._serialized_end=312
-  _globals['_PREDICT']._serialized_start=314
-  _globals['_PREDICT']._serialized_end=378
-  _globals['_CLIENTIDENTIFIER']._serialized_start=380
-  _globals['_CLIENTIDENTIFIER']._serialized_end=413
-  _globals['_UNIQUECODESRESP']._serialized_start=415
-  _globals['_UNIQUECODESRESP']._serialized_end=464
-  _globals['_UNIQUECODE']._serialized_start=466
-  _globals['_UNIQUECODE']._serialized_end=512
-  _globals['_PREDICTOR']._serialized_start=515
-  _globals['_PREDICTOR']._serialized_end=697
+    DESCRIPTOR._loaded_options = None
+    _globals["_PREPAREDATAREQ"]._serialized_start = 139
+    _globals["_PREPAREDATAREQ"]._serialized_end = 172
+    _globals["_PREDICTREQ"]._serialized_start = 174
+    _globals["_PREDICTREQ"]._serialized_end = 265
+    _globals["_PREDICTRESP"]._serialized_start = 267
+    _globals["_PREDICTRESP"]._serialized_end = 312
+    _globals["_PREDICT"]._serialized_start = 314
+    _globals["_PREDICT"]._serialized_end = 378
+    _globals["_CLIENTIDENTIFIER"]._serialized_start = 380
+    _globals["_CLIENTIDENTIFIER"]._serialized_end = 413
+    _globals["_UNIQUECODESRESP"]._serialized_start = 415
+    _globals["_UNIQUECODESRESP"]._serialized_end = 464
+    _globals["_UNIQUECODE"]._serialized_start = 466
+    _globals["_UNIQUECODE"]._serialized_end = 512
+    _globals["_PREDICTOR"]._serialized_start = 515
+    _globals["_PREDICTOR"]._serialized_end = 697
 # @@protoc_insertion_point(module_scope)

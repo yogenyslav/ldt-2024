@@ -17,6 +17,7 @@ contracts_map_columns = {
     "Наименование (предмет) ГК": "item_name_gk",
     "Конечное наименование КПГЗ": "final_name_kpgz",
     "Реестровый номер в РК": "registry_number_in_rk",
+    "Исполнено поставщиком": "provider",
 }
 
 
@@ -38,7 +39,9 @@ def prepare_contracts_df(df: pd.DataFrame) -> pd.DataFrame:
         df["execution_term_until"], dayfirst=True
     )
     df["execution_term_from"] = pd.to_datetime(df["execution_term_from"], dayfirst=True)
-    df["end_date_of_validity"] = pd.to_datetime(df["end_date_of_validity"], dayfirst=True)
+    df["end_date_of_validity"] = pd.to_datetime(
+        df["end_date_of_validity"], dayfirst=True
+    )
 
     df["depth3_code_kpgz"] = df["final_code_kpgz"].str.slice(0, 8).astype(str)
 

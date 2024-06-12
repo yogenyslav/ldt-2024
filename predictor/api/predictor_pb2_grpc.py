@@ -5,28 +5,31 @@ import warnings
 
 from api import predictor_pb2 as api_dot_predictor__pb2
 
-GRPC_GENERATED_VERSION = '1.64.1'
+GRPC_GENERATED_VERSION = "1.64.1"
 GRPC_VERSION = grpc.__version__
-EXPECTED_ERROR_RELEASE = '1.65.0'
-SCHEDULED_RELEASE_DATE = 'June 25, 2024'
+EXPECTED_ERROR_RELEASE = "1.65.0"
+SCHEDULED_RELEASE_DATE = "June 25, 2024"
 _version_not_supported = False
 
 try:
     from grpc._utilities import first_version_is_lower
-    _version_not_supported = first_version_is_lower(GRPC_VERSION, GRPC_GENERATED_VERSION)
+
+    _version_not_supported = first_version_is_lower(
+        GRPC_VERSION, GRPC_GENERATED_VERSION
+    )
 except ImportError:
     _version_not_supported = True
 
 if _version_not_supported:
     warnings.warn(
-        f'The grpc package installed is at version {GRPC_VERSION},'
-        + f' but the generated code in api/predictor_pb2_grpc.py depends on'
-        + f' grpcio>={GRPC_GENERATED_VERSION}.'
-        + f' Please upgrade your grpc module to grpcio>={GRPC_GENERATED_VERSION}'
-        + f' or downgrade your generated code using grpcio-tools<={GRPC_VERSION}.'
-        + f' This warning will become an error in {EXPECTED_ERROR_RELEASE},'
-        + f' scheduled for release on {SCHEDULED_RELEASE_DATE}.',
-        RuntimeWarning
+        f"The grpc package installed is at version {GRPC_VERSION},"
+        + f" but the generated code in api/predictor_pb2_grpc.py depends on"
+        + f" grpcio>={GRPC_GENERATED_VERSION}."
+        + f" Please upgrade your grpc module to grpcio>={GRPC_GENERATED_VERSION}"
+        + f" or downgrade your generated code using grpcio-tools<={GRPC_VERSION}."
+        + f" This warning will become an error in {EXPECTED_ERROR_RELEASE},"
+        + f" scheduled for release on {SCHEDULED_RELEASE_DATE}.",
+        RuntimeWarning,
     )
 
 
@@ -40,20 +43,23 @@ class PredictorStub(object):
             channel: A grpc.Channel.
         """
         self.PrepareData = channel.unary_unary(
-                '/api.Predictor/PrepareData',
-                request_serializer=api_dot_predictor__pb2.PrepareDataReq.SerializeToString,
-                response_deserializer=api_dot_predictor__pb2.ClientIdentifier.FromString,
-                _registered_method=True)
+            "/api.Predictor/PrepareData",
+            request_serializer=api_dot_predictor__pb2.PrepareDataReq.SerializeToString,
+            response_deserializer=api_dot_predictor__pb2.ClientIdentifier.FromString,
+            _registered_method=True,
+        )
         self.Predict = channel.unary_unary(
-                '/api.Predictor/Predict',
-                request_serializer=api_dot_predictor__pb2.PredictReq.SerializeToString,
-                response_deserializer=api_dot_predictor__pb2.PredictResp.FromString,
-                _registered_method=True)
+            "/api.Predictor/Predict",
+            request_serializer=api_dot_predictor__pb2.PredictReq.SerializeToString,
+            response_deserializer=api_dot_predictor__pb2.PredictResp.FromString,
+            _registered_method=True,
+        )
         self.UniqueCodes = channel.unary_unary(
-                '/api.Predictor/UniqueCodes',
-                request_serializer=api_dot_predictor__pb2.ClientIdentifier.SerializeToString,
-                response_deserializer=api_dot_predictor__pb2.UniqueCodesResp.FromString,
-                _registered_method=True)
+            "/api.Predictor/UniqueCodes",
+            request_serializer=api_dot_predictor__pb2.ClientIdentifier.SerializeToString,
+            response_deserializer=api_dot_predictor__pb2.UniqueCodesResp.FromString,
+            _registered_method=True,
+        )
 
 
 class PredictorServicer(object):
@@ -62,65 +68,68 @@ class PredictorServicer(object):
     def PrepareData(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
 
     def Predict(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
 
     def UniqueCodes(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
 
 
 def add_PredictorServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'PrepareData': grpc.unary_unary_rpc_method_handler(
-                    servicer.PrepareData,
-                    request_deserializer=api_dot_predictor__pb2.PrepareDataReq.FromString,
-                    response_serializer=api_dot_predictor__pb2.ClientIdentifier.SerializeToString,
-            ),
-            'Predict': grpc.unary_unary_rpc_method_handler(
-                    servicer.Predict,
-                    request_deserializer=api_dot_predictor__pb2.PredictReq.FromString,
-                    response_serializer=api_dot_predictor__pb2.PredictResp.SerializeToString,
-            ),
-            'UniqueCodes': grpc.unary_unary_rpc_method_handler(
-                    servicer.UniqueCodes,
-                    request_deserializer=api_dot_predictor__pb2.ClientIdentifier.FromString,
-                    response_serializer=api_dot_predictor__pb2.UniqueCodesResp.SerializeToString,
-            ),
+        "PrepareData": grpc.unary_unary_rpc_method_handler(
+            servicer.PrepareData,
+            request_deserializer=api_dot_predictor__pb2.PrepareDataReq.FromString,
+            response_serializer=api_dot_predictor__pb2.ClientIdentifier.SerializeToString,
+        ),
+        "Predict": grpc.unary_unary_rpc_method_handler(
+            servicer.Predict,
+            request_deserializer=api_dot_predictor__pb2.PredictReq.FromString,
+            response_serializer=api_dot_predictor__pb2.PredictResp.SerializeToString,
+        ),
+        "UniqueCodes": grpc.unary_unary_rpc_method_handler(
+            servicer.UniqueCodes,
+            request_deserializer=api_dot_predictor__pb2.ClientIdentifier.FromString,
+            response_serializer=api_dot_predictor__pb2.UniqueCodesResp.SerializeToString,
+        ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-            'api.Predictor', rpc_method_handlers)
+        "api.Predictor", rpc_method_handlers
+    )
     server.add_generic_rpc_handlers((generic_handler,))
-    server.add_registered_method_handlers('api.Predictor', rpc_method_handlers)
+    server.add_registered_method_handlers("api.Predictor", rpc_method_handlers)
 
 
- # This class is part of an EXPERIMENTAL API.
+# This class is part of an EXPERIMENTAL API.
 class Predictor(object):
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod
-    def PrepareData(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
+    def PrepareData(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/api.Predictor/PrepareData',
+            "/api.Predictor/PrepareData",
             api_dot_predictor__pb2.PrepareDataReq.SerializeToString,
             api_dot_predictor__pb2.ClientIdentifier.FromString,
             options,
@@ -131,23 +140,26 @@ class Predictor(object):
             wait_for_ready,
             timeout,
             metadata,
-            _registered_method=True)
+            _registered_method=True,
+        )
 
     @staticmethod
-    def Predict(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
+    def Predict(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/api.Predictor/Predict',
+            "/api.Predictor/Predict",
             api_dot_predictor__pb2.PredictReq.SerializeToString,
             api_dot_predictor__pb2.PredictResp.FromString,
             options,
@@ -158,23 +170,26 @@ class Predictor(object):
             wait_for_ready,
             timeout,
             metadata,
-            _registered_method=True)
+            _registered_method=True,
+        )
 
     @staticmethod
-    def UniqueCodes(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
+    def UniqueCodes(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/api.Predictor/UniqueCodes',
+            "/api.Predictor/UniqueCodes",
             api_dot_predictor__pb2.ClientIdentifier.SerializeToString,
             api_dot_predictor__pb2.UniqueCodesResp.FromString,
             options,
@@ -185,4 +200,5 @@ class Predictor(object):
             wait_for_ready,
             timeout,
             metadata,
-            _registered_method=True)
+            _registered_method=True,
+        )
