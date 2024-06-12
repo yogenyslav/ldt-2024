@@ -23,6 +23,7 @@ from data import merge_contracts_with_kpgz, prepare_contracts_df, prepare_kpgz_d
 from forecast_model import Model
 from period_model import PeriodPredictor
 from process_stock import process_and_merge_stocks, StockType, Quarters, Stock
+from matcher import ColbertMatcher
 
 load_dotenv(".env")
 
@@ -53,6 +54,15 @@ def parse_filename(filename):
 class Predictor(predictor_pb2_grpc.PredictorServicer):
     def __init__(self, period_model):
         self._period_model = period_model
+        self._code_matcher = ColbertMatcher(
+            checkpoint_name="3rd_level_codes.8bits",
+            collection_path="./matcher/collections/collection_3rd_level_codes.json",
+            category2code_path="./matcher/collections/category2code.json"
+        )
+        self._name_matcher = ColbertMatcher(
+            checkpoint_name="full_names_stocks.8bits",
+            collection_path="full_names_collection.json",
+        )
 
     def get_merged_df(self, contracts_path, kpgz_path):
         contracts_df = pd.read_excel(contracts_path, nrows=3699)
@@ -219,7 +229,7 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
         logging.info(
             f"predict for ts={request.ts.ToJsonString()} months_count={request.months_count} segment={request.segment}"
         )
-
+        # матчинг 
         collection_name = "codes"
         collection = mongo_db[collection_name]
         code_info = collection.find_one({"code": request.segment},{'_id':False})
