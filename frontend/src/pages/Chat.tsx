@@ -18,6 +18,7 @@ const Chat = observer(() => {
     const { sessionId } = useParams();
     const navigate = useNavigate();
     const [message, setMessage] = useState('');
+    const [titleValue, setTitleValue] = useState('');
 
     const titleInputRef = useRef<HTMLInputElement>(null);
 
@@ -98,6 +99,8 @@ const Chat = observer(() => {
     }, 1000);
 
     const onTitleChange = (event: ChangeEvent<HTMLInputElement>) => {
+        setTitleValue(event.target.value);
+
         const title = event.target?.value;
         if (rootStore.activeSessionId) {
             debouncedRenameSession(rootStore.activeSessionId, title);
@@ -113,7 +116,7 @@ const Chat = observer(() => {
                             ref={titleInputRef}
                             type='text'
                             className='bg-transparent text-lg font-medium focus:outline-none'
-                            defaultValue={rootStore.activeSession?.title || 'Новый чат'}
+                            value={titleValue || rootStore.activeSession?.title || 'Новый чат'}
                             onChange={(event) => onTitleChange(event)}
                         />
                         <Button
