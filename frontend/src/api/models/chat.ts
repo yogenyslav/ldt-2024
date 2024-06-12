@@ -9,6 +9,7 @@ export interface ChatQuery {
     id: number;
     prompt: string;
     product: string;
+    period?: string;
     type: string;
     status: string;
     created_at: string;
@@ -55,7 +56,7 @@ export interface DeleteSessionParams {
 }
 
 export interface WSOutcomingMessage {
-    prompt: string;
+    prompt?: string;
     command?: ChatCommand;
     period?: string;
     product?: string;
@@ -76,6 +77,7 @@ export enum IncomingMessageType {
 export enum IncomingMessageStatus {
     Pending = 'PENDING',
     Valid = 'VALID',
+    Invalid = 'INVALID',
 }
 
 export interface WSMessage {

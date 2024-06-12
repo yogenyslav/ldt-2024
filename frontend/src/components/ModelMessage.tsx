@@ -29,7 +29,6 @@ const ModelMessage = ({ incomingMessage, isLastMessage }: ModelMessageProps) => 
                                 <Button
                                     onClick={() => {
                                         rootStore.sendMessage({
-                                            prompt: '',
                                             command: ChatCommand.Valid,
                                         });
                                     }}
@@ -48,7 +47,6 @@ const ModelMessage = ({ incomingMessage, isLastMessage }: ModelMessageProps) => 
                                             });
 
                                             rootStore.sendMessage({
-                                                prompt: '',
                                                 command: ChatCommand.Invalid,
                                             });
 
@@ -82,6 +80,15 @@ const ModelMessage = ({ incomingMessage, isLastMessage }: ModelMessageProps) => 
                                 <ClipboardIcon className='w-4 h-4' />
                                 <span className='sr-only'>Копировать</span>
                             </Button>
+                        </div>
+                    </>
+                );
+
+            case IncomingMessageStatus.Invalid:
+                return (
+                    <>
+                        <div className='prose prose-stone'>
+                            <p>{`продукт: ${incomingMessage.product}, период: ${incomingMessage.period}, тип: ${incomingMessage.type}`}</p>
                         </div>
                     </>
                 );
