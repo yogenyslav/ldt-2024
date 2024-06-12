@@ -84,7 +84,7 @@ proto:
 	@python -m grpc_tools.protoc -Iproto --python_out=prompter --pyi_out=prompter --grpc_python_out=prompter \
  					proto/api/prompter.proto
 	@python -m grpc_tools.protoc -Iproto --python_out=predictor --pyi_out=predictor --grpc_python_out=predictor \
-     					proto/api/predictor.proto
+					proto/api/predictor.proto proto/api/prompter.proto
 
 .PHONY: tests
 tests:
