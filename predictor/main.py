@@ -67,15 +67,15 @@ def convert_datetime_to_str(obj):
 class Predictor(predictor_pb2_grpc.PredictorServicer):
     def __init__(self, period_model):
         self._period_model = period_model
-        # self._code_matcher = ColbertMatcher(
-        #     checkpoint_name="3rd_level_codes.8bits",
-        #     collection_path="./matcher/collections/collection_3rd_level_codes.json",
-        #     category2code_path="./matcher/collections/category2code.json",
-        # )
-        # self._name_matcher = ColbertMatcher(
-        #     checkpoint_name="full_names_stocks.8bits",
-        #     collection_path="./matcher/collections/full_names_collection.json",
-        # )
+        self._code_matcher = ColbertMatcher(
+            checkpoint_name="3rd_level_codes.8bits",
+            collection_path="./matcher/collections/collection_3rd_level_codes.json",
+            category2code_path="./matcher/collections/category2code.json",
+        )
+        self._name_matcher = ColbertMatcher(
+            checkpoint_name="full_names_stocks.8bits",
+            collection_path="./matcher/collections/full_names_collection.json",
+        )
 
     def get_merged_df(self, contracts_path, kpgz_path):
         contracts_df = pd.read_excel(contracts_path, nrows=3699)
