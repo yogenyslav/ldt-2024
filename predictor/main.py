@@ -2,6 +2,7 @@ import os
 import logging
 import re
 from datetime import datetime
+from dateutil.relativedelta import relativedelta
 
 import pandas as pd
 import pymongo
@@ -29,6 +30,10 @@ mongo_url = f"mongodb://{os.getenv('MONGO_HOST')}:{os.getenv('MONGO_PORT')}/{os.
 mongo_client = pymongo.MongoClient(mongo_url)
 mongo_db = mongo_client[os.getenv("MONGO_DB")]
 
+def convert_to_datetime(iso_str):
+    iso_str = iso_str.replace("Z", "+00:00")
+    dt = datetime.strptime(iso_str, "%Y-%m-%dT%H:%M:%S.%f%z")
+    return dt
 
 def parse_filename(filename):
     pattern = r".*на\s(\d{2}\.\d{2}\.\d{4})(?:г\.?)?\s*\(сч\.\s*(\d+)\).*\.xlsx"
@@ -215,11 +220,19 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
             f"predict for ts={request.ts.ToJsonString()} months_count={request.months_count} segment={request.segment}"
         )
 
-        collection_name = "segments"
+        collection_name = "codes"
         collection = mongo_db[collection_name]
-        collection.find_one
-
-        return PredictResp(predicts=[])
+        code_info = collection.find_one({"code": request.segment},{'_id':False})
+        
+        if code_info is None:
+            pass #TODO
+        
+        start_dt = convert_to_datetime(request.ts.ToJsonString())
+        end_dt = start_dt + relativedelta(years=request.months_count//12, months=request.months_count%12)
+        forecast = [x for x in code_info['forecast'] if start_dt.timestamp() <= x['date'].timestamp() <= end_dt.timestamp() ]
+        code_info['forecast'] = forecast
+        
+        return PredictResp(predicts=[]) #TODO
 
     def UniqueCodes(self, request: ClientIdentifier, context: ServicerContext):
         logging.info(f"unique codes for {request.value}")
