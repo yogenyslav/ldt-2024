@@ -1,8 +1,13 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "api/predictor.proto",
-    "version": "version not set"
+    "title": "API",
+    "description": "Документация к API-сервису команды misis.tech",
+    "version": "version not set",
+    "license": {
+      "name": "BSD 3-Clause License",
+      "url": "https://github.com/grpc-ecosystem/grpc-gateway/blob/main/LICENSE"
+    }
   },
   "tags": [
     {
@@ -48,6 +53,11 @@
         ],
         "tags": [
           "predictor"
+        ],
+        "security": [
+          {
+            "Authorization": []
+          }
         ]
       }
     },
@@ -84,6 +94,11 @@
         ],
         "tags": [
           "predictor"
+        ],
+        "security": [
+          {
+            "Authorization": []
+          }
         ]
       }
     },
@@ -124,6 +139,11 @@
         },
         "tags": [
           "predictor"
+        ],
+        "security": [
+          {
+            "Authorization": []
+          }
         ]
       }
     }
@@ -282,6 +302,13 @@
           }
         }
       }
+    }
+  },
+  "securityDefinitions": {
+    "Authorization": {
+      "type": "apiKey",
+      "name": "Authorization",
+      "in": "header"
     }
   }
 }

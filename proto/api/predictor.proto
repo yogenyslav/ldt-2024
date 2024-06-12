@@ -9,6 +9,27 @@ import "api/prompter.proto";
 
 option go_package="internal/api/pb";
 
+option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
+  info: {
+    title: "API"
+    description: "Документация к API-сервису команды misis.tech"
+    license: {
+      name: "BSD 3-Clause License";
+      url: "https://github.com/grpc-ecosystem/grpc-gateway/blob/main/LICENSE";
+    };
+  }
+  security_definitions: {
+    security: {
+      key: "Authorization";
+      value: {
+        type: TYPE_API_KEY;
+        in: IN_HEADER;
+        name: "Authorization";
+      }
+    }
+  }
+};
+
 service Predictor {
   rpc PrepareData(PrepareDataReq) returns (google.protobuf.Empty) {
     option (google.api.http) = {
@@ -23,6 +44,12 @@ service Predictor {
         key: "200"
         value: {
           description: "Данные успешно подготовлены"
+        }
+      }
+      security: {
+        security_requirement: {
+          key: "Authorization";
+          value: {}
         }
       }
     };
@@ -40,6 +67,12 @@ service Predictor {
         key: "200"
         value: {
           description: "Предикт успешно получен"
+        }
+      }
+      security: {
+        security_requirement: {
+          key: "Authorization";
+          value: {}
         }
       }
     };
@@ -60,6 +93,12 @@ service Predictor {
             key: "application/json"
             value: "{\"codes\": [{\"segment\": \"1\",\"name\": \"Товар 1\",\"regular\": true}, {\"segment\": \"2\",\"name\": \"Товар 2\",\"regular\": false}]}"
           }
+        }
+      }
+      security: {
+        security_requirement: {
+          key: "Authorization";
+          value: {}
         }
       }
     };
