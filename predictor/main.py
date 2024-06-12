@@ -54,19 +54,28 @@ def parse_filename(filename):
         return quarter, year, account
     return None
 
+def convert_datetime_to_str(obj):
+    if isinstance(obj, dict):
+        return {k: convert_datetime_to_str(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [convert_datetime_to_str(i) for i in obj]
+    elif isinstance(obj, datetime):
+        return obj.strftime('%Y-%m-%d')
+    else:
+        return obj
 
 class Predictor(predictor_pb2_grpc.PredictorServicer):
     def __init__(self, period_model):
         self._period_model = period_model
-        self._code_matcher = ColbertMatcher(
-            checkpoint_name="3rd_level_codes.8bits",
-            collection_path="./matcher/collections/collection_3rd_level_codes.json",
-            category2code_path="./matcher/collections/category2code.json",
-        )
-        self._name_matcher = ColbertMatcher(
-            checkpoint_name="full_names_stocks.8bits",
-            collection_path="./matcher/collections/full_names_collection.json",
-        )
+        # self._code_matcher = ColbertMatcher(
+        #     checkpoint_name="3rd_level_codes.8bits",
+        #     collection_path="./matcher/collections/collection_3rd_level_codes.json",
+        #     category2code_path="./matcher/collections/category2code.json",
+        # )
+        # self._name_matcher = ColbertMatcher(
+        #     checkpoint_name="full_names_stocks.8bits",
+        #     collection_path="./matcher/collections/full_names_collection.json",
+        # )
 
     def get_merged_df(self, contracts_path, kpgz_path):
         contracts_df = pd.read_excel(contracts_path, nrows=3699)
@@ -200,7 +209,6 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
         return process_and_merge_stocks(stocks)
 
     def PrepareData(self, request: PrepareDataReq, context: ServicerContext):
-        print(self._code_matcher.match_to_3rd_level_code("вода"))
         # в PrepareDataReq лежит путь до .csv/.xlsx файла
 
         logging.info(request.sources)
@@ -232,17 +240,20 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
 
     def Predict(self, request: PredictReq, context: ServicerContext):
         logging.info(f"predict for {str(request)}")
-        # матчинг
+        
+        code = self._code_matcher.match_to_3rd_level_code("вода")
+        
+        
         collection_name = "codes"
         collection = mongo_db[collection_name]
-        code_info = collection.find_one({"code": request.segment}, {"_id": False})
+        code_info = collection.find_one({"code": code}, {"_id": False})
 
         if code_info is None:
             pass  # TODO
 
-        start_dt = convert_to_datetime(request.ts.ToJsonString())
+        start_dt = convert_to_datetime("2023-01-01T10:00:20.021Z")
         end_dt = start_dt + relativedelta(
-            years=request.months_count // 12, months=request.months_count % 12
+            years=int(request.period) // 12, months=int(request.period) % 12
         )
         forecast = [
             x
@@ -251,14 +262,33 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
         ]
         code_info["forecast"] = forecast
 
-        return PredictResp(data=json.dumps(code_info).encode("utf-8"))  # TODO
-
+        code_info = convert_datetime_to_str(code_info)
+        return PredictResp(data=json.dumps(code_info).encode("utf-8"))
+    
     def UniqueCodes(self, request: Empty, context: ServicerContext):
+        collection_name = "codes"
+        collection = mongo_db[collection_name]
+        out = collection.find({"code": {"$exists": True}},{'_id': False, 'code':True, 'code_name': True, 'is_regular': True})
+        
+        codes_info = []
+        for code_info in out:
+            print(type(code_info['code_name']))
+            
+            if isinstance(code_info['code_name'], float) or code_info['code_name'] is None:
+                code_name = ''
+            else:
+                code_name = code_info['code_name']
+            
+            codes_info.append(
+                UniqueCode(
+                    segment=code_info['code'], 
+                    name=code_name, 
+                    regular=code_info['is_regular']
+                    )
+                )
+        
         return UniqueCodesResp(
-            codes=[
-                UniqueCode(segment="test", name="test", regular=True),
-                UniqueCode(segment="test", name="test", regular=False),
-            ]
+            codes=codes_info,
         )
 
 
