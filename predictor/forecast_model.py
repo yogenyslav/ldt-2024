@@ -45,12 +45,16 @@ class Model:
         return tuple(self._trend_models_by_segment.keys())
 
     def filter_regular_codes(
-        self, segments: pd.Series, regular_codes: tuple, count_threshold: int = 3, starts_with: Optional[str] = '01.'
+        self,
+        segments: pd.Series,
+        regular_codes: tuple,
+        count_threshold: int = 3,
+        starts_with: Optional[str] = "01.",
     ):
 
         segments = segments[segments > count_threshold]
         segments_np = segments.index.to_numpy()
-        
+
         if starts_with is not None:
             segments_mask = segments.index.str.startswith(starts_with)
             segments_np = segments.index.to_numpy()[segments_mask]
@@ -73,7 +77,7 @@ class Model:
                 .sum()
                 .reset_index()
             )
-            
+
             if (filtered_df[self._value_column] > 0).sum() < min_dates_records:
                 continue
 
@@ -92,7 +96,7 @@ class Model:
             fitted_model = self._trend_model.fit(X, y, 1)
 
             if r2_score(y, fitted_model(X)) < min_r2:
-                continue  
+                continue
 
             fitted_model = FittedTrendModel(
                 model=fitted_model,
