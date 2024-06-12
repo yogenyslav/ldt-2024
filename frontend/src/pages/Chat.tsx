@@ -10,6 +10,7 @@ import debounce from 'lodash/debounce';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Pages } from '@/router/constants';
 import Conversation from '@/components/Conversation';
+import EmptyChat from '@/components/EmptyChat';
 
 const Chat = observer(() => {
     const { rootStore } = useStores();
@@ -130,34 +131,37 @@ const Chat = observer(() => {
 
                 <div className='chat__messages-area flex flex-col'>
                     <div className='max-w-5xl w-full flex-1 mx-auto flex flex-col items-start gap-8 px-4 py-8'>
-                        {rootStore.activeSessionLoading
-                            ? Array.from({ length: 3 }).map((_, i) => (
-                                  <div
-                                      key={i}
-                                      className='flex items-start gap-4 animate-pulse w-full'
-                                  >
-                                      <Skeleton className='bg-slate-200 w-8 h-8 rounded-full' />
-                                      <div className='grid gap-1 flex-1'>
-                                          <Skeleton className='bg-slate-200 h-8 w-24' />
-                                          <Skeleton
-                                              className={`bg-slate-200 w-full ${
-                                                  Math.random() > 0.5 ? 'h-8' : 'h-12'
-                                              }`}
-                                          />
-                                      </div>
-                                  </div>
-                              ))
-                            : rootStore.activeDisplayedSession?.messages.map((conversation, i) => (
-                                  <Conversation
-                                      key={i}
-                                      conversation={conversation}
-                                      isLastConversation={
-                                          i ===
-                                          (rootStore.activeDisplayedSession?.messages.length || 0) -
-                                              1
-                                      }
-                                  />
-                              ))}
+                        {rootStore.activeSessionLoading ? (
+                            Array.from({ length: 3 }).map((_, i) => (
+                                <div
+                                    key={i}
+                                    className='flex items-start gap-4 animate-pulse w-full'
+                                >
+                                    <Skeleton className='bg-slate-200 w-8 h-8 rounded-full' />
+                                    <div className='grid gap-1 flex-1'>
+                                        <Skeleton className='bg-slate-200 h-8 w-24' />
+                                        <Skeleton
+                                            className={`bg-slate-200 w-full ${
+                                                Math.random() > 0.5 ? 'h-8' : 'h-12'
+                                            }`}
+                                        />
+                                    </div>
+                                </div>
+                            ))
+                        ) : rootStore.activeDisplayedSession?.messages.length ? (
+                            rootStore.activeDisplayedSession?.messages.map((conversation, i) => (
+                                <Conversation
+                                    key={i}
+                                    conversation={conversation}
+                                    isLastConversation={
+                                        i ===
+                                        (rootStore.activeDisplayedSession?.messages.length || 0) - 1
+                                    }
+                                />
+                            ))
+                        ) : (
+                            <EmptyChat />
+                        )}
                     </div>
 
                     <div className='max-w-5xl w-full sticky bottom-0 mx-auto py-4 flex flex-col gap-2 px-4 dark:bg-[#0f172a] bg-neutral-100'>
