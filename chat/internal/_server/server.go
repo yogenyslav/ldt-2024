@@ -135,7 +135,7 @@ func (s *Server) Run() {
 			if e := recover(); e != nil {
 				err = conn.WriteJSON(ch.Response{
 					Msg: "internal error",
-					Err: err,
+					Err: err.Error(),
 				})
 				if err != nil {
 					log.Warn().Err(err).Msg("failed to recover ws panic")

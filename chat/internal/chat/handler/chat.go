@@ -2,7 +2,6 @@ package handler
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"time"
 
@@ -34,19 +33,19 @@ func (h *Handler) Chat(c *websocket.Conn) { //nolint:gocyclo // will be soon ref
 		return
 	}
 	if mt != websocket.TextMessage {
-		respondRaw(c, "need authorization first", errors.New("unexpected message type"))
+		respondError(c, "need authorization first", errors.New("unexpected message type"))
 		return
 	}
 
 	ctx, username, authErr := h.ctrl.Authorize(context.Background(), string(msg))
 	if authErr != nil {
-		respondRaw(c, "unauthorized", authErr)
+		respondError(c, "unauthorized", authErr)
 		return
 	}
 
 	sessionID, uuidErr := uuid.Parse(c.Params("session_id"))
 	if uuidErr != nil {
-		respondRaw(c, "invalid session uuid", uuidErr)
+		respondError(c, "invalid session uuid", uuidErr)
 		return
 	}
 	defer func() {
@@ -65,7 +64,7 @@ func (h *Handler) Chat(c *websocket.Conn) { //nolint:gocyclo // will be soon ref
 	for {
 		var req model.QueryCreateReq
 		if err := c.ReadJSON(&req); err != nil {
-			respondRaw(c, "failed to read query", err)
+			respondError(c, "failed to read query", err)
 			return
 		}
 
@@ -80,16 +79,11 @@ func (h *Handler) Chat(c *websocket.Conn) { //nolint:gocyclo // will be soon ref
 			log.Debug().Msg("processing hint")
 			query, err := h.ctrl.Hint(ctx, queryID, req)
 			if err != nil {
-				respondRaw(c, "failed to process hint", err)
+				respondError(c, "failed to process hint", err)
 				hint <- queryID
 				continue
 			}
-			queryMsg, err := json.Marshal(query)
-			if err != nil {
-				respondRaw(c, err.Error(), err)
-				return
-			}
-			respondRaw(c, string(queryMsg), nil)
+			respondData(c, query)
 			validate <- queryID
 			continue
 		case queryID := <-validate:
@@ -98,7 +92,7 @@ func (h *Handler) Chat(c *websocket.Conn) { //nolint:gocyclo // will be soon ref
 				log.Debug().Msg("extracted prompt is valid")
 				go h.ctrl.Predict(ctx, out, cancel, queryID)
 				if err := h.ctrl.UpdateStatus(ctx, queryID, shared.StatusValid); err != nil {
-					respondRaw(c, "failed to update status to valid", err)
+					respondError(c, "failed to update status to valid", err)
 					validate <- queryID
 					cancel <- struct{}{}
 					continue
@@ -106,7 +100,7 @@ func (h *Handler) Chat(c *websocket.Conn) { //nolint:gocyclo // will be soon ref
 			} else if req.Command == shared.CommandInvalid {
 				log.Debug().Msg("extracted prompt is invalid")
 				if err := h.ctrl.UpdateStatus(ctx, queryID, shared.StatusPending); err != nil {
-					respondRaw(c, "failed to update status to pending", err)
+					respondError(c, "failed to update status to pending", err)
 					validate <- queryID
 					continue
 				}
@@ -116,15 +110,10 @@ func (h *Handler) Chat(c *websocket.Conn) { //nolint:gocyclo // will be soon ref
 		default:
 			query, err := h.ctrl.InsertQuery(ctx, req, username, sessionID)
 			if err != nil {
-				respondRaw(c, err.Error(), err)
+				respondError(c, err.Error(), err)
 				return
 			}
-			queryMsg, err := json.Marshal(query)
-			if err != nil {
-				respondRaw(c, err.Error(), err)
-				return
-			}
-			respondRaw(c, string(queryMsg), nil)
+			respondData(c, query)
 
 			validate <- query.ID
 			continue

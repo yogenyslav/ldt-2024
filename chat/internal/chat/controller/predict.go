@@ -29,7 +29,7 @@ func (ctrl *Controller) Predict(ctx context.Context, out chan<- ch.Response, can
 		Status:  shared.StatusProcessing,
 	}); err != nil {
 		out <- ch.Response{
-			Err: err,
+			Err: err.Error(),
 			Msg: "predict failed",
 		}
 		return
@@ -44,7 +44,6 @@ func (ctrl *Controller) Predict(ctx context.Context, out chan<- ch.Response, can
 		select {
 		case <-cancel:
 			out <- ch.Response{
-				Err:    nil,
 				Msg:    "predict canceled",
 				Finish: true,
 			}
@@ -54,7 +53,7 @@ func (ctrl *Controller) Predict(ctx context.Context, out chan<- ch.Response, can
 				Body:    buff.String(),
 			}); err != nil {
 				out <- ch.Response{
-					Err:    err,
+					Err:    err.Error(),
 					Msg:    "cancel failed",
 					Finish: true,
 				}
@@ -62,7 +61,6 @@ func (ctrl *Controller) Predict(ctx context.Context, out chan<- ch.Response, can
 			return
 		case <-withCancel.Done():
 			out <- ch.Response{
-				Err:    nil,
 				Msg:    "finished",
 				Finish: true,
 			}
@@ -72,7 +70,7 @@ func (ctrl *Controller) Predict(ctx context.Context, out chan<- ch.Response, can
 				Body:    buff.String(),
 			}); err != nil {
 				out <- ch.Response{
-					Err:    err,
+					Err:    err.Error(),
 					Msg:    "failed to save response",
 					Finish: true,
 				}
@@ -81,12 +79,14 @@ func (ctrl *Controller) Predict(ctx context.Context, out chan<- ch.Response, can
 		default:
 			cnt++
 			time.Sleep(time.Second * 1)
-			msg := fmt.Sprintf("chunk %d", cnt)
+			chunk := fmt.Sprintf("chunk %d", cnt)
 			out <- ch.Response{
-				Err: nil,
-				Msg: msg,
+				Data: struct {
+					Info string `json:"info"`
+				}{chunk},
+				Chunk: true,
 			}
-			buff.WriteString(msg)
+			buff.WriteString(chunk)
 			if cnt >= 10 {
 				finish()
 			}
