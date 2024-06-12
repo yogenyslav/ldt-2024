@@ -11,7 +11,7 @@ import (
 	"github.com/yogenyslav/ldt-2024/chat/internal/shared"
 )
 
-// Encrypt encrypts a string using a key.
+// Encrypt шифрует строку с использованием ключа.
 func Encrypt(toEncrypt, keyString string) (string, error) {
 	key, err := hex.DecodeString(keyString)
 	if err != nil {
@@ -34,7 +34,7 @@ func Encrypt(toEncrypt, keyString string) (string, error) {
 	return base64.URLEncoding.EncodeToString(ciphertext), nil
 }
 
-// Decrypt decrypts a string using a key.
+// Decrypt расшифровывает строку с использованием ключа.
 func Decrypt(toDecrypt, keyString string) (string, error) {
 	key, err := hex.DecodeString(keyString)
 	if err != nil {

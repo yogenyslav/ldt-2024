@@ -10,6 +10,7 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
+// List возвращает список сессий пользователя.
 func (ctrl *Controller) List(ctx context.Context, username string) ([]model.SessionDto, error) {
 	ctx, span := ctrl.tracer.Start(
 		ctx,

@@ -6,6 +6,7 @@ import (
 	"github.com/yogenyslav/ldt-2024/chat/internal/shared"
 )
 
+// WsProtocolUpgrade проверяет, что запрос является вебсокет-апгрейдом.
 func WsProtocolUpgrade() fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
 		if websocket.IsWebSocketUpgrade(ctx) {

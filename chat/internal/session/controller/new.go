@@ -11,7 +11,7 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
-// NewSession creates new session and returns its id(uuid).
+// NewSession создает новую сессию.
 func (ctrl *Controller) NewSession(ctx context.Context, id uuid.UUID, username string) error {
 	ctx, span := ctrl.tracer.Start(
 		ctx,

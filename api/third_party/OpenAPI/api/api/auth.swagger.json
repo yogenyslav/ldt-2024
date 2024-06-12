@@ -28,14 +28,16 @@
         "operationId": "AuthService_Login",
         "responses": {
           "200": {
-            "description": "Успешная авторизация. Возвращает токен и роль пользователя. Соответствие ролей: 1 - администратор, 2 - аналитик, 3 - закупщик",
+            "description": "Успешная авторизация. Возвращает токен и роли пользователя. Соответствие ролей: 1 - администратор, 2 - аналитик, 3 - закупщик",
             "schema": {
               "$ref": "#/definitions/apiLoginResponse"
             },
             "examples": {
               "application/json": {
                 "token": "some_random_access_token",
-                "role": 1
+                "roles": [
+                  1
+                ]
               }
             }
           },
@@ -93,17 +95,23 @@
       "type": "object",
       "example": {
         "token": "some_random_access_token",
-        "role": 1
+        "roles": [
+          2,
+          3
+        ]
       },
       "properties": {
         "token": {
           "type": "string"
         },
-        "role": {
-          "$ref": "#/definitions/apiUserRole"
+        "roles": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiUserRole"
+          }
         }
       },
-      "description": "Модель ответа на запрос авторизации, содержащая токен и роль пользователя. Соответствие ролей: 1 - администратор, 2 - аналитик, 3 - закупщик",
+      "description": "Модель ответа на запрос авторизации, содержащая токен и роли пользователя. Соответствие ролей: 1 - администратор, 2 - аналитик, 3 - закупщик",
       "title": "Результат авторизации"
     },
     "apiUserRole": {

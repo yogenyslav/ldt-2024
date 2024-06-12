@@ -10,7 +10,7 @@ import (
 	"github.com/yogenyslav/pkg/storage/postgres"
 )
 
-// Config is the struct for the whole service configuration.
+// Config конфигурация сервиса.
 type Config struct {
 	Server     *srvconfig.Config        `yaml:"server"`
 	Postgres   *postgres.Config         `yaml:"postgres"`
@@ -20,13 +20,13 @@ type Config struct {
 	KeyCloak   *KeyCloakConfig          `yaml:"keycloak"`
 }
 
-// KeyCloakConfig holds the configuration for Keycloak.
+// KeyCloakConfig конфигурация KeyCloak.
 type KeyCloakConfig struct {
 	URL   string `yaml:"url"`
 	Realm string `yaml:"realm"`
 }
 
-// MustNew creates a new Config instance or panics if failed.
+// MustNew создает новую конфигурацию или вызывает панику.
 func MustNew(path string) *Config {
 	cfg := &Config{}
 	if err := cleanenv.ReadConfig(path, cfg); err != nil {

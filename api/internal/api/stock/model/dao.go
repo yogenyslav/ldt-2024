@@ -4,7 +4,7 @@ import (
 	"github.com/yogenyslav/ldt-2024/api/internal/api/pb"
 )
 
-// ProductDao is a model for the product entity.
+// ProductDao модель продукта в базе данных.
 type ProductDao struct {
 	RegistryNumberInRk  any     `json:"registry_number_in_rk" bson:"registry_number_in_rk"`
 	PaidRub             any     `json:"paid_rub" bson:"paid_rub"`
@@ -25,7 +25,7 @@ type ProductDao struct {
 	GkPriceRub          float64 `json:"gk_price_rub" bson:"gk_price_rub"`
 }
 
-// ToPb converts ProductDao to *pb.Product.
+// ToPb конвертирует ProductDao в pb.Product.
 func (p *ProductDao) ToPb() *pb.Product {
 	return &pb.Product{
 		NameSpgz:       p.NameSpgz,

@@ -41,10 +41,10 @@ service AuthService {
       responses: {
         key: "200"
         value: {
-          description: "Успешная авторизация. Возвращает токен и роль пользователя. Соответствие ролей: 1 - администратор, 2 - аналитик, 3 - закупщик"
+          description: "Успешная авторизация. Возвращает токен и роли пользователя. Соответствие ролей: 1 - администратор, 2 - аналитик, 3 - закупщик"
           examples: {
             key: "application/json"
-            value: "{\"token\": \"some_random_access_token\", \"role\": 1}"
+            value: "{\"token\": \"some_random_access_token\", \"roles\": [1]}"
           }
         }
       }
@@ -82,10 +82,10 @@ message LoginResponse {
   option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_schema) = {
     json_schema: {
       title: "Результат авторизации"
-      description: "Модель ответа на запрос авторизации, содержащая токен и роль пользователя. Соответствие ролей: 1 - администратор, 2 - аналитик, 3 - закупщик"
+      description: "Модель ответа на запрос авторизации, содержащая токен и роли пользователя. Соответствие ролей: 1 - администратор, 2 - аналитик, 3 - закупщик"
     }
-    example: "{\"token\": \"some_random_access_token\", \"role\": 1}"
+    example: "{\"token\": \"some_random_access_token\", \"roles\": [2, 3]}"
   };
   string token = 1;
-  UserRole role = 2;
+  repeated UserRole roles = 2;
 }

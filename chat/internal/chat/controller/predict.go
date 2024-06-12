@@ -13,9 +13,7 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
-// Predict get prediction for query.
-//
-//nolint:funlen // will be refactored soon
+// Predict получить предикт по запросу.
 func (ctrl *Controller) Predict(ctx context.Context, out chan<- ch.Response, cancel <-chan struct{}, queryID int64) {
 	ctx, span := ctrl.tracer.Start(
 		ctx,
@@ -28,10 +26,7 @@ func (ctrl *Controller) Predict(ctx context.Context, out chan<- ch.Response, can
 		QueryID: queryID,
 		Status:  shared.StatusProcessing,
 	}); err != nil {
-		out <- ch.Response{
-			Err: err.Error(),
-			Msg: "predict failed",
-		}
+		out <- ch.Response{Err: err.Error(), Msg: "predict failed"}
 		return
 	}
 
@@ -43,48 +38,32 @@ func (ctrl *Controller) Predict(ctx context.Context, out chan<- ch.Response, can
 	for {
 		select {
 		case <-cancel:
-			out <- ch.Response{
-				Msg:    "predict canceled",
-				Finish: true,
-			}
+			out <- ch.Response{Msg: "predict canceled", Finish: true}
 			if err := ctrl.cr.UpdateResponse(ctx, model.ResponseDao{
 				QueryID: queryID,
 				Status:  shared.StatusCanceled,
 				Body:    buff.String(),
 			}); err != nil {
-				out <- ch.Response{
-					Err:    err.Error(),
-					Msg:    "cancel failed",
-					Finish: true,
-				}
+				out <- ch.Response{Err: err.Error(), Msg: "cancel failed", Finish: true}
 			}
 			return
 		case <-withCancel.Done():
-			out <- ch.Response{
-				Msg:    "finished",
-				Finish: true,
-			}
+			out <- ch.Response{Msg: "finished", Finish: true}
 			if err := ctrl.cr.UpdateResponse(ctx, model.ResponseDao{
 				QueryID: queryID,
 				Status:  shared.StatusSuccess,
 				Body:    buff.String(),
 			}); err != nil {
-				out <- ch.Response{
-					Err:    err.Error(),
-					Msg:    "failed to save response",
-					Finish: true,
-				}
+				out <- ch.Response{Err: err.Error(), Msg: "failed to save response", Finish: true}
 			}
 			return
 		default:
 			cnt++
 			time.Sleep(time.Second * 1)
 			chunk := fmt.Sprintf("chunk %d", cnt)
-			out <- ch.Response{
-				Data: struct {
-					Info string `json:"info"`
-				}{chunk},
-				Chunk: true,
+			out <- ch.Response{Data: struct {
+				Info string `json:"info"`
+			}{chunk}, Chunk: true,
 			}
 			buff.WriteString(chunk)
 			if cnt >= 10 {

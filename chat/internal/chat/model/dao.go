@@ -7,7 +7,7 @@ import (
 	"github.com/yogenyslav/ldt-2024/chat/internal/shared"
 )
 
-// QueryDao is a data layer representation of users query.
+// QueryDao модель запроса в базе данных.
 type QueryDao struct { //nolint:govet // order is required for sql request
 	CreatedAt time.Time          `db:"created_at"`
 	Prompt    string             `db:"prompt"`
@@ -20,7 +20,7 @@ type QueryDao struct { //nolint:govet // order is required for sql request
 	SessionID uuid.UUID          `db:"session_id"`
 }
 
-// ToDto converts QueryDao to QueryDto.
+// ToDto конвертирует QueryDao в QueryDto.
 func (q QueryDao) ToDto() QueryDto {
 	return QueryDto{
 		CreatedAt: q.CreatedAt,
@@ -33,7 +33,7 @@ func (q QueryDao) ToDto() QueryDto {
 	}
 }
 
-// ResponseDao is a data layer representation of response for query.
+// ResponseDao модель ответа в базе данных.
 type ResponseDao struct {
 	CreatedAt time.Time             `db:"created_at"`
 	Body      string                `db:"body"`
@@ -41,7 +41,7 @@ type ResponseDao struct {
 	QueryID   int64                 `db:"query_id"`
 }
 
-// ToDto converts ResponseDao to ResponseDto.
+// ToDto конвертирует ResponseDao в ResponseDto.
 func (r ResponseDao) ToDto() ResponseDto {
 	return ResponseDto{
 		CreatedAt: r.CreatedAt,

@@ -11,7 +11,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-// Login logs in a user.
+// Login авторизует пользователя.
 func (h *Handler) Login(c context.Context, params *pb.LoginRequest) (*pb.LoginResponse, error) {
 	ctx, err := pkg.GetTraceCtx(c)
 	if err != nil {

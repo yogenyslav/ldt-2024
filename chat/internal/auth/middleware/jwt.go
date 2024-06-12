@@ -10,6 +10,7 @@ import (
 	"github.com/yogenyslav/ldt-2024/chat/pkg/secure"
 )
 
+// JWT валидирует JWT токен.
 func JWT(kc *gocloak.GoCloak, realm, cipher string) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		authHeader := c.Get("Authorization")

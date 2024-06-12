@@ -25,6 +25,7 @@ issues:
     - G104
     - G114
     - SA1029
+    - S1000
     - Comment should end in a period
     - should have a package comment
     - don't use an underscore in package name
@@ -95,7 +96,7 @@ linters-settings:
     enable-all: true
 
   funlen:
-    lines: 60
+    lines: 90
     statements: 60
     ignore-comments: true
 

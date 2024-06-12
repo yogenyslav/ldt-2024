@@ -16,13 +16,13 @@ type sessionController interface {
 	FindOne(ctx context.Context, id uuid.UUID, username string) (model.FindOneResp, error)
 }
 
-// Handler is the session handler
+// Handler имплементация сервиса сессий.
 type Handler struct {
 	ctrl      sessionController
 	validator *validator.Validate
 }
 
-// New creates a new session handler
+// New создает новый Handler.
 func New(ctrl sessionController) *Handler {
 	return &Handler{
 		ctrl:      ctrl,
