@@ -1,5 +1,7 @@
 import os
 import logging
+import re
+from datetime import datetime
 
 import pandas as pd
 import pymongo
@@ -19,6 +21,7 @@ from dotenv import load_dotenv
 from data import merge_contracts_with_kpgz, prepare_contracts_df, prepare_kpgz_df
 from forecast_model import Model
 from period_model import PeriodPredictor
+from process_stock import process_and_merge_stocks, StockType, Quarters, Stock
 
 load_dotenv(".env")
 
@@ -26,6 +29,19 @@ mongo_url = f"mongodb://{os.getenv('MONGO_HOST')}:{os.getenv('MONGO_PORT')}/{os.
 mongo_client = pymongo.MongoClient(mongo_url)
 mongo_db = mongo_client[os.getenv("MONGO_DB")]
 
+def parse_filename(filename):
+    pattern = r".*на\s(\d{2}\.\d{2}\.\d{4})(?:г\.?)?\s*\(сч\.\s*(\d+)\).*\.xlsx"
+    
+    match = re.match(pattern, filename)
+    if match:
+        date_str, account = match.groups()
+        date = datetime.strptime(date_str, "%d.%m.%Y")
+        
+        quarter = (date.month - 1) // 3 + 1
+        year = date.year
+        
+        return quarter, year, account
+    return None
 
 class Predictor(predictor_pb2_grpc.PredictorServicer):
     def __init__(self, period_model):
@@ -140,14 +156,36 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
 
         return codes_data
 
+    def get_stocks(self, paths):
+        stocks = []
+        for path in paths:
+            result = parse_filename(path)
+            if result:
+                quarter, year, stock_type = result
+                stock_type = StockType._value2member_map_.get(int(stock_type), None)
+                quarter = Quarters._value2member_map_.get(int(quarter), None)
+            else:
+                raise ValueError(f'Wrong pattern for sotcks file: {path}')
+            
+            if stock_type is None or quarter is None:
+                raise ValueError(f'Not valid stock info: stock_type={stock_type}, quarter={quarter}')
+            
+            raw_stock = pd.read_excel(path)
+            stock = Stock(raw_stock, stock_type, quarter, year)
+            stocks.append(stock)
+            
+        return process_and_merge_stocks(stocks)
+    
     def PrepareData(self, request: PrepareDataReq, context: ServicerContext):
         # в PrepareDataReq лежит путь до .csv/.xlsx файла
 
         logging.info(request.sources)
 
-        assert len(request.sources) == 3
+        assert len(request.sources) == 15
 
-        contracts_path, kpgz_path, all_kpgz_codes_path = request.sources
+        contracts_path, kpgz_path, all_kpgz_codes_path = request.sources[:3]
+        stocks = self.get_stocks(request.sources[3:])
+        
 
         all_kpgz_codes = pd.read_csv(all_kpgz_codes_path)
         all_kpgz_codes = all_kpgz_codes.set_index("code")
@@ -163,9 +201,10 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
         collection = mongo_db[collection_name]
         collection.insert_many(codes_data)
 
-        # 1. prepare data here -> mongo
-        # 2. unique codes here -> mongo
-        # 3. predict here -> mongo
+        collection_name = "stocks"
+        collection = mongo_db[collection_name]
+        collection.insert_many(stocks.to_dict(orient='records'))
+        
         return ClientIdentifier(value="")
 
     def Predict(self, request: PredictReq, context: ServicerContext):
