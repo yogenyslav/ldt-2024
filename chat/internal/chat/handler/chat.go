@@ -78,8 +78,8 @@ func (h *Handler) Chat(c *websocket.Conn) {
 					continue
 				}
 			} else if req.Command == shared.CommandInvalid {
-				if err := h.ctrl.UpdateStatus(ctx, queryID, shared.StatusPending); err != nil {
-					respondError(c, "failed to update status to pending", err)
+				if err := h.ctrl.UpdateStatus(ctx, queryID, shared.StatusInvalid); err != nil {
+					respondError(c, "failed to update status to invalid", err)
 					validate <- queryID
 					continue
 				}

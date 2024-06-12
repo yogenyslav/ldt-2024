@@ -1,6 +1,8 @@
 package model
 
-import "github.com/yogenyslav/ldt-2024/api/internal/shared"
+import (
+	"github.com/yogenyslav/ldt-2024/api/internal/api/pb"
+)
 
 // LoginReq внутренняя модель запроса для метода Login.
 type LoginReq struct {
@@ -11,5 +13,5 @@ type LoginReq struct {
 // LoginResp внутренняя модель ответа для метода Login.
 type LoginResp struct {
 	Token string
-	Roles []shared.UserRole
+	Roles []pb.UserRole
 }

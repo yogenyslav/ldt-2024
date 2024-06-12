@@ -27,7 +27,7 @@ type ListResp struct {
 
 // RenameReq модель для запроса на переименование сессии.
 type RenameReq struct {
-	Title string    `json:"title" validate:"required,gte=3,max=25"`
+	Title string    `json:"title" validate:"required"`
 	ID    uuid.UUID `json:"id" validate:"required"`
 }
 

@@ -86,6 +86,8 @@ const (
 	StatusPending
 	// StatusValid статус валидности.
 	StatusValid
+	// StatusInvalid статус невалидного запроса.
+	StatusInvalid
 )
 
 // ToString возвращает строковое представление статуса запроса.
@@ -95,6 +97,8 @@ func (s QueryStatus) ToString() string {
 		return "PENDING"
 	case StatusValid:
 		return "VALID"
+	case StatusInvalid:
+		return "INVALID"
 	}
 	return enumsUndefined
 }

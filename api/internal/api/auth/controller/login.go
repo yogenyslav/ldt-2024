@@ -3,6 +3,7 @@ package controller
 import (
 	"context"
 	"errors"
+	"github.com/yogenyslav/ldt-2024/api/internal/api/pb"
 
 	"github.com/Nerzal/gocloak/v13"
 	"github.com/yogenyslav/ldt-2024/api/internal/api/auth/model"
@@ -36,7 +37,7 @@ func (ctrl *Controller) Login(ctx context.Context, params model.LoginReq) (model
 		return resp, err
 	}
 
-	roles := make([]shared.UserRole, len(groups))
+	roles := make([]pb.UserRole, len(groups))
 	for idx, role := range groups {
 		roles[idx] = shared.RoleFromString(*role.Name)
 	}

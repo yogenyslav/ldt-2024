@@ -40,5 +40,6 @@ func (h *Handler) Login(c context.Context, params *pb.LoginRequest) (*pb.LoginRe
 
 	return &pb.LoginResponse{
 		Token: resp.Token,
+		Roles: resp.Roles,
 	}, status.Error(codes.OK, "login success")
 }

@@ -1,6 +1,9 @@
 package shared
 
-import "strings"
+import (
+	"github.com/yogenyslav/ldt-2024/api/internal/api/pb"
+	"strings"
+)
 
 const (
 	// UsernameKey ключ для получения имени пользователя из контекста.
@@ -9,26 +12,16 @@ const (
 	LoginEndpoint = "/api.AuthService/Login"
 )
 
-// UserRole роль пользователя.
-type UserRole int8
-
-const (
-	RoleUndefined UserRole = iota
-	RoleAdmin
-	RoleAnalyst
-	RoleBuyer
-)
-
 // RoleFromString конвертирует строку роли в число.
-func RoleFromString(v string) UserRole {
+func RoleFromString(v string) pb.UserRole {
 	switch strings.ToLower(v) {
 	case "admin":
-		return RoleAdmin
+		return pb.UserRole_ROLE_ADMIN
 	case "analyst":
-		return RoleAnalyst
+		return pb.UserRole_ROLE_ANALYST
 	case "buyer":
-		return RoleBuyer
+		return pb.UserRole_ROLE_BUYER
 	default:
-		return RoleUndefined
+		return pb.UserRole_ROLE_UNDEFINED
 	}
 }
