@@ -4,24 +4,22 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-	"github.com/rs/zerolog/log"
+	"github.com/yogenyslav/ldt-2024/chat/internal/shared"
 )
 
-// SessionCleanup checks if whether session is empty and deletes it.
+// SessionCleanup проверяет, пуста ли сессия, и удаляет ее, если она пуста.
 func (ctrl *Controller) SessionCleanup(ctx context.Context, sessionID uuid.UUID) error {
 	ctx, span := ctrl.tracer.Start(ctx, "Controller.SessionCleanup")
 	defer span.End()
 
 	isEmpty, err := ctrl.sr.SessionContentEmpty(ctx, sessionID)
 	if err != nil {
-		log.Error().Err(err).Msg("failed to check whether session is empty")
-		return err
+		return shared.ErrGetSession
 	}
 
 	if isEmpty {
 		if err := ctrl.sr.DeleteOne(ctx, sessionID); err != nil {
-			log.Error().Err(err).Msg("failed to delete empty session")
-			return err
+			return shared.ErrDeleteSession
 		}
 	}
 

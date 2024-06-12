@@ -11,13 +11,13 @@ type stockRepo interface {
 	ListProducts(ctx context.Context) ([]model.ProductDao, error)
 }
 
-// Controller is a struct that implements stock business logic.
+// Controller имплементирует методы для работы с Stock.
 type Controller struct {
 	repo   stockRepo
 	tracer trace.Tracer
 }
 
-// New creates new Controller.
+// New создает новый Controller.
 func New(repo stockRepo, tracer trace.Tracer) *Controller {
 	return &Controller{
 		repo:   repo,

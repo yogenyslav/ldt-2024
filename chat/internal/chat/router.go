@@ -10,7 +10,7 @@ type chatHandler interface {
 	Chat(c *websocket.Conn)
 }
 
-// SetupChatRoutes maps the chat routes to the chat handler.
+// SetupChatRoutes маппит пути для чата.
 func SetupChatRoutes(app *fiber.App, h chatHandler, cfg websocket.Config) {
 	g := app.Group("/chat/ws")
 	g.Use(middleware.WsProtocolUpgrade())

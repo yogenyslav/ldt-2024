@@ -32,3 +32,10 @@ prometheus:
 prompter:
   host: "prompter"
   port: 9990
+
+mongo:
+  host: "mongo"
+  port: 27017
+  db: "product"
+  auth_type: "no"
+  retry_timeout: 20

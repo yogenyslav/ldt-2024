@@ -17,13 +17,13 @@ type sessionRepo interface {
 	FindContent(ctx context.Context, id uuid.UUID) ([]model.SessionContentDao, error)
 }
 
-// Controller a struct that implements session business logic.
+// Controller имплементирует сервис сессий.
 type Controller struct {
 	repo   sessionRepo
 	tracer trace.Tracer
 }
 
-// New creates new session Controller.
+// New создает новый Controller.
 func New(repo sessionRepo, tracer trace.Tracer) *Controller {
 	return &Controller{
 		repo:   repo,

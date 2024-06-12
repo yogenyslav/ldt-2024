@@ -9,13 +9,13 @@ import (
 	"google.golang.org/grpc/metadata"
 )
 
-// PushSpan pushes the span to the context.
+// PushSpan прокинуть span в контекст.
 func PushSpan(ctx context.Context, span trace.Span) context.Context {
 	traceID := span.SpanContext().TraceID().String()
 	return metadata.AppendToOutgoingContext(ctx, "x-trace-id", traceID)
 }
 
-// GetTraceCtx returns context with a trace.
+// GetTraceCtx получить контекст, содержащий span.
 func GetTraceCtx(ctx context.Context) (context.Context, error) {
 	md, _ := metadata.FromIncomingContext(ctx)
 	traceIDVal, ok := md["x-trace-id"]

@@ -11,13 +11,13 @@ type authController interface {
 	Login(ctx context.Context, params model.LoginReq) (model.LoginResp, error)
 }
 
-// Handler is the auth handler
+// Handler имплементация сервиса авторизации.
 type Handler struct {
 	ctrl      authController
 	validator *validator.Validate
 }
 
-// New creates a new auth handler
+// New создает новый Handler.
 func New(ctrl authController) *Handler {
 	return &Handler{
 		ctrl:      ctrl,

@@ -5,14 +5,14 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
-// Controller is a struct that implements the business logic of the auth service.
+// Controller имплементирует методы для работы с сервисом авторизации.
 type Controller struct {
 	authService pb.AuthServiceClient
 	tracer      trace.Tracer
 	cipherKey   string
 }
 
-// New creates a new instance of the Controller.
+// New создает новый Controller.
 func New(authConn pb.AuthServiceClient, cipher string, tracer trace.Tracer) *Controller {
 	return &Controller{
 		authService: authConn,

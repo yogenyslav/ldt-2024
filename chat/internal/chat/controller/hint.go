@@ -7,14 +7,13 @@ import (
 
 	"github.com/jackc/pgx/v5"
 	"github.com/rs/zerolog/log"
-	"github.com/yogenyslav/ldt-2024/chat/internal/api/pb"
 	"github.com/yogenyslav/ldt-2024/chat/internal/chat/model"
 	"github.com/yogenyslav/ldt-2024/chat/internal/shared"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
 )
 
-// Hint adds hint to existing prompt by id.
+// Hint добавляет подсказку к запросу.
 func (ctrl *Controller) Hint(ctx context.Context, queryID int64, params model.QueryCreateReq) (model.QueryDto, error) {
 	ctx, span := ctrl.tracer.Start(
 		ctx,
@@ -27,7 +26,6 @@ func (ctrl *Controller) Hint(ctx context.Context, queryID int64, params model.Qu
 	defer span.End()
 
 	var query model.QueryDto
-
 	if params.Prompt == "" {
 		return query, shared.ErrEmptyQueryHint
 	}
@@ -37,17 +35,13 @@ func (ctrl *Controller) Hint(ctx context.Context, queryID int64, params model.Qu
 		if errors.Is(err, pgx.ErrNoRows) {
 			return query, shared.ErrNoQueryWithID
 		}
+		log.Error().Err(err).Msg("failed to get query prompt")
 		return query, shared.ErrGetQuery
 	}
 
-	log.Debug().Str("initial prompt", prompt).Msg("adding hint")
-
 	newPrompt := prompt + "\nhint: " + params.Prompt
-
-	in := &pb.ExtractReq{Prompt: newPrompt}
-	meta, err := ctrl.prompter.Extract(ctx, in)
+	meta, err := ctrl.extractMeta(ctx, newPrompt)
 	if err != nil {
-		log.Error().Err(err).Msg("failed to extract meta from prompt")
 		return query, err
 	}
 
@@ -59,7 +53,6 @@ func (ctrl *Controller) Hint(ctx context.Context, queryID int64, params model.Qu
 		Type:    shared.QueryType(meta.GetType()),
 		Period:  meta.GetPeriod(),
 	}); err != nil {
-		log.Error().Err(err).Msg("failed to update query")
 		return query, err
 	}
 

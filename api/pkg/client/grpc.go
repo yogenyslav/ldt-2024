@@ -7,18 +7,18 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-// GrpcClient is an interface grpc clients.
+// GrpcClient интерфейс для работы с gRPC клиентом.
 type GrpcClient interface {
 	GetConn() *grpc.ClientConn
 	Close() error
 }
 
-// GrpcClient is a wrapper around grpc.ClientConn.
+// GrpcClient обертка над gRPC клиентом.
 type grpcClient struct {
 	conn *grpc.ClientConn
 }
 
-// NewGrpcClient creates a new GrpcClient.
+// NewGrpcClient создает новый gRPC клиент.
 func NewGrpcClient(cfg *GrpcClientConfig) (GrpcClient, error) {
 	var grpcOpts []grpc.DialOption
 	grpcOpts = append(grpcOpts, grpc.WithTransportCredentials(insecure.NewCredentials()))
@@ -31,12 +31,12 @@ func NewGrpcClient(cfg *GrpcClientConfig) (GrpcClient, error) {
 	return &grpcClient{conn: conn}, nil
 }
 
-// Close closes the grpc connection.
+// Close закрывает gRPC клиент.
 func (c *grpcClient) Close() error {
 	return c.conn.Close()
 }
 
-// GetConn returns the grpc connection.
+// GetConn получить gRPC соединение.
 func (c *grpcClient) GetConn() *grpc.ClientConn {
 	return c.conn
 }

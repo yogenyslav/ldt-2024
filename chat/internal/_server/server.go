@@ -42,7 +42,7 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
-// Server main struct that holds dependencies.
+// Server структура сервера со всеми зависимостями.
 type Server struct {
 	cfg      *config.Config
 	app      *fiber.App
@@ -52,7 +52,7 @@ type Server struct {
 	kc       *gocloak.GoCloak
 }
 
-// New creates a new Server instance.
+// New создает новый сервер.
 func New(cfg *config.Config) *Server {
 	app := fiber.New(fiber.Config{
 		ErrorHandler: srvresp.NewErrorHandler(errStatus).Handler,
@@ -86,7 +86,7 @@ func New(cfg *config.Config) *Server {
 	}
 }
 
-// Run setups the server and starts it.
+// Run запускает сервер.
 func (s *Server) Run() {
 	defer s.pg.Close()
 	defer func() {
@@ -130,20 +130,7 @@ func (s *Server) Run() {
 		s.tracer,
 	)
 	chatHandler := ch.New(chatController, s.tracer)
-	wsConfig := websocket.Config{
-		RecoverHandler: func(conn *websocket.Conn) {
-			if e := recover(); e != nil {
-				err = conn.WriteJSON(ch.Response{
-					Msg: "internal error",
-					Err: err.Error(),
-				})
-				if err != nil {
-					log.Warn().Err(err).Msg("failed to recover ws panic")
-				}
-			}
-		},
-	}
-	chat.SetupChatRoutes(s.app, chatHandler, wsConfig)
+	chat.SetupChatRoutes(s.app, chatHandler, s.getWsConfig())
 
 	go s.listen()
 	go prom.HandlePrometheus(s.cfg.Prometheus)
@@ -158,5 +145,21 @@ func (s *Server) listen() {
 	addr := fmt.Sprintf(":%d", s.cfg.Server.Port)
 	if err := s.app.Listen(addr); err != nil {
 		log.Error().Err(err).Msg("failed to start server")
+	}
+}
+
+func (s *Server) getWsConfig() websocket.Config {
+	return websocket.Config{
+		RecoverHandler: func(conn *websocket.Conn) {
+			if e := recover(); e != nil {
+				err := conn.WriteJSON(ch.Response{
+					Msg: "internal error",
+					Err: fmt.Errorf("can't handle error: %v", e).Error(),
+				})
+				if err != nil {
+					log.Warn().Err(err).Msg("failed to recover ws panic")
+				}
+			}
+		},
 	}
 }

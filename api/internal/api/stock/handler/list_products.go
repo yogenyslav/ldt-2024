@@ -11,7 +11,7 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
-// ListProducts is a handler for list products method.
+// ListProducts хендлер для получения списка всех продуктов.
 func (h *Handler) ListProducts(c context.Context, _ *emptypb.Empty) (*pb.ListProductsResp, error) {
 	ctx, err := pkg.GetTraceCtx(c)
 	if err != nil {

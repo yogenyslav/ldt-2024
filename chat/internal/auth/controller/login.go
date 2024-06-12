@@ -13,7 +13,7 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
-// Login is a method that implements the login logic.
+// Login выполняет вход пользователя через API.
 func (ctrl *Controller) Login(ctx context.Context, params model.LoginReq) (model.LoginResp, error) {
 	ctx, span := ctrl.tracer.Start(
 		ctx,
@@ -30,17 +30,23 @@ func (ctrl *Controller) Login(ctx context.Context, params model.LoginReq) (model
 		Username: params.Username,
 		Password: params.Password,
 	}
-	token, err := ctrl.authService.Login(ctx, in)
+	loginResp, err := ctrl.authService.Login(ctx, in)
 	if err != nil {
 		return resp, shared.ErrLoginFailed
 	}
 
-	tokenEncrypted, err := secure.Encrypt(token.Token, ctrl.cipherKey)
+	tokenEncrypted, err := secure.Encrypt(loginResp.Token, ctrl.cipherKey)
 	if err != nil {
 		log.Error().Err(err).Msg("encryption internal error")
 		return resp, shared.ErrEncryption
 	}
 	resp.Token = tokenEncrypted
+
+	roles := make([]string, 0, len(loginResp.Roles))
+	for _, role := range loginResp.Roles {
+		roles = append(roles, shared.UserRole(role).ToString())
+	}
+	resp.Roles = roles
 
 	return resp, nil
 }

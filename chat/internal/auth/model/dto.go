@@ -1,12 +1,13 @@
 package model
 
-// LoginReq is the request model for the login endpoint.
+// LoginReq модель запроса для авторизации.
 type LoginReq struct {
 	Username string `json:"username" validate:"required"`
 	Password string `json:"password" validate:"required"`
 }
 
-// LoginResp is the response model for the login endpoint.
+// LoginResp модель ответа для авторизации.
 type LoginResp struct {
-	Token string `json:"token"`
+	Token string   `json:"token"`
+	Roles []string `json:"roles"`
 }

@@ -5,6 +5,7 @@ import (
 
 	"github.com/Nerzal/gocloak/v13"
 	"github.com/google/uuid"
+	"github.com/rs/zerolog/log"
 	"github.com/yogenyslav/ldt-2024/chat/internal/api/pb"
 	"github.com/yogenyslav/ldt-2024/chat/internal/chat/model"
 	"github.com/yogenyslav/ldt-2024/chat/internal/shared"
@@ -29,7 +30,7 @@ type sessionRepo interface {
 	SessionContentEmpty(ctx context.Context, sessionID uuid.UUID) (bool, error)
 }
 
-// Controller is a struct that implements chat business logic.
+// Controller имплементирует методы для работы с сервисом чатов.
 type Controller struct {
 	cr        chatRepo
 	sr        sessionRepo
@@ -40,7 +41,7 @@ type Controller struct {
 	cipherKey string
 }
 
-// New creates new Controller.
+// New создает новый Controller.
 func New(cr chatRepo, sr sessionRepo, prompter pb.PrompterClient, kc *gocloak.GoCloak, realm, cipher string, tracer trace.Tracer) *Controller {
 	return &Controller{
 		cr:        cr,
@@ -51,4 +52,14 @@ func New(cr chatRepo, sr sessionRepo, prompter pb.PrompterClient, kc *gocloak.Go
 		tracer:    tracer,
 		prompter:  prompter,
 	}
+}
+
+func (ctrl *Controller) extractMeta(ctx context.Context, prompt string) (*pb.ExtractedPrompt, error) {
+	in := &pb.ExtractReq{Prompt: prompt}
+	meta, err := ctrl.prompter.Extract(ctx, in)
+	if err != nil {
+		log.Error().Err(err).Msg("failed to extract meta")
+		return nil, err
+	}
+	return meta, nil
 }

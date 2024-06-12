@@ -8,6 +8,7 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
+// Rename переименовывает сессию.
 func (ctrl *Controller) Rename(ctx context.Context, params model.RenameReq) error {
 	ctx, span := ctrl.tracer.Start(
 		ctx,

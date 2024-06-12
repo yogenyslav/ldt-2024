@@ -13,7 +13,7 @@ type authController interface {
 	Login(ctx context.Context, params model.LoginReq) (model.LoginResp, error)
 }
 
-// Handler is the struct that implements the AuthServiceServer interface.
+// Handler имплементация сервиса авторизации.
 type Handler struct {
 	pb.UnimplementedAuthServiceServer
 	ctrl    authController
@@ -21,7 +21,7 @@ type Handler struct {
 	metrics *metrics.Metrics
 }
 
-// New creates a new Handler.
+// New создает новый Handler.
 func New(ctrl authController, tracer trace.Tracer, m *metrics.Metrics) *Handler {
 	return &Handler{
 		ctrl:    ctrl,

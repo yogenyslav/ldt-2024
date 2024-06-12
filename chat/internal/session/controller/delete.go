@@ -8,6 +8,7 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
+// Delete удаляет сессию по id.
 func (ctrl *Controller) Delete(ctx context.Context, id uuid.UUID) error {
 	ctx, span := ctrl.tracer.Start(
 		ctx,

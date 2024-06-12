@@ -12,6 +12,7 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
+// FindOne находит сессию по id.
 func (ctrl *Controller) FindOne(ctx context.Context, id uuid.UUID, username string) (model.FindOneResp, error) {
 	ctx, span := ctrl.tracer.Start(
 		ctx,

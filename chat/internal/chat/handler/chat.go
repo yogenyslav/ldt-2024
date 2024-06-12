@@ -1,10 +1,6 @@
 package handler
 
 import (
-	"context"
-	"errors"
-	"time"
-
 	"github.com/gofiber/contrib/websocket"
 	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
@@ -12,37 +8,26 @@ import (
 	"github.com/yogenyslav/ldt-2024/chat/internal/shared"
 )
 
-// Chat handles chat ws functional.
-//
-//nolint:funlen // will be soon refactored
-func (h *Handler) Chat(c *websocket.Conn) { //nolint:gocyclo // will be soon refactored
+func closeHandler(code int, text string) error {
+	log.Info().Int("code", code).Str("text", text).Msg("close handler")
+	return nil
+}
+
+// Chat обрабатывает вебсокет соединение.
+func (h *Handler) Chat(c *websocket.Conn) {
 	log.Info().Str("addr", c.LocalAddr().String()).Msg("new conn")
-	c.SetCloseHandler(func(code int, text string) error {
-		log.Info().Int("code", code).Str("text", text).Msg("conn closed")
-		return nil
-	})
+	c.SetCloseHandler(closeHandler)
 	defer func() {
 		if err := c.Close(); err != nil {
 			log.Warn().Err(err).Msg("failed to close websocket conn")
 		}
+		log.Info().Msg("conn closed")
 	}()
 
-	mt, msg, tokenErr := c.ReadMessage()
-	if tokenErr != nil {
-		log.Error().Err(tokenErr).Msg("failed to read first message")
-		return
-	}
-	if mt != websocket.TextMessage {
-		respondError(c, "need authorization first", errors.New("unexpected message type"))
-		return
-	}
-
-	ctx, username, authErr := h.ctrl.Authorize(context.Background(), string(msg))
+	ctx, username, authErr := h.Authorize(c)
 	if authErr != nil {
-		respondError(c, "unauthorized", authErr)
 		return
 	}
-
 	sessionID, uuidErr := uuid.Parse(c.Params("session_id"))
 	if uuidErr != nil {
 		respondError(c, "invalid session uuid", uuidErr)
@@ -67,16 +52,13 @@ func (h *Handler) Chat(c *websocket.Conn) { //nolint:gocyclo // will be soon ref
 			respondError(c, "failed to read query", err)
 			return
 		}
-
 		if req.Command == shared.CommandCancel {
 			cancel <- struct{}{}
-			log.Debug().Msg("predict was canceled")
 			continue
 		}
 
 		select {
 		case queryID := <-hint:
-			log.Debug().Msg("processing hint")
 			query, err := h.ctrl.Hint(ctx, queryID, req)
 			if err != nil {
 				respondError(c, "failed to process hint", err)
@@ -88,8 +70,6 @@ func (h *Handler) Chat(c *websocket.Conn) { //nolint:gocyclo // will be soon ref
 			continue
 		case queryID := <-validate:
 			if req.Command == shared.CommandValid {
-				// for debug purposes
-				log.Debug().Msg("extracted prompt is valid")
 				go h.ctrl.Predict(ctx, out, cancel, queryID)
 				if err := h.ctrl.UpdateStatus(ctx, queryID, shared.StatusValid); err != nil {
 					respondError(c, "failed to update status to valid", err)
@@ -98,7 +78,6 @@ func (h *Handler) Chat(c *websocket.Conn) { //nolint:gocyclo // will be soon ref
 					continue
 				}
 			} else if req.Command == shared.CommandInvalid {
-				log.Debug().Msg("extracted prompt is invalid")
 				if err := h.ctrl.UpdateStatus(ctx, queryID, shared.StatusPending); err != nil {
 					respondError(c, "failed to update status to pending", err)
 					validate <- queryID
@@ -114,25 +93,9 @@ func (h *Handler) Chat(c *websocket.Conn) { //nolint:gocyclo // will be soon ref
 				return
 			}
 			respondData(c, query)
-
 			validate <- query.ID
 			continue
 		}
-
-		go func() {
-			for {
-				select {
-				case chunk := <-out:
-					respond(c, chunk)
-					if chunk.Finish {
-						log.Debug().Msg("predict finished")
-						return
-					}
-				default:
-					time.Sleep(time.Second * 1)
-					log.Debug().Msg("waiting for messages...")
-				}
-			}
-		}()
+		go h.ProcessChunks(out, c)
 	}
 }

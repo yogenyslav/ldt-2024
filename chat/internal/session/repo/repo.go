@@ -9,12 +9,12 @@ import (
 	"github.com/yogenyslav/pkg/storage"
 )
 
-// Repo is a repository for the session model.
+// Repo репозиторий сессий.
 type Repo struct {
 	pg storage.SQLDatabase
 }
 
-// New creates a new session repository.
+// New создает новый Repo.
 func New(pg storage.SQLDatabase) *Repo {
 	return &Repo{pg: pg}
 }
@@ -24,7 +24,7 @@ const insertOne = `
 	values ($1, $2, $3);
 `
 
-// InsertOne create new session.
+// InsertOne создает новую сессию.
 func (r *Repo) InsertOne(ctx context.Context, params model.SessionDao) error {
 	_, err := r.pg.Exec(ctx, insertOne, params.ID, params.Username, params.Title)
 	return err
@@ -37,7 +37,7 @@ const list = `
 	order by created_at;
 `
 
-// List get list of sessions by username.
+// List возвращает список сессий пользователя.
 func (r *Repo) List(ctx context.Context, username string) ([]model.SessionDao, error) {
 	var sessions []model.SessionDao
 	err := r.pg.QuerySlice(ctx, &sessions, list, username)
@@ -50,7 +50,7 @@ const updateTitle = `
 	where id = $1 and is_deleted = false;
 `
 
-// UpdateTitle updates session title filtered by id.
+// UpdateTitle обновляет название сессии.
 func (r *Repo) UpdateTitle(ctx context.Context, params model.RenameReq) error {
 	tag, err := r.pg.Exec(ctx, updateTitle, params.ID, params.Title)
 	if err != nil {
@@ -68,7 +68,7 @@ const deleteOne = `
 	where id = $1;
 `
 
-// DeleteOne deletes a session by id.
+// DeleteOne удаляет сессию.
 func (r *Repo) DeleteOne(ctx context.Context, id uuid.UUID) error {
 	tag, err := r.pg.Exec(ctx, deleteOne, id)
 	if err != nil {
@@ -86,7 +86,7 @@ const findMeta = `
 	where id = $1;
 `
 
-// FindMeta returns session meta info.
+// FindMeta возвращает метаинформацию о сессии.
 func (r *Repo) FindMeta(ctx context.Context, id uuid.UUID) (model.SessionMeta, error) {
 	var status model.SessionMeta
 	err := r.pg.Query(ctx, &status, findMeta, id)
@@ -109,7 +109,7 @@ const findContent = `
 	  	and s.is_deleted = false;
 `
 
-// FindContent finds session content by id.
+// FindContent возвращает контент сессии.
 func (r *Repo) FindContent(ctx context.Context, id uuid.UUID) ([]model.SessionContentDao, error) {
 	var content []model.SessionContentDao
 	err := r.pg.QuerySlice(ctx, &content, findContent, id)
@@ -122,7 +122,7 @@ const sessionClenaup = `
 	where session_id = $1;
 `
 
-// SessionContentEmpty checks if session content is empty.
+// SessionContentEmpty проверяет, что контент сессии пуст.
 func (r *Repo) SessionContentEmpty(ctx context.Context, sessionID uuid.UUID) (bool, error) {
 	var count int64
 	err := r.pg.Query(ctx, &count, sessionClenaup, sessionID)

@@ -7,6 +7,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+// InterceptorLogger возвращает логгер для gRPC.
 func InterceptorLogger() logging.LoggerFunc {
 	return func(ctx context.Context, level logging.Level, msg string, fields ...any) {
 		l := log.With().Fields(fields).Logger()

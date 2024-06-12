@@ -9,7 +9,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-// AuthFuncOverride overrides auth interceptor for auth service.
+// AuthFuncOverride interceptor авторизации для /login.
 func (h *Handler) AuthFuncOverride(ctx context.Context, fullMethod string) (context.Context, error) {
 	log.Debug().Str("fullMethod", fullMethod).Msg("auth")
 	if fullMethod == shared.LoginEndpoint {

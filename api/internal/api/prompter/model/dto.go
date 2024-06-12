@@ -1,6 +1,6 @@
 package model
 
-// ExtractReq internal model for extract requests.
+// ExtractReq внутренняя модель запроса для метода Extract.
 type ExtractReq struct {
 	Prompt string
 }

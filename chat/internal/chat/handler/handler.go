@@ -18,13 +18,13 @@ type chatController interface {
 	SessionCleanup(ctx context.Context, sessionID uuid.UUID) error
 }
 
-// Handler is the chat handler
+// Handler имплементирует сервис чата.
 type Handler struct {
 	ctrl   chatController
 	tracer trace.Tracer
 }
 
-// New creates a new chat handler
+// New создает новый Handler.
 func New(ctrl chatController, tracer trace.Tracer) *Handler {
 	return &Handler{
 		ctrl:   ctrl,

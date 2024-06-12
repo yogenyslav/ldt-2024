@@ -8,7 +8,7 @@ import (
 	"github.com/yogenyslav/ldt-2024/api/pkg"
 )
 
-// Extract calls to prompter extract method.
+// Extract вызывает метод Extract у Prompter.
 func (ctrl *Controller) Extract(ctx context.Context, params model.ExtractReq) (*pb.ExtractedPrompt, error) {
 	ctx, span := ctrl.tracer.Start(ctx, "Controller.Extract")
 	defer span.End()
