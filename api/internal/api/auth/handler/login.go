@@ -36,7 +36,6 @@ func (h *Handler) Login(c context.Context, params *pb.LoginRequest) (*pb.LoginRe
 		return nil, status.Error(codes.Unauthenticated, err.Error())
 	}
 
-	log.Info().Str("username", req.Username).Msg("user logged in")
 	h.metrics.LoginCount.Inc()
 
 	return &pb.LoginResponse{

@@ -9,4 +9,5 @@ type LoginReq struct {
 // LoginResp is the internal response model for the Login method.
 type LoginResp struct {
 	Token string
+	Role  string
 }

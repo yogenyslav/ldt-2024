@@ -23,13 +23,25 @@
   "paths": {
     "/api/v1/auth/login": {
       "post": {
+        "summary": "Логин",
+        "description": "Авторизация пользователя по логину и паролю",
         "operationId": "AuthService_Login",
         "responses": {
           "200": {
-            "description": "A successful response.",
+            "description": "Успешная авторизация. Возвращает токен и роль пользователя. Соответствие ролей: 1 - администратор, 2 - аналитик, 3 - закупщик",
             "schema": {
               "$ref": "#/definitions/apiLoginResponse"
+            },
+            "examples": {
+              "application/json": {
+                "token": "some_random_access_token",
+                "role": 1
+              }
             }
+          },
+          "401": {
+            "description": "Неверный логин или пароль",
+            "schema": {}
           },
           "default": {
             "description": "An unexpected error response.",
@@ -41,7 +53,7 @@
         "parameters": [
           {
             "name": "body",
-            "description": "Login request model holding credentials for authorization.",
+            "description": "Модель запроса на авторизацию, содержащая логин и пароль пользователя.",
             "in": "body",
             "required": true,
             "schema": {
@@ -50,7 +62,7 @@
           }
         ],
         "tags": [
-          "AuthService"
+          "auth"
         ]
       }
     }
@@ -70,8 +82,8 @@
           "type": "string"
         }
       },
-      "description": "Login request model holding credentials for authorization.",
-      "title": "Login request",
+      "description": "Модель запроса на авторизацию, содержащая логин и пароль пользователя.",
+      "title": "Данные для авторизации",
       "required": [
         "username",
         "password"
@@ -80,15 +92,29 @@
     "apiLoginResponse": {
       "type": "object",
       "example": {
-        "token": "some_random_access_token"
+        "token": "some_random_access_token",
+        "role": 1
       },
       "properties": {
         "token": {
           "type": "string"
+        },
+        "role": {
+          "$ref": "#/definitions/apiUserRole"
         }
       },
-      "description": "Login response returning a token for authorization.",
-      "title": "Login response"
+      "description": "Модель ответа на запрос авторизации, содержащая токен и роль пользователя. Соответствие ролей: 1 - администратор, 2 - аналитик, 3 - закупщик",
+      "title": "Результат авторизации"
+    },
+    "apiUserRole": {
+      "type": "string",
+      "enum": [
+        "ROLE_UNDEFINED",
+        "ROLE_ADMIN",
+        "ROLE_ANALYST",
+        "ROLE_BUYER"
+      ],
+      "default": "ROLE_UNDEFINED"
     },
     "protobufAny": {
       "type": "object",
