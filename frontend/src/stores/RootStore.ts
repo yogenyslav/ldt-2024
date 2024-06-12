@@ -174,12 +174,15 @@ export class RootStore {
         this.setIsModelAnswering(true);
         this.setChatDisabled(true);
 
-        if (this.isInvalidCommandRequired() && !message.command) {
-            message.command = ChatCommand.Invalid;
-        }
-
         if (this.websocket && this.websocket.readyState === WebSocket.OPEN) {
             this.websocket.send(JSON.stringify(message));
+        }
+
+        if (this.isFirstMessageInSession()) {
+            this.renameSession({
+                id: this.activeSessionId as string,
+                title: message.prompt.slice(0, 25),
+            });
         }
 
         this.addMessageToActiveSession(message);
@@ -239,15 +242,6 @@ export class RootStore {
         }
     }
 
-    private isInvalidCommandRequired() {
-        return false;
-        // return (
-        //     this.activeDisplayedSession?.messages.length &&
-        //     this.activeDisplayedSession.messages[this.activeDisplayedSession?.messages.length - 1]
-        //         .incomingMessage?.status === IncomingMessageStatus.Pending
-        // );
-    }
-
     setChatDisabled(isDisabled: boolean) {
         this.isChatDisabled = isDisabled;
     }
@@ -264,5 +258,9 @@ export class RootStore {
 
         this.setChatDisabled(false);
         this.setIsModelAnswering(false);
+    }
+
+    private isFirstMessageInSession() {
+        return !this.activeDisplayedSession?.messages.length;
     }
 }
