@@ -26,6 +26,8 @@ export class RootStore {
     activeSession: ChatSession | null = null;
     activeDisplayedSession: DisplayedChat | null = null;
     activeSessionLoading: boolean = false;
+    isChatDisabled: boolean = false;
+    isModelAnswering: boolean = false;
 
     websocket: WebSocket | null = null;
 
@@ -133,15 +135,22 @@ export class RootStore {
         this.websocket.onmessage = (event) => {
             const wsMessage: WSMessage = JSON.parse(event.data);
 
-            console.log(wsMessage);
-
             runInAction(() => {
                 const data = wsMessage.data;
 
-                if (wsMessage.chunk && !wsMessage.finished) {
+                console.log(wsMessage);
+
+                if (wsMessage.chunk && !wsMessage.finish) {
+                    // this.isModelAnswering = true;
+                    // this.isChatDisabled = true;
+
                     this.processIncomingChunk(data as WSIncomingChunk);
-                } else if (!wsMessage.chunk) {
+                } else if (!wsMessage.chunk && wsMessage.data) {
                     this.processIncomingQuery(data as WSIncomingQuery);
+                }
+
+                if (wsMessage.finish || !wsMessage.chunk) {
+                    this.isModelAnswering = false;
                 }
             });
         };
@@ -157,6 +166,9 @@ export class RootStore {
 
     sendMessage(message: WSOutcomingMessage) {
         console.log('sendMessage', message);
+
+        this.setIsModelAnswering(true);
+        this.setChatDisabled(true);
 
         if (this.isInvalidCommandRequired() && !message.command) {
             message.command = ChatCommand.Invalid;
@@ -229,5 +241,23 @@ export class RootStore {
             this.activeDisplayedSession.messages[this.activeDisplayedSession?.messages.length - 1]
                 .incomingMessage?.status === IncomingMessageStatus.Pending
         );
+    }
+
+    setChatDisabled(isDisabled: boolean) {
+        this.isChatDisabled = isDisabled;
+    }
+
+    setIsModelAnswering(isAnswering: boolean) {
+        this.isModelAnswering = isAnswering;
+    }
+
+    cancelRequest() {
+        this.sendMessage({
+            prompt: '',
+            command: ChatCommand.Cancel,
+        });
+
+        this.setChatDisabled(false);
+        this.setIsModelAnswering(false);
     }
 }

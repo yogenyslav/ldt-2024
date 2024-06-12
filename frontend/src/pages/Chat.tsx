@@ -3,7 +3,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
 import { useStores } from '@/hooks/useStores';
-import { ArrowUpIcon, FilePenIcon } from 'lucide-react';
+import { ArrowUpIcon, FilePenIcon, Loader2, StopCircleIcon } from 'lucide-react';
 import { observer } from 'mobx-react-lite';
 import { ChangeEvent, KeyboardEvent, useEffect, useRef, useState } from 'react';
 import debounce from 'lodash/debounce';
@@ -69,7 +69,7 @@ const Chat = observer(() => {
     };
 
     const sendMessage = () => {
-        if (message.trim()) {
+        if (message.trim() && !rootStore.isChatDisabled && rootStore.websocket?.readyState === 1) {
             rootStore.sendMessage({
                 prompt: message.trim(),
             });
@@ -167,13 +167,38 @@ const Chat = observer(() => {
                             rows={1}
                             className='min-h-[48px] rounded-2xl resize-none p-4 border border-gray-300 shadow-sm pr-16 dark:border-gray-800'
                         />
+
+                        <Button
+                            type='submit'
+                            size='icon'
+                            variant='outline'
+                            className={`absolute top-3 right-12 w-8 h-8 ${
+                                !rootStore.isModelAnswering && 'hidden'
+                            }`}
+                            onClick={sendMessage}
+                        >
+                            <StopCircleIcon
+                                onClick={() => {
+                                    rootStore.cancelRequest();
+                                }}
+                                className='w-4 h-4'
+                            />
+                            <span className='sr-only'>Остановить запрос</span>
+                        </Button>
+
                         <Button
                             type='submit'
                             size='icon'
                             className='absolute top-3 right-3 w-8 h-8'
                             onClick={sendMessage}
+                            disabled={rootStore.isChatDisabled || !rootStore.websocket}
                         >
-                            <ArrowUpIcon className='w-4 h-4' />
+                            {rootStore.isModelAnswering ? (
+                                <Loader2 className='absolute h-4 w-4 animate-spin' />
+                            ) : (
+                                <ArrowUpIcon className='w-4 h-4' />
+                            )}
+
                             <span className='sr-only'>Отправить</span>
                         </Button>
                     </div>

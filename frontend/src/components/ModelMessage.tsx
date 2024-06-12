@@ -48,6 +48,7 @@ const ModelMessage = ({ incomingMessage, isLastMessage }: ModelMessageProps) => 
                                             });
 
                                             setShowInvalidButton(false);
+                                            rootStore.setChatDisabled(false);
                                         }}
                                         variant='outline'
                                         className='flex-1'
