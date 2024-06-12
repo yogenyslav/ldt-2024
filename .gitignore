@@ -5,3 +5,9 @@ vendor
 **/config_test.yaml
 **/.venv
 data
+ollama/id_ed25519
+ollama/id_ed25519.pub
+ollama/history
+ollama/models
+ollama/model-q4_K.gguf
+.vscode

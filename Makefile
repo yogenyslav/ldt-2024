@@ -90,3 +90,12 @@ tests:
 .PHONY: swag
 swag:
 	cd ./chat && swag init -g cmd/server/main.go -o ./docs
+
+.PHONY: ollama_up
+ollama_up:
+	docker run -d --gpus=all -v ./ollama:/root/.ollama -p 11434:11434 --name ollama ollama/ollama
+
+.PHONY: ollama_down
+ollama_down:
+	docker stop ollama
+	docker rm ollama

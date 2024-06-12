@@ -2,7 +2,7 @@ from api import prompter_pb2_grpc
 from api.prompter_pb2 import ExtractReq, ExtractedPrompt, QueryType
 from grpc import ServicerContext, server
 from concurrent import futures
-from saiga_prompter import SaigaPrompter, SaigaOutput
+from saiga_ollama import SaigaPrompter, SaigaOutput
 from pathlib import Path
 
 
@@ -17,7 +17,9 @@ class Prompter(prompter_pb2_grpc.PrompterServicer):
         # prompter action here
         print(f"got prompt {request.prompt}")
         output = self.saiga.process_request(request.prompt)
-        return ExtractedPrompt(type=output.type, product=output.product, period=output.period)
+        return ExtractedPrompt(
+            type=output.type, product=output.product, period=output.period
+        )
 
 
 def serve():

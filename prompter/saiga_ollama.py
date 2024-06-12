@@ -33,9 +33,13 @@ class Conversation:
     def add_bot_message(self, message):
         self.messages.append({"role": "bot", "content": message})
 
-    def get_prompt(self) -> list[dict[str, str]]:
-        self.messages.append({"role": "system", "content": self.system_prompt})
-        return self.messages
+    def get_prompt(self):
+        final_text = ""
+        for message in self.messages:
+            message_text = self.message_template.format(**message)
+            final_text += message_text
+        final_text += "<s>bot\n"
+        return final_text.strip()
 
 
 class SaigaPrompter:
@@ -43,19 +47,23 @@ class SaigaPrompter:
         self,
         prompts_path: str = "./prompts.json",
     ) -> SaigaOutput:
-        self.client = ollama.Client(os.getenv("OLLAMA_HOST"))
+        host = os.getenv("OLLAMA_HOST")
+        print(host)
+        self.client = ollama.Client(host=host)
         self.prompts = json.load(open(prompts_path))
 
-    def generate(self, messages: list[dict[str, str]]):
-        print(messages)
-        output = self.client.chat(model="saiga", messages=messages, stream=False)
-        return output["message"]["content"]
+    def generate(self, prompt: str):
+        print(prompt)
+        output = self.client.generate(model="saiga", prompt=prompt, stream=False)
+        print(output)
+        print(type(output))
+        return output["response"]
 
     def generate_response(self, prompt: str):
         conversation = Conversation()
         conversation.add_user_message(prompt)
-        messages = conversation.get_prompt(self.tokenizer)
-        response = self.generate(messages)
+        prompt = conversation.get_prompt()
+        response = self.generate(prompt)
         return response
 
     def process_request(self, request: str):
@@ -104,8 +112,3 @@ class SaigaPrompter:
         if saiga_output.type == QueryType.STOCK:
             saiga_output.period = None
         return saiga_output
-
-
-if __name__ == "__main__":
-    saiga = SaigaPrompter()
-    print(saiga.process_request("Привет, построй план закупки чайников на 1 год."))
