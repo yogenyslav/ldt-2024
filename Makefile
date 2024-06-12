@@ -30,10 +30,13 @@ docker_remove: docker_down
 	docker volume rm ${BASE_IMAGE}_redis_data
 	docker volume rm ${BASE_IMAGE}_redis_conf
 	docker volume rm ${BASE_IMAGE}_mongo_data
+	docker volume rm ${BASE_IMAGE}_predictor_data
+	docker volume rm ${BASE_IMAGE}_s3_data
 	docker image rm chat
 	docker image rm api
 	docker image rm bot
 	docker image rm prompter
+	docker image rm predictor
 
 .PHONY: docker_restart
 docker_restart: docker_down docker_up
@@ -75,16 +78,17 @@ proto:
 		protoc --proto_path=./proto --go_out=$$dir --go-grpc_out=$$dir \
 				proto/api/auth.proto \
 				proto/api/prompter.proto \
+				proto/api/predictor.proto \
 				proto/api/stock.proto; \
 	done
 	@protoc --proto_path=./proto --grpc-gateway_out=./api \
                     --grpc-gateway_opt=generate_unbound_methods=true \
-                    proto/api/auth.proto proto/api/prompter.proto proto/api/stock.proto \
+                    proto/api/auth.proto proto/api/prompter.proto proto/api/stock.proto proto/api/predictor.proto \
 				 	--openapiv2_out ./api/third_party/OpenAPI/api
 	@python -m grpc_tools.protoc -Iproto --python_out=prompter --pyi_out=prompter --grpc_python_out=prompter \
  					proto/api/prompter.proto
 	@python -m grpc_tools.protoc -Iproto --python_out=predictor --pyi_out=predictor --grpc_python_out=predictor \
-     					proto/api/predictor.proto
+					proto/api/predictor.proto proto/api/prompter.proto
 
 .PHONY: tests
 tests:

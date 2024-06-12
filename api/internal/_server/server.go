@@ -24,6 +24,7 @@ import (
 	authmw "github.com/yogenyslav/ldt-2024/api/internal/api/auth/middleware"
 	"github.com/yogenyslav/ldt-2024/api/internal/api/middleware"
 	"github.com/yogenyslav/ldt-2024/api/internal/api/pb"
+	"github.com/yogenyslav/ldt-2024/api/internal/api/predictor/handler"
 	pc "github.com/yogenyslav/ldt-2024/api/internal/api/prompter/controller"
 	ph "github.com/yogenyslav/ldt-2024/api/internal/api/prompter/handler"
 	sc "github.com/yogenyslav/ldt-2024/api/internal/api/stock/controller"
@@ -112,6 +113,15 @@ func (s *Server) Run() {
 			log.Error().Err(err).Msg("failed to close prompter grpc client")
 		}
 	}()
+	predictorClient, err := client.NewGrpcClient(s.cfg.Predictor)
+	if err != nil {
+		log.Panic().Err(err).Msg("failed to create predictor grpc client")
+	}
+	defer func() {
+		if err := prompterClient.Close(); err != nil {
+			log.Error().Err(err).Msg("failed to close predictor grpc client")
+		}
+	}()
 
 	prompterController := pc.New(prompterClient, s.tracer)
 	prompterHandler := ph.New(prompterController, s.tracer)
@@ -121,6 +131,8 @@ func (s *Server) Run() {
 	stockController := sc.New(stockRepo, s.tracer)
 	stockHandler := sh.New(stockController, s.tracer)
 	pb.RegisterStockServer(s.srv, stockHandler)
+
+	pb.RegisterPredictorServer(s.srv, handler.New(predictorClient, s.tracer))
 
 	log.Info().Msg("starting the server")
 	go s.listen()
@@ -167,7 +179,10 @@ func (s *Server) listenGateway() {
 		log.Panic().Err(err).Msg("failed to register the prompter gateway")
 	}
 	if err = pb.RegisterStockHandler(ctx, mux, conn); err != nil {
-		log.Panic().Err(err).Msg("failed to register the stocj gateway")
+		log.Panic().Err(err).Msg("failed to register the stock gateway")
+	}
+	if err = pb.RegisterPredictorHandler(ctx, mux, conn); err != nil {
+		log.Panic().Err(err).Msg("failed to register the predictor gateway")
 	}
 
 	withCors := cors.New(cors.Options{

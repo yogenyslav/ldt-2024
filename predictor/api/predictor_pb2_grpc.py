@@ -4,6 +4,7 @@ import grpc
 import warnings
 
 from api import predictor_pb2 as api_dot_predictor__pb2
+from google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
 
 GRPC_GENERATED_VERSION = "1.64.1"
 GRPC_VERSION = grpc.__version__
@@ -43,11 +44,10 @@ class PredictorStub(object):
             channel: A grpc.Channel.
         """
         self.PrepareData = channel.unary_unary(
-            "/api.Predictor/PrepareData",
-            request_serializer=api_dot_predictor__pb2.PrepareDataReq.SerializeToString,
-            response_deserializer=api_dot_predictor__pb2.ClientIdentifier.FromString,
-            _registered_method=True,
-        )
+                '/api.Predictor/PrepareData',
+                request_serializer=api_dot_predictor__pb2.PrepareDataReq.SerializeToString,
+                response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+                _registered_method=True)
         self.Predict = channel.unary_unary(
             "/api.Predictor/Predict",
             request_serializer=api_dot_predictor__pb2.PredictReq.SerializeToString,
@@ -55,11 +55,10 @@ class PredictorStub(object):
             _registered_method=True,
         )
         self.UniqueCodes = channel.unary_unary(
-            "/api.Predictor/UniqueCodes",
-            request_serializer=api_dot_predictor__pb2.ClientIdentifier.SerializeToString,
-            response_deserializer=api_dot_predictor__pb2.UniqueCodesResp.FromString,
-            _registered_method=True,
-        )
+                '/api.Predictor/UniqueCodes',
+                request_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+                response_deserializer=api_dot_predictor__pb2.UniqueCodesResp.FromString,
+                _registered_method=True)
 
 
 class PredictorServicer(object):
@@ -86,21 +85,21 @@ class PredictorServicer(object):
 
 def add_PredictorServicer_to_server(servicer, server):
     rpc_method_handlers = {
-        "PrepareData": grpc.unary_unary_rpc_method_handler(
-            servicer.PrepareData,
-            request_deserializer=api_dot_predictor__pb2.PrepareDataReq.FromString,
-            response_serializer=api_dot_predictor__pb2.ClientIdentifier.SerializeToString,
-        ),
-        "Predict": grpc.unary_unary_rpc_method_handler(
-            servicer.Predict,
-            request_deserializer=api_dot_predictor__pb2.PredictReq.FromString,
-            response_serializer=api_dot_predictor__pb2.PredictResp.SerializeToString,
-        ),
-        "UniqueCodes": grpc.unary_unary_rpc_method_handler(
-            servicer.UniqueCodes,
-            request_deserializer=api_dot_predictor__pb2.ClientIdentifier.FromString,
-            response_serializer=api_dot_predictor__pb2.UniqueCodesResp.SerializeToString,
-        ),
+            'PrepareData': grpc.unary_unary_rpc_method_handler(
+                    servicer.PrepareData,
+                    request_deserializer=api_dot_predictor__pb2.PrepareDataReq.FromString,
+                    response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+            ),
+            'Predict': grpc.unary_unary_rpc_method_handler(
+                    servicer.Predict,
+                    request_deserializer=api_dot_predictor__pb2.PredictReq.FromString,
+                    response_serializer=api_dot_predictor__pb2.PredictResp.SerializeToString,
+            ),
+            'UniqueCodes': grpc.unary_unary_rpc_method_handler(
+                    servicer.UniqueCodes,
+                    request_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+                    response_serializer=api_dot_predictor__pb2.UniqueCodesResp.SerializeToString,
+            ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
         "api.Predictor", rpc_method_handlers
@@ -131,7 +130,7 @@ class Predictor(object):
             target,
             "/api.Predictor/PrepareData",
             api_dot_predictor__pb2.PrepareDataReq.SerializeToString,
-            api_dot_predictor__pb2.ClientIdentifier.FromString,
+            google_dot_protobuf_dot_empty__pb2.Empty.FromString,
             options,
             channel_credentials,
             insecure,
@@ -189,8 +188,8 @@ class Predictor(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            "/api.Predictor/UniqueCodes",
-            api_dot_predictor__pb2.ClientIdentifier.SerializeToString,
+            '/api.Predictor/UniqueCodes',
+            google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
             api_dot_predictor__pb2.UniqueCodesResp.FromString,
             options,
             channel_credentials,

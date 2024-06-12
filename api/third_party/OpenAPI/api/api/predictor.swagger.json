@@ -1,0 +1,314 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "API",
+    "description": "Документация к API-сервису команды misis.tech",
+    "version": "version not set",
+    "license": {
+      "name": "BSD 3-Clause License",
+      "url": "https://github.com/grpc-ecosystem/grpc-gateway/blob/main/LICENSE"
+    }
+  },
+  "tags": [
+    {
+      "name": "Predictor"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/api/v1/predictor/predict": {
+      "post": {
+        "summary": "Получить предикт",
+        "description": "Получить предикт по фильтрам: тип запроса, продукт, период",
+        "operationId": "Predictor_Predict",
+        "responses": {
+          "200": {
+            "description": "Предикт успешно получен",
+            "schema": {
+              "$ref": "#/definitions/apiPredictResp"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": "Запрос на получение предикта по фильтрам: тип запроса, продукт, период",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/apiPredictReq"
+            }
+          }
+        ],
+        "tags": [
+          "predictor"
+        ],
+        "security": [
+          {
+            "Authorization": []
+          }
+        ]
+      }
+    },
+    "/api/v1/predictor/prepare_data": {
+      "post": {
+        "summary": "Подготовка и парсинг данных",
+        "description": "Перевести данные из .csv/.xlsx во внутренний формат, с которым будет работать модель",
+        "operationId": "Predictor_PrepareData",
+        "responses": {
+          "200": {
+            "description": "Данные успешно подготовлены",
+            "schema": {
+              "type": "object",
+              "properties": {}
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": "Запрос на подготовку и парсинг данных по .csv/.xlsx файлам. Названия файлов должны совпадать с импортированными в систему",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/apiPrepareDataReq"
+            }
+          }
+        ],
+        "tags": [
+          "predictor"
+        ],
+        "security": [
+          {
+            "Authorization": []
+          }
+        ]
+      }
+    },
+    "/api/v1/predictor/unique_codes": {
+      "get": {
+        "summary": "Регулярные товары",
+        "description": "Получить список уникальных кодов товаров",
+        "operationId": "Predictor_UniqueCodes",
+        "responses": {
+          "200": {
+            "description": "Список уникальных кодов успешно получен",
+            "schema": {
+              "$ref": "#/definitions/apiUniqueCodesResp"
+            },
+            "examples": {
+              "application/json": {
+                "codes": [
+                  {
+                    "segment": "1",
+                    "name": "Товар 1",
+                    "regular": true
+                  },
+                  {
+                    "segment": "2",
+                    "name": "Товар 2",
+                    "regular": false
+                  }
+                ]
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "predictor"
+        ],
+        "security": [
+          {
+            "Authorization": []
+          }
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "apiPredictReq": {
+      "type": "object",
+      "example": {
+        "type": "1",
+        "product": "product1",
+        "period": "9"
+      },
+      "properties": {
+        "type": {
+          "$ref": "#/definitions/apiQueryType"
+        },
+        "product": {
+          "type": "string"
+        },
+        "period": {
+          "type": "string"
+        }
+      },
+      "description": "Запрос на получение предикта по фильтрам: тип запроса, продукт, период",
+      "title": "Запрос на получение предикта",
+      "required": [
+        "sources"
+      ]
+    },
+    "apiPredictResp": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "string",
+          "format": "byte"
+        }
+      },
+      "description": "Предикт, содержащий данные в формате json в бинарном представлении",
+      "title": "Предикт",
+      "required": [
+        "sources"
+      ]
+    },
+    "apiPrepareDataReq": {
+      "type": "object",
+      "example": {
+        "source": [
+          "file1.csv",
+          "file2.xlsx"
+        ]
+      },
+      "properties": {
+        "sources": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Запрос на подготовку и парсинг данных по .csv/.xlsx файлам. Названия файлов должны совпадать с импортированными в систему",
+      "title": "Запрос на подготовку данных",
+      "required": [
+        "sources"
+      ]
+    },
+    "apiQueryType": {
+      "type": "string",
+      "enum": [
+        "UNDEFINED",
+        "PREDICTION",
+        "STOCK"
+      ],
+      "default": "UNDEFINED"
+    },
+    "apiUniqueCode": {
+      "type": "object",
+      "example": {
+        "segment": "1",
+        "name": "Товар 1",
+        "regular": true
+      },
+      "properties": {
+        "segment": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "regular": {
+          "type": "boolean"
+        }
+      },
+      "description": "Уникальный код товара",
+      "title": "Уникальный код товара",
+      "required": [
+        "segment",
+        "name",
+        "regular"
+      ]
+    },
+    "apiUniqueCodesResp": {
+      "type": "object",
+      "example": {
+        "codes": [
+          {
+            "segment": "1",
+            "name": "Товар 1",
+            "regular": true
+          },
+          {
+            "segment": "2",
+            "name": "Товар 2",
+            "regular": false
+          }
+        ]
+      },
+      "properties": {
+        "codes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/apiUniqueCode"
+          }
+        }
+      },
+      "description": "Список уникальных кодов товаров",
+      "title": "Список уникальных кодов",
+      "required": [
+        "codes"
+      ]
+    },
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    }
+  },
+  "securityDefinitions": {
+    "Authorization": {
+      "type": "apiKey",
+      "name": "Authorization",
+      "in": "header"
+    }
+  }
+}

@@ -6,7 +6,8 @@ window.onload = function() {
     urls: [
         {"url":"api/auth.swagger.json","name":"auth"},
         {"url":"api/prompter.swagger.json","name":"prompter"},
-        {"url":"api/stock.swagger.json","name":"stock"}
+        {"url":"api/stock.swagger.json","name":"stock"},
+        {"url":"api/predictor.swagger.json","name":"predictor"}
     ],
     dom_id: '#swagger-ui',
     deepLinking: true,

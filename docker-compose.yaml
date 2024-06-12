@@ -5,6 +5,8 @@ volumes:
   redis_data:
   redis_conf:
   mongo_data:
+  predictor_data:
+  s3_data:
 
 services:
   jaeger:
@@ -99,6 +101,18 @@ services:
       - mongo_data:/data/db
       - mongo_data:/data/configdb
 
+  s3:
+    image: minio/minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - s3_data:/data
+    environment:
+      MINIO_ROOT_USER: ${MINIO_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_PASSWORD}
+    command: server --console-address ":9001" /data
+
   prompter:
     build:
       context: ./prompter
@@ -109,6 +123,19 @@ services:
       - "9990:9990"
     depends_on:
       - jaeger
+
+  predictor:
+    build:
+      context: ./predictor
+      dockerfile: Dockerfile
+    restart: always
+    image: predictor
+    ports:
+      - "9980:9980"
+    volumes:
+      - predictor_data:/root/.cache/huggingface
+    depends_on:
+      - mongo
 
   chat:
     build:
@@ -142,6 +169,7 @@ services:
       - jaeger
       - keycloak
       - prompter
+      - predictor
 
   bot:
     build:

@@ -140,3 +140,16 @@ func (r *Repo) UpdateQueryStatus(ctx context.Context, id int64, status shared.Qu
 	}
 	return nil
 }
+
+const findQueryMeta = `
+	select product, period, type
+	from chat.query
+	where id = $1;
+`
+
+// FindQueryMeta получить метаданные запроса по id.
+func (r *Repo) FindQueryMeta(ctx context.Context, id int64) (model.QueryMeta, error) {
+	var meta model.QueryMeta
+	err := r.pg.Query(ctx, &meta, findQueryMeta, id)
+	return meta, err
+}
