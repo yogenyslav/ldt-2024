@@ -124,6 +124,7 @@ func (s *Server) Run() {
 		chatRepo,
 		sessionRepo,
 		pb.NewPrompterClient(apiClient.GetConn()),
+		pb.NewPredictorClient(apiClient.GetConn()),
 		s.kc,
 		s.cfg.KeyCloak.Realm,
 		s.cfg.Server.CipherKey,

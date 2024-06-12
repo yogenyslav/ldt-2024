@@ -30,10 +30,13 @@ docker_remove: docker_down
 	docker volume rm ${BASE_IMAGE}_redis_data
 	docker volume rm ${BASE_IMAGE}_redis_conf
 	docker volume rm ${BASE_IMAGE}_mongo_data
+	docker volume rm ${BASE_IMAGE}_predictor_data
+	docker volume rm ${BASE_IMAGE}_s3_data
 	docker image rm chat
 	docker image rm api
 	docker image rm bot
 	docker image rm prompter
+	docker image rm predictor
 
 .PHONY: docker_restart
 docker_restart: docker_down docker_up

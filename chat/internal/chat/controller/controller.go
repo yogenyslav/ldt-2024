@@ -23,6 +23,7 @@ type chatRepo interface {
 	FindQueryPrompt(ctx context.Context, id int64) (string, error)
 	UpdateQuery(ctx context.Context, params model.QueryDao) error
 	UpdateQueryStatus(ctx context.Context, id int64, status shared.QueryStatus) error
+	FindQueryMeta(ctx context.Context, id int64) (model.QueryMeta, error)
 }
 
 type sessionRepo interface {
@@ -37,12 +38,13 @@ type Controller struct {
 	tracer    trace.Tracer
 	kc        *gocloak.GoCloak
 	prompter  pb.PrompterClient
+	predictor pb.PredictorClient
 	realm     string
 	cipherKey string
 }
 
 // New создает новый Controller.
-func New(cr chatRepo, sr sessionRepo, prompter pb.PrompterClient, kc *gocloak.GoCloak, realm, cipher string, tracer trace.Tracer) *Controller {
+func New(cr chatRepo, sr sessionRepo, prompter pb.PrompterClient, predictor pb.PredictorClient, kc *gocloak.GoCloak, realm, cipher string, tracer trace.Tracer) *Controller {
 	return &Controller{
 		cr:        cr,
 		sr:        sr,
@@ -51,6 +53,7 @@ func New(cr chatRepo, sr sessionRepo, prompter pb.PrompterClient, kc *gocloak.Go
 		cipherKey: cipher,
 		tracer:    tracer,
 		prompter:  prompter,
+		predictor: predictor,
 	}
 }
 
