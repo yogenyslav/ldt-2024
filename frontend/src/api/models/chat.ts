@@ -77,6 +77,7 @@ export enum IncomingMessageType {
 export enum IncomingMessageStatus {
     Pending = 'PENDING',
     Valid = 'VALID',
+    Invalid = 'INVALID',
 }
 
 export interface WSMessage {

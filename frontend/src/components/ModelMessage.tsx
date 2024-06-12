@@ -84,6 +84,15 @@ const ModelMessage = ({ incomingMessage, isLastMessage }: ModelMessageProps) => 
                     </>
                 );
 
+            case IncomingMessageStatus.Invalid:
+                return (
+                    <>
+                        <div className='prose prose-stone'>
+                            <p>{`продукт: ${incomingMessage.product}, период: ${incomingMessage.period}, тип: ${incomingMessage.type}`}</p>
+                        </div>
+                    </>
+                );
+
             default:
                 return 'Error';
         }
