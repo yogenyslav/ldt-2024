@@ -34,6 +34,7 @@ mongo_client = pymongo.MongoClient(mongo_url)
 mongo_db = mongo_client[os.getenv("MONGO_DB")]
 
 
+
 def convert_to_datetime(iso_str):
     iso_str = iso_str.replace("Z", "+00:00")
     dt = datetime.strptime(iso_str, "%Y-%m-%dT%H:%M:%S.%f%z")
@@ -209,6 +210,7 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
         return process_and_merge_stocks(stocks)
 
     def PrepareData(self, request: PrepareDataReq, context: ServicerContext):
+        print(self._code_matcher.match_to_3rd_level_code('вода'))
         # в PrepareDataReq лежит путь до .csv/.xlsx файла
 
         logging.info(request.sources)

@@ -7,6 +7,7 @@ from google.protobuf import descriptor as _descriptor
 from google.protobuf import descriptor_pool as _descriptor_pool
 from google.protobuf import symbol_database as _symbol_database
 from google.protobuf.internal import builder as _builder
+
 # @@protoc_insertion_point(imports)
 
 _sym_db = _symbol_database.Default()
@@ -22,7 +23,7 @@ DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x13\x61pi/predict
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
-_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'api.predictor_pb2', _globals)
+_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, "api.predictor_pb2", _globals)
 if not _descriptor._USE_C_DESCRIPTORS:
   _globals['DESCRIPTOR']._loaded_options = None
   _globals['DESCRIPTOR']._serialized_options = b'Z\017internal/api/pb\222A\324\001\022\251\001\n\003API\022H\320\224\320\276\320\272\321\203\320\274\320\265\320\275\321\202\320\260\321\206\320\270\321\217 \320\272 API-\321\201\320\265\321\200\320\262\320\270\321\201\321\203 \320\272\320\276\320\274\320\260\320\275\320\264\321\213 misis.tech*X\n\024BSD 3-Clause License\022@https://github.com/grpc-ecosystem/grpc-gateway/blob/main/LICENSEZ&\n$\n\rAuthorization\022\023\010\002\032\rAuthorization \002'
