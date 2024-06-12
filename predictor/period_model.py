@@ -88,7 +88,7 @@ class PeriodPredictor:
             .reset_index()
         )
         values = df[values_column]
-        if len(np.unique(values))==1:
+        if len(np.unique(values)) == 1:
             values /= values
         else:
             df[values_column] = (values - values.min()) / (values.max() - values.min())

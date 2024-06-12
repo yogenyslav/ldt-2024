@@ -27,7 +27,7 @@ class Model:
     ):
         self._value_column = value_column
         self._date_column = date_column
-        self._df = df.copy()
+        self._df = df[["depth3_code_kpgz", value_column, date_column]].copy()
 
         segments_counts = self._df["depth3_code_kpgz"].value_counts()
         self._uniq_segments = self.filter_regular_codes(segments_counts, regular_codes)
@@ -45,13 +45,20 @@ class Model:
         return tuple(self._trend_models_by_segment.keys())
 
     def filter_regular_codes(
-        self, segments: pd.Series, regular_codes: tuple, count_threshold: int = 3
+        self,
+        segments: pd.Series,
+        regular_codes: tuple,
+        count_threshold: int = 3,
+        starts_with: Optional[str] = "01.",
     ):
 
         segments = segments[segments > count_threshold]
-        # segments_mask = segments.index.str.startswith('01.')
-        segments = segments.index.to_numpy()
-        # segments = segments[segments_mask]
+        segments_np = segments.index.to_numpy()
+
+        if starts_with is not None:
+            segments_mask = segments.index.str.startswith(starts_with)
+            segments_np = segments.index.to_numpy()[segments_mask]
+        segments = segments_np
 
         if regular_codes is not None:
             segments = np.intersect1d(segments, regular_codes)
@@ -71,9 +78,6 @@ class Model:
                 .reset_index()
             )
 
-            if segment == '03.07.07':
-                pass
-            
             if (filtered_df[self._value_column] > 0).sum() < min_dates_records:
                 continue
 
