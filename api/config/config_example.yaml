@@ -33,6 +33,10 @@ prompter:
   host: "prompter"
   port: 9990
 
+predictor:
+  host: "predictor"
+  port: 9980
+
 mongo:
   host: "mongo"
   port: 27017

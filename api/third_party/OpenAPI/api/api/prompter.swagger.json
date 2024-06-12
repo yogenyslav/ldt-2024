@@ -23,12 +23,21 @@
   "paths": {
     "/api/v1/prompter/extract": {
       "post": {
+        "summary": "Извлечь метаданные из запроса",
+        "description": "Извлечение метаданных из запроса для передачи в предиктор",
         "operationId": "Prompter_Extract",
         "responses": {
           "200": {
-            "description": "A successful response.",
+            "description": "Метаданные из запроса",
             "schema": {
               "$ref": "#/definitions/apiExtractedPrompt"
+            },
+            "examples": {
+              "application/json": {
+                "type": 1,
+                "product": "бумага A4",
+                "period": "18 месяцев"
+              }
             }
           },
           "default": {
@@ -41,7 +50,7 @@
         "parameters": [
           {
             "name": "body",
-            "description": "Extracts required metadata from prompt",
+            "description": "Извлечение метаданных из запроса для передачи в предиктор",
             "in": "body",
             "required": true,
             "schema": {
@@ -50,7 +59,7 @@
           }
         ],
         "tags": [
-          "Prompter"
+          "prompter"
         ],
         "security": [
           {
@@ -71,8 +80,8 @@
           "type": "string"
         }
       },
-      "description": "Extracts required metadata from prompt",
-      "title": "Extract prompt request",
+      "description": "Извлечение метаданных из запроса для передачи в предиктор",
+      "title": "Получить метаданные из запроса",
       "required": [
         "prompt"
       ]
@@ -81,7 +90,8 @@
       "type": "object",
       "example": {
         "type": 1,
-        "product": "бумага A4"
+        "product": "бумага A4",
+        "period": "18 месяцев"
       },
       "properties": {
         "type": {
@@ -94,11 +104,12 @@
           "type": "string"
         }
       },
-      "description": "Metadata from raw prompt that is passed to predictor",
-      "title": "Extract prompt response",
+      "description": "Метаданные из запроса для передачи в предиктор",
+      "title": "Метаданные из запроса",
       "required": [
         "type",
-        "product"
+        "product",
+        "period"
       ]
     },
     "apiQueryType": {

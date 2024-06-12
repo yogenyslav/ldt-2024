@@ -19,6 +19,7 @@ type Config struct {
 	Prometheus *prom.Config             `yaml:"prometheus"`
 	KeyCloak   *KeyCloakConfig          `yaml:"keycloak"`
 	Prompter   *client.GrpcClientConfig `yaml:"prompter"`
+	Predictor  *client.GrpcClientConfig `yaml:"predictor"`
 	Mongo      *mongo.Config            `yaml:"mongo"`
 }
 

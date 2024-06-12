@@ -23,12 +23,27 @@
   "paths": {
     "/api/v1/stock/list_products": {
       "get": {
+        "summary": "Получить список продуктов",
+        "description": "Метод для получения списка продуктов",
         "operationId": "Stock_ListProducts",
         "responses": {
           "200": {
-            "description": "A successful response.",
+            "description": "Список продуктов",
             "schema": {
               "$ref": "#/definitions/apiListProductsResp"
+            },
+            "examples": {
+              "application/json": {
+                "products": [
+                  {
+                    "name_spgz": "string",
+                    "final_name_kpgz": "string",
+                    "final_code_kpgz": "string",
+                    "depth3_code_kpgz": "string",
+                    "id": 0
+                  }
+                ]
+              }
             }
           },
           "default": {
@@ -39,7 +54,7 @@
           }
         },
         "tags": [
-          "Stock"
+          "stock"
         ],
         "security": [
           {
@@ -61,8 +76,8 @@
           }
         }
       },
-      "description": "Response model for list products request",
-      "title": "List products response",
+      "description": "Модель для получения списка продуктов",
+      "title": "Получить список продуктов",
       "required": [
         "products"
       ]
@@ -87,8 +102,8 @@
           "format": "int64"
         }
       },
-      "description": "Model describing product entity",
-      "title": "Product",
+      "description": "Модель продукта",
+      "title": "Продукт",
       "required": [
         "nameSpgz",
         "finalNameKpgz",

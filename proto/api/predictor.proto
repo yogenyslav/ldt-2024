@@ -2,37 +2,128 @@ syntax = "proto3";
 
 package api;
 
-import "google/protobuf/timestamp.proto";
 import "google/api/annotations.proto";
 import "google/protobuf/empty.proto";
 import "protoc-gen-openapiv2/options/annotations.proto";
 import "api/prompter.proto";
 
+option go_package="internal/api/pb";
+
 service Predictor {
-  rpc PrepareData(PrepareDataReq) returns (google.protobuf.Empty) {};
-  rpc Predict(PredictReq) returns (PredictResp) {};
-  rpc UniqueCodes(google.protobuf.Empty) returns (UniqueCodesResp) {};
+  rpc PrepareData(PrepareDataReq) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post: "/api/v1/predictor/prepare_data"
+      body: "*"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "Подготовка и парсинг данных"
+      description: "Перевести данные из .csv/.xlsx во внутренний формат, с которым будет работать модель"
+      tags: ["predictor"]
+      responses: {
+        key: "200"
+        value: {
+          description: "Данные успешно подготовлены"
+        }
+      }
+    };
+  };
+  rpc Predict(PredictReq) returns (PredictResp) {
+    option (google.api.http) = {
+      post: "/api/v1/predictor/predict"
+      body: "*"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "Получить предикт"
+      description: "Получить предикт по фильтрам: тип запроса, продукт, период"
+      tags: ["predictor"]
+      responses: {
+        key: "200"
+        value: {
+          description: "Предикт успешно получен"
+        }
+      }
+    };
+  };
+  rpc UniqueCodes(google.protobuf.Empty) returns (UniqueCodesResp) {
+    option (google.api.http) = {
+      get: "/api/v1/predictor/unique_codes"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "Регулярные товары"
+      description: "Получить список уникальных кодов товаров"
+      tags: ["predictor"]
+      responses: {
+        key: "200"
+        value: {
+          description: "Список уникальных кодов успешно получен"
+          examples: {
+            key: "application/json"
+            value: "{\"codes\": [{\"segment\": \"1\",\"name\": \"Товар 1\",\"regular\": true}, {\"segment\": \"2\",\"name\": \"Товар 2\",\"regular\": false}]}"
+          }
+        }
+      }
+    };
+  }
 }
 
 message PrepareDataReq {
+  option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_schema) = {
+    json_schema: {
+      title: "Запрос на подготовку данных"
+      description: "Запрос на подготовку и парсинг данных по .csv/.xlsx файлам. Названия файлов должны совпадать с импортированными в систему"
+      required: ["sources"]
+    }
+    example: "{\"source\": [\"file1.csv\", \"file2.xlsx\"]}"
+  };
   repeated string sources = 1;
 }
 
 message PredictReq {
+  option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_schema) = {
+    json_schema: {
+      title: "Запрос на получение предикта"
+      description: "Запрос на получение предикта по фильтрам: тип запроса, продукт, период"
+      required: ["sources"]
+    }
+    example: "{\"type\": \"1\", \"product\": \"product1\", \"period\": \"9\"}"
+  };
   QueryType type = 1;
   string product = 2;
   string period = 3;
 }
 
 message PredictResp {
+  option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_schema) = {
+    json_schema: {
+      title: "Предикт"
+      description: "Предикт, содержащий данные в формате json в бинарном представлении"
+      required: ["sources"]
+    }
+  };
   bytes data = 1;
 }
 
 message UniqueCodesResp {
+  option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_schema) = {
+    json_schema: {
+      title: "Список уникальных кодов"
+      description: "Список уникальных кодов товаров"
+      required: ["codes"]
+    }
+    example: "{\"codes\": [{\"segment\": \"1\",\"name\": \"Товар 1\",\"regular\": true}, {\"segment\": \"2\",\"name\": \"Товар 2\",\"regular\": false}]}"
+  };
   repeated UniqueCode codes = 1;
 }
 
 message UniqueCode {
+  option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_schema) = {
+    json_schema: {
+      title: "Уникальный код товара"
+      description: "Уникальный код товара"
+      required: ["segment", "name", "regular"]
+    }
+    example: "{\"segment\": \"1\",\"name\": \"Товар 1\",\"regular\": true}"
+  };
   string segment = 1;
   string name = 2;
   bool regular = 3;
