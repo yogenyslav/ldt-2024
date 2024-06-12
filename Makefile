@@ -75,11 +75,12 @@ proto:
 		protoc --proto_path=./proto --go_out=$$dir --go-grpc_out=$$dir \
 				proto/api/auth.proto \
 				proto/api/prompter.proto \
+				proto/api/predictor.proto \
 				proto/api/stock.proto; \
 	done
 	@protoc --proto_path=./proto --grpc-gateway_out=./api \
                     --grpc-gateway_opt=generate_unbound_methods=true \
-                    proto/api/auth.proto proto/api/prompter.proto proto/api/stock.proto \
+                    proto/api/auth.proto proto/api/prompter.proto proto/api/stock.proto proto/api/predictor.proto \
 				 	--openapiv2_out ./api/third_party/OpenAPI/api
 	@python -m grpc_tools.protoc -Iproto --python_out=prompter --pyi_out=prompter --grpc_python_out=prompter \
  					proto/api/prompter.proto

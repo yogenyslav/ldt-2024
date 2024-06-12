@@ -35,6 +35,19 @@ service Stock {
       get: "/api/v1/stock/list_products"
     };
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "Получить список продуктов"
+      description: "Метод для получения списка продуктов"
+      tags: ["stock"]
+      responses: {
+        key: "200"
+        value: {
+          description: "Список продуктов"
+          examples: {
+            key: "application/json"
+            value: "{\"products\":[{\"name_spgz\":\"string\",\"final_name_kpgz\":\"string\",\"final_code_kpgz\":\"string\",\"depth3_code_kpgz\":\"string\",\"id\":0}]}"
+          }
+        }
+      }
       security: {
         security_requirement: {
           key: "Authorization";
@@ -48,8 +61,8 @@ service Stock {
 message ListProductsResp {
   option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_schema) = {
     json_schema: {
-      title: "List products response"
-      description: "Response model for list products request"
+      title: "Получить список продуктов"
+      description: "Модель для получения списка продуктов"
       required: ["products"]
     }
   };
@@ -59,8 +72,8 @@ message ListProductsResp {
 message Product {
   option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_schema) = {
     json_schema: {
-      title: "Product"
-      description: "Model describing product entity"
+      title: "Продукт"
+      description: "Модель продукта"
       required: ["name_spgz", "final_name_kpgz", "final_code_kpgz", "depth3_code_kpgz", "id"]
     }
   };

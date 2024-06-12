@@ -35,6 +35,19 @@ service Prompter {
       body: "*"
     };
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "Извлечь метаданные из запроса"
+      description: "Извлечение метаданных из запроса для передачи в предиктор"
+      tags: ["prompter"]
+      responses: {
+        key: "200"
+        value: {
+          description: "Метаданные из запроса"
+          examples: {
+            key: "application/json"
+            value: "{\"type\": 1, \"product\": \"бумага A4\", \"period\": \"18 месяцев\"}"
+          }
+        }
+      }
       security: {
         security_requirement: {
           key: "Authorization";
@@ -48,8 +61,8 @@ service Prompter {
 message ExtractReq {
   option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_schema) = {
     json_schema: {
-      title: "Extract prompt request"
-      description: "Extracts required metadata from prompt"
+      title: "Получить метаданные из запроса"
+      description: "Извлечение метаданных из запроса для передачи в предиктор"
       required: ["prompt"]
     }
     example: "{\"prompt\": \"я хочу купить бумагу A4 на 18 месяцев вперед\"}"
@@ -66,11 +79,11 @@ enum QueryType {
 message ExtractedPrompt {
   option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_schema) = {
     json_schema: {
-      title: "Extract prompt response"
-      description: "Metadata from raw prompt that is passed to predictor"
-      required: ["type", "product"]
+      title: "Метаданные из запроса"
+      description: "Метаданные из запроса для передачи в предиктор"
+      required: ["type", "product", "period"]
     }
-    example: "{\"type\": 1, \"product\": \"бумага A4\"}"
+    example: "{\"type\": 1, \"product\": \"бумага A4\", \"period\": \"18 месяцев\"}"
   };
   QueryType type = 1;
   string product = 2;
