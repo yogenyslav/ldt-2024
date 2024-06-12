@@ -3,17 +3,19 @@ package handler
 import (
 	"context"
 	"errors"
+	"time"
 
 	"github.com/gofiber/contrib/websocket"
 	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
 	"github.com/yogenyslav/ldt-2024/chat/internal/chat/model"
+	"github.com/yogenyslav/ldt-2024/chat/internal/shared"
 )
 
 // Chat handles chat ws functional.
-func (h *Handler) Chat(c *websocket.Conn) {
-	ctx := context.Background()
-
+//
+//nolint:funlen // will be soon refactored
+func (h *Handler) Chat(c *websocket.Conn) { //nolint:gocyclo // will be soon refactored
 	log.Info().Str("addr", c.LocalAddr().String()).Msg("new conn")
 	c.SetCloseHandler(func(code int, text string) error {
 		log.Info().Int("code", code).Str("text", text).Msg("conn closed")
@@ -22,7 +24,6 @@ func (h *Handler) Chat(c *websocket.Conn) {
 	defer func() {
 		if err := c.Close(); err != nil {
 			log.Warn().Err(err).Msg("failed to close websocket conn")
-			return
 		}
 	}()
 
@@ -32,44 +33,106 @@ func (h *Handler) Chat(c *websocket.Conn) {
 		return
 	}
 	if mt != websocket.TextMessage {
-		writeError(c, "need authorization first", errors.New("unexpected message type"))
+		respondError(c, "need authorization first", errors.New("unexpected message type"))
 		return
 	}
 
-	username, authErr := h.ctrl.Authorize(ctx, string(msg))
+	ctx, username, authErr := h.ctrl.Authorize(context.Background(), string(msg))
 	if authErr != nil {
-		writeError(c, "unauthorized", authErr)
+		respondError(c, "unauthorized", authErr)
 		return
 	}
 
 	sessionID, uuidErr := uuid.Parse(c.Params("session_id"))
 	if uuidErr != nil {
-		writeError(c, "invalid session uuid", uuidErr)
+		respondError(c, "invalid session uuid", uuidErr)
 		return
 	}
+	defer func() {
+		if err := h.ctrl.SessionCleanup(ctx, sessionID); err != nil {
+			log.Error().Err(err).Msg("failed to cleanup session")
+		}
+	}()
 
 	var (
-		validate = make(chan struct{}, 1)
+		validate = make(chan int64, 1)
+		out      = make(chan Response)
+		hint     = make(chan int64, 1)
+		cancel   = make(chan struct{}, 1)
 	)
 
 	for {
 		var req model.QueryCreateReq
 		if err := c.ReadJSON(&req); err != nil {
-			writeError(c, "failed to read query", err)
+			respondError(c, "failed to read query", err)
 			return
 		}
 
+		if req.Command == shared.CommandCancel {
+			cancel <- struct{}{}
+			log.Debug().Msg("predict was canceled")
+			continue
+		}
+
 		select {
-		case <-validate:
-			if req.Command == "valid" {
+		case queryID := <-hint:
+			log.Debug().Msg("processing hint")
+			query, err := h.ctrl.Hint(ctx, queryID, req)
+			if err != nil {
+				respondError(c, "failed to process hint", err)
+				hint <- queryID
+				continue
+			}
+			respondData(c, query)
+			validate <- queryID
+			continue
+		case queryID := <-validate:
+			if req.Command == shared.CommandValid {
+				// for debug purposes
 				log.Debug().Msg("extracted prompt is valid")
+				go h.ctrl.Predict(ctx, out, cancel, queryID)
+				if err := h.ctrl.UpdateStatus(ctx, queryID, shared.StatusValid); err != nil {
+					respondError(c, "failed to update status to valid", err)
+					validate <- queryID
+					cancel <- struct{}{}
+					continue
+				}
+			} else if req.Command == shared.CommandInvalid {
+				log.Debug().Msg("extracted prompt is invalid")
+				if err := h.ctrl.UpdateStatus(ctx, queryID, shared.StatusPending); err != nil {
+					respondError(c, "failed to update status to pending", err)
+					validate <- queryID
+					continue
+				}
+				hint <- queryID
+				continue
 			}
 		default:
-			validate <- struct{}{}
-			if err := h.ctrl.InsertQuery(ctx, req, username, sessionID); err != nil {
-				writeError(c, err.Error(), err)
+			query, err := h.ctrl.InsertQuery(ctx, req, username, sessionID)
+			if err != nil {
+				respondError(c, err.Error(), err)
 				return
 			}
+			respondData(c, query)
+
+			validate <- query.ID
+			continue
 		}
+
+		go func() {
+			for {
+				select {
+				case chunk := <-out:
+					respond(c, chunk)
+					if chunk.Finish {
+						log.Debug().Msg("predict finished")
+						return
+					}
+				default:
+					time.Sleep(time.Second * 1)
+					log.Debug().Msg("waiting for messages...")
+				}
+			}
+		}()
 	}
 }

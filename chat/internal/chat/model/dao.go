@@ -9,14 +9,15 @@ import (
 
 // QueryDao is a data layer representation of users query.
 type QueryDao struct { //nolint:govet // order is required for sql request
-	CreatedAt time.Time        `db:"created_at"`
-	Prompt    string           `db:"prompt"`
-	Command   string           `db:"command"`
-	Product   string           `db:"product"`
-	Type      shared.QueryType `db:"type"`
-	ID        int64            `db:"id"`
-	Username  string           `db:"username"`
-	SessionID uuid.UUID        `db:"session_id"`
+	CreatedAt time.Time          `db:"created_at"`
+	Prompt    string             `db:"prompt"`
+	Product   string             `db:"product"`
+	Period    string             `db:"period"`
+	Status    shared.QueryStatus `db:"status"`
+	Type      shared.QueryType   `db:"type"`
+	ID        int64              `db:"id"`
+	Username  string             `db:"username"`
+	SessionID uuid.UUID          `db:"session_id"`
 }
 
 // ToDto converts QueryDao to QueryDto.
@@ -24,9 +25,10 @@ func (q QueryDao) ToDto() QueryDto {
 	return QueryDto{
 		CreatedAt: q.CreatedAt,
 		Prompt:    q.Prompt,
-		Command:   q.Command,
+		Status:    q.Status.ToString(),
+		Period:    q.Period,
 		Product:   q.Product,
-		Type:      q.Type,
+		Type:      q.Type.ToString(),
 		ID:        q.ID,
 	}
 }
@@ -44,6 +46,6 @@ func (r ResponseDao) ToDto() ResponseDto {
 	return ResponseDto{
 		CreatedAt: r.CreatedAt,
 		Body:      r.Body,
-		Status:    r.Status,
+		Status:    r.Status.ToString(),
 	}
 }

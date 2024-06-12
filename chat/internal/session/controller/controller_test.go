@@ -281,7 +281,7 @@ func TestController_FindOne(t *testing.T) {
 	for _, query := range queriesToFill {
 		prompter.EXPECT().Extract(gomock.Any(), gomock.Any())
 
-		err := qc.InsertQuery(ctx, query.params, query.username, query.sessionID)
+		_, err := qc.InsertQuery(ctx, query.params, query.username, query.sessionID)
 		require.NoError(t, err)
 	}
 

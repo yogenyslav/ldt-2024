@@ -80,23 +80,23 @@ func (r *Repo) DeleteOne(ctx context.Context, id uuid.UUID) error {
 	return nil
 }
 
-const findStatus = `
-	select username, is_deleted, tg
+const findMeta = `
+	select username, title, is_deleted, tg
 	from chat.session
 	where id = $1;
 `
 
-// FindStatus returns the username of the session creator, status (is_deleted) and tg flag.
-func (r *Repo) FindStatus(ctx context.Context, id uuid.UUID) (model.SessionStatus, error) {
-	var status model.SessionStatus
-	err := r.pg.Query(ctx, &status, findStatus, id)
+// FindMeta returns session meta info.
+func (r *Repo) FindMeta(ctx context.Context, id uuid.UUID) (model.SessionMeta, error) {
+	var status model.SessionMeta
+	err := r.pg.Query(ctx, &status, findMeta, id)
 	return status, err
 }
 
 const findContent = `
 	select 
 		(r.created_at, r.body, r.status) as response,
-		(q.created_at, q.prompt, q.command, q.product, q.type, q.id) as query
+		(q.created_at, q.prompt, q.product, q.status, q.type, q.id) as query
 	from chat.query q
 	join
 	    chat.response r
@@ -114,4 +114,17 @@ func (r *Repo) FindContent(ctx context.Context, id uuid.UUID) ([]model.SessionCo
 	var content []model.SessionContentDao
 	err := r.pg.QuerySlice(ctx, &content, findContent, id)
 	return content, err
+}
+
+const sessionClenaup = `
+	select count(id)
+	from chat.query
+	where session_id = $1;
+`
+
+// SessionContentEmpty checks if session content is empty.
+func (r *Repo) SessionContentEmpty(ctx context.Context, sessionID uuid.UUID) (bool, error) {
+	var count int64
+	err := r.pg.Query(ctx, &count, sessionClenaup, sessionID)
+	return count == 0, err
 }

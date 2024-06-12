@@ -23,9 +23,11 @@ class ExtractReq(_message.Message):
     def __init__(self, prompt: _Optional[str] = ...) -> None: ...
 
 class ExtractedPrompt(_message.Message):
-    __slots__ = ("type", "product")
+    __slots__ = ("type", "product", "period")
     TYPE_FIELD_NUMBER: _ClassVar[int]
     PRODUCT_FIELD_NUMBER: _ClassVar[int]
+    PERIOD_FIELD_NUMBER: _ClassVar[int]
     type: QueryType
     product: str
-    def __init__(self, type: _Optional[_Union[QueryType, str]] = ..., product: _Optional[str] = ...) -> None: ...
+    period: str
+    def __init__(self, type: _Optional[_Union[QueryType, str]] = ..., product: _Optional[str] = ..., period: _Optional[str] = ...) -> None: ...

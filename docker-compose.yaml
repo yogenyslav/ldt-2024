@@ -4,6 +4,8 @@ volumes:
   prom_data:
   redis_data:
   redis_conf:
+  prompter_data:
+  mongo_data:
 
 services:
   jaeger:
@@ -88,14 +90,35 @@ services:
       - redis_data:/data
       - redis_conf:/usr/local/etc/redis/redis.conf
 
+  mongo:
+    image: mongo:5.0
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./data:/data/csv
+      - mongo_data:/data/db
+      - mongo_data:/data/configdb
+
   prompter:
     build:
       context: ./prompter
       dockerfile: Dockerfile
     restart: always
     image: prompter
+    ports:
+      - "9990:9990"
     depends_on:
       - jaeger
+    volumes:
+      - prompter_data:/root/.cache/huggingface
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
 
   chat:
     build:

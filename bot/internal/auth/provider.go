@@ -18,7 +18,7 @@ func Listen(machine *state.Machine, bot *tele.Bot, port int) *fiber.App {
 	srv.Use(cors.New(cors.Config{
 		AllowOrigins: "https://hawk-handy-wolf.ngrok-free.app",
 	}))
-	srv.Post("/auth", func(c *fiber.Ctx) error {
+	srv.Post("/bot/auth", func(c *fiber.Ctx) error {
 		var req model.AuthorizeReq
 		if err := c.BodyParser(&req); err != nil {
 			log.Error().Err(err).Msg("failed to parse the request")

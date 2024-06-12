@@ -33,9 +33,10 @@ type SessionContentDao struct {
 	Query    model.QueryDao    `db:"query"`
 }
 
-// SessionStatus is a model for session status info.
-type SessionStatus struct {
+// SessionMeta is a model for session meta info.
+type SessionMeta struct {
 	Username  string `db:"username"`
+	Title     string `db:"title"`
 	IsDeleted bool   `db:"is_deleted"`
 	Tg        bool   `db:"tg"`
 }

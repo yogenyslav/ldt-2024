@@ -61,7 +61,10 @@ func New(cfg *config.Config) *Server {
 
 	app.Use(logger.New())
 	app.Use(cors.New(cors.Config{
-		AllowOrigins: strings.Join(cfg.Server.CorsOrigins, ","),
+		AllowOrigins:     strings.Join(cfg.Server.CorsOrigins, ","),
+		AllowMethods:     "GET,POST,HEAD,PUT,DELETE,PATCH,OPTIONS",
+		AllowHeaders:     "Access-Control-Allow-Origin,Authorization,Origin,Accept,Content-Type,ngrok-skip-browser-warning",
+		AllowCredentials: true,
 	}))
 	app.Use(otelfiber.Middleware())
 	app.Use(recovermw.New())
@@ -117,15 +120,22 @@ func (s *Server) Run() {
 	session.SetupSessionRoutes(s.app, sessionHandler, s.kc, s.cfg.KeyCloak.Realm, s.cfg.Server.CipherKey)
 
 	chatRepo := cr.New(s.pg)
-	chatController := cc.New(chatRepo, pb.NewPrompterClient(apiClient.GetConn()), s.kc, s.cfg.KeyCloak.Realm, s.cfg.Server.CipherKey, s.tracer)
+	chatController := cc.New(
+		chatRepo,
+		sessionRepo,
+		pb.NewPrompterClient(apiClient.GetConn()),
+		s.kc,
+		s.cfg.KeyCloak.Realm,
+		s.cfg.Server.CipherKey,
+		s.tracer,
+	)
 	chatHandler := ch.New(chatController, s.tracer)
 	wsConfig := websocket.Config{
-		Origins: s.cfg.Server.CorsOrigins,
 		RecoverHandler: func(conn *websocket.Conn) {
 			if e := recover(); e != nil {
-				err = conn.WriteJSON(ch.ErrorResponse{
+				err = conn.WriteJSON(ch.Response{
 					Msg: "internal error",
-					Err: err,
+					Err: err.Error(),
 				})
 				if err != nil {
 					log.Warn().Err(err).Msg("failed to recover ws panic")

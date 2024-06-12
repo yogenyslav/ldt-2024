@@ -25,20 +25,21 @@ func (ctrl *Controller) FindOne(ctx context.Context, id uuid.UUID, username stri
 		Editable: false,
 	}
 
-	status, err := ctrl.repo.FindStatus(ctx, id)
+	meta, err := ctrl.repo.FindMeta(ctx, id)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return resp, shared.ErrNoSessionWithID
 		}
 		return resp, shared.ErrGetSession
 	}
-	if status.IsDeleted {
+	if meta.IsDeleted {
 		return resp, shared.ErrNoSessionWithID
 	}
-	if status.Username == username {
+	if meta.Username == username {
 		resp.Editable = true
 	}
-	resp.Tg = status.Tg
+	resp.Tg = meta.Tg
+	resp.Title = meta.Title
 
 	contentDB, err := ctrl.repo.FindContent(ctx, id)
 	if err != nil {

@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
@@ -14,62 +15,75 @@ import (
 )
 
 // InsertQuery creates new query.
-func (ctrl *Controller) InsertQuery(ctx context.Context, params model.QueryCreateReq, username string, sessionID uuid.UUID) error {
+//
+//nolint:funlen // will be soon refactored
+func (ctrl *Controller) InsertQuery(ctx context.Context, params model.QueryCreateReq, username string, sessionID uuid.UUID) (model.QueryDto, error) {
 	ctx, span := ctrl.tracer.Start(
 		ctx,
 		"Controller.InsertQuery",
 		trace.WithAttributes(
 			attribute.String("username", username),
-			attribute.String("query", params.Prompt+params.Command),
+			attribute.String("query", params.Prompt),
 			attribute.String("sessionID", sessionID.String()),
 		),
 	)
 	defer span.End()
 
-	tx, err := ctrl.repo.BeginTx(ctx)
+	var query model.QueryDto
+
+	if params.Prompt == "" {
+		return query, shared.ErrEmptyQueryHint
+	}
+
+	tx, err := ctrl.cr.BeginTx(ctx)
 	if err != nil {
-		return shared.ErrBeginTx
+		return query, shared.ErrBeginTx
 	}
 	defer func() {
-		_ = ctrl.repo.RollbackTx(tx) //nolint:errcheck // transaction is either properly closed or nothing can be done
+		_ = ctrl.cr.RollbackTx(tx) //nolint:errcheck // transaction is either properly closed or nothing can be done
 	}()
 
-	queryID, err := ctrl.repo.InsertQuery(tx, model.QueryDao{
+	queryID, err := ctrl.cr.InsertQuery(tx, model.QueryDao{
 		SessionID: sessionID,
 		Prompt:    params.Prompt,
-		Command:   params.Command,
 		Username:  username,
+		Status:    shared.StatusPending,
 	})
 	if err != nil {
-		return shared.ErrCreateQuery
+		return query, shared.ErrCreateQuery
 	}
 
-	if params.Prompt != "" {
-		tx = pkg.PushSpan(tx, span)
+	tx = pkg.PushSpan(tx, span)
 
-		in := &pb.ExtractReq{Prompt: params.Prompt}
-		meta, err := ctrl.prompter.Extract(tx, in)
-		if err != nil {
-			log.Error().Err(err).Msg("failed to extract meta from prompt")
-			return err
-		}
+	in := &pb.ExtractReq{Prompt: params.Prompt}
+	meta, err := ctrl.prompter.Extract(tx, in)
+	if err != nil {
+		log.Error().Err(err).Msg("failed to extract meta from prompt")
+		return query, err
+	}
 
-		if err := ctrl.repo.UpdateQueryMeta(tx, model.QueryMeta{
-			Product: meta.GetProduct(),
-			Type:    shared.QueryType(meta.GetType()),
-		}, queryID); err != nil {
-			log.Error().Err(err).Msg("failed to update query metadata")
-			return err
-		}
+	if err := ctrl.cr.UpdateQueryMeta(tx, model.QueryMeta{
+		Product: meta.GetProduct(),
+		Type:    shared.QueryType(meta.GetType()),
+		Period:  meta.GetPeriod(),
+	}, queryID); err != nil {
+		log.Error().Err(err).Msg("failed to update query metadata")
+		return query, err
 	}
 
 	if err := ctrl.InsertResponse(tx, queryID); err != nil {
-		return err
+		return query, err
+	}
+	if err := ctrl.cr.CommitTx(tx); err != nil {
+		return query, shared.ErrCommitTx
 	}
 
-	if err := ctrl.repo.CommitTx(tx); err != nil {
-		return shared.ErrCommitTx
-	}
+	query.ID = queryID
+	query.Type = shared.QueryType(meta.GetType()).ToString()
+	query.Product = meta.GetProduct()
+	query.Status = shared.StatusPending.ToString()
+	query.CreatedAt = time.Now()
+	query.Period = meta.GetPeriod()
 
-	return nil
+	return query, nil
 }

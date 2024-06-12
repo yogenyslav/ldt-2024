@@ -5,7 +5,8 @@ window.onload = function() {
   window.ui = SwaggerUIBundle({
     urls: [
         {"url":"api/auth.swagger.json","name":"auth"},
-        {"url":"api/prompter.swagger.json","name":"prompter"}
+        {"url":"api/prompter.swagger.json","name":"prompter"},
+        {"url":"api/stock.swagger.json","name":"stock"}
     ],
     dom_id: '#swagger-ui',
     deepLinking: true,

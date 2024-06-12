@@ -2,13 +2,44 @@ syntax = "proto3";
 
 package api;
 
-message Metadata {
+import "google/protobuf/timestamp.proto";
+import "google/api/annotations.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
 
+service Predictor {
+  rpc PrepareData(PrepareDataReq) returns (ClientIdentifier) {};
+  rpc Predict(PredictReq) returns (PredictResp) {};
+  rpc UniqueCodes(ClientIdentifier) returns (UniqueCodesResp) {};
 }
 
-message Response {
-  int64 query_id = 1;
-  string body = 2;
-  bool final = 3;
-  Metadata result = 4;
+message PrepareDataReq {
+  repeated string sources = 1;
+}
+
+message PredictReq {
+  google.protobuf.Timestamp ts = 1;
+  int64 months_count = 2;
+  string segment = 3;
+}
+
+message PredictResp {
+  repeated Predict predicts = 1;
+}
+
+message Predict {
+  google.protobuf.Timestamp ts = 1;
+  float price = 2;
+}
+
+message ClientIdentifier {
+  string value = 1;
+}
+
+message UniqueCodesResp {
+  repeated UniqueCode codes = 1;
+}
+
+message UniqueCode {
+  string segment = 1;
+  bool regular = 2;
 }

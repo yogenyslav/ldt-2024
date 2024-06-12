@@ -227,7 +227,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Информация о сессии",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/model.FindOneResp"
                         }
                     },
                     "400": {
@@ -290,6 +290,29 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "model.FindOneResp": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.SessionContentDto"
+                    }
+                },
+                "editable": {
+                    "type": "boolean"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "tg": {
+                    "type": "boolean"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
         "model.ListResp": {
             "type": "object",
             "properties": {
@@ -332,6 +355,29 @@ const docTemplate = `{
                 }
             }
         },
+        "model.QueryDto": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "product": {
+                    "type": "string"
+                },
+                "prompt": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
         "model.RenameReq": {
             "type": "object",
             "required": [
@@ -346,6 +392,31 @@ const docTemplate = `{
                     "type": "string",
                     "maxLength": 25,
                     "minLength": 3
+                }
+            }
+        },
+        "model.ResponseDto": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.SessionContentDto": {
+            "type": "object",
+            "properties": {
+                "query": {
+                    "$ref": "#/definitions/model.QueryDto"
+                },
+                "response": {
+                    "$ref": "#/definitions/model.ResponseDto"
                 }
             }
         },

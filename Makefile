@@ -23,6 +23,8 @@ docker_remove: docker_down
 	docker volume rm ${BASE_IMAGE}_jaeger_data
 	docker volume rm ${BASE_IMAGE}_redis_data
 	docker volume rm ${BASE_IMAGE}_redis_conf
+	docker volume rm ${BASE_IMAGE}_prompter_data
+	docker volume rm ${BASE_IMAGE}_mongo_data
 	docker image rm chat
 	docker image rm api
 	docker image rm bot
@@ -65,13 +67,19 @@ migrate_new:
 .PHONY: proto
 proto:
 	@for dir in $(shell find . -type f -name go.mod -exec dirname {} \;); do \
-		protoc --proto_path=./proto --go_out=$$dir --go-grpc_out=$$dir proto/api/auth.proto proto/api/prompter.proto; \
+		protoc --proto_path=./proto --go_out=$$dir --go-grpc_out=$$dir \
+				proto/api/auth.proto \
+				proto/api/prompter.proto \
+				proto/api/stock.proto; \
 	done
 	@protoc --proto_path=./proto --grpc-gateway_out=./api \
                     --grpc-gateway_opt=generate_unbound_methods=true \
-                    proto/api/auth.proto proto/api/prompter.proto --openapiv2_out ./api/third_party/OpenAPI/api
-	@python -m grpc_tools.protoc -Iproto --python_out=prompter --grpc_python_out=prompter \
+                    proto/api/auth.proto proto/api/prompter.proto proto/api/stock.proto \
+				 	--openapiv2_out ./api/third_party/OpenAPI/api
+	@python -m grpc_tools.protoc -Iproto --python_out=prompter --pyi_out=prompter --grpc_python_out=prompter \
  					proto/api/prompter.proto
+	@python -m grpc_tools.protoc -Iproto --python_out=predictor --pyi_out=predictor --grpc_python_out=predictor \
+     					proto/api/predictor.proto
 
 .PHONY: tests
 tests:
@@ -82,3 +90,12 @@ tests:
 .PHONY: swag
 swag:
 	cd ./chat && swag init -g cmd/server/main.go -o ./docs
+
+.PHONY: ollama_up
+ollama_up:
+	docker run -d --gpus=all -v ./ollama:/root/.ollama -p 11434:11434 --name ollama ollama/ollama
+
+.PHONY: ollama_down
+ollama_down:
+	docker stop ollama
+	docker rm ollama

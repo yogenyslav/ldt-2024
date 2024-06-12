@@ -13,21 +13,29 @@ import (
 	"syscall"
 
 	"github.com/Nerzal/gocloak/v13"
+	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/auth"
+	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/rs/cors"
 	"github.com/rs/zerolog/log"
 	"github.com/yogenyslav/ldt-2024/api/config"
 	ac "github.com/yogenyslav/ldt-2024/api/internal/api/auth/controller"
 	ah "github.com/yogenyslav/ldt-2024/api/internal/api/auth/handler"
+	authmw "github.com/yogenyslav/ldt-2024/api/internal/api/auth/middleware"
+	"github.com/yogenyslav/ldt-2024/api/internal/api/middleware"
 	"github.com/yogenyslav/ldt-2024/api/internal/api/pb"
 	pc "github.com/yogenyslav/ldt-2024/api/internal/api/prompter/controller"
 	ph "github.com/yogenyslav/ldt-2024/api/internal/api/prompter/handler"
+	sc "github.com/yogenyslav/ldt-2024/api/internal/api/stock/controller"
+	sh "github.com/yogenyslav/ldt-2024/api/internal/api/stock/handler"
+	sr "github.com/yogenyslav/ldt-2024/api/internal/api/stock/repo"
 	"github.com/yogenyslav/ldt-2024/api/pkg/client"
 	"github.com/yogenyslav/ldt-2024/api/pkg/metrics"
 	"github.com/yogenyslav/ldt-2024/api/third_party"
 	"github.com/yogenyslav/pkg/infrastructure/prom"
 	"github.com/yogenyslav/pkg/infrastructure/tracing"
 	"github.com/yogenyslav/pkg/storage"
+	"github.com/yogenyslav/pkg/storage/mongo"
 	"github.com/yogenyslav/pkg/storage/postgres"
 	"go.opentelemetry.io/otel"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
@@ -41,13 +49,25 @@ type Server struct {
 	cfg      *config.Config
 	srv      *grpc.Server
 	pg       storage.SQLDatabase
+	mongo    storage.MongoDatabase
+	kc       *gocloak.GoCloak
 	exporter sdktrace.SpanExporter
 	tracer   trace.Tracer
 }
 
 // New creates a new Server instance.
 func New(cfg *config.Config) *Server {
+	kc := gocloak.NewClient(cfg.KeyCloak.URL)
+
+	logOpts := []logging.Option{
+		logging.WithLogOnEvents(logging.StartCall, logging.FinishCall),
+	}
+
 	var grpcOpts []grpc.ServerOption
+	grpcOpts = append(grpcOpts, grpc.ChainUnaryInterceptor(
+		logging.UnaryServerInterceptor(middleware.InterceptorLogger(), logOpts...),
+		auth.UnaryServerInterceptor(authmw.JWT(kc, cfg.KeyCloak.Realm)),
+	))
 	srv := grpc.NewServer(grpcOpts...)
 
 	exporter := tracing.MustNewExporter(context.Background(), cfg.Jaeger.URL())
@@ -59,6 +79,8 @@ func New(cfg *config.Config) *Server {
 		cfg:      cfg,
 		srv:      srv,
 		pg:       postgres.MustNew(cfg.Postgres, tracer),
+		mongo:    mongo.MustNew(cfg.Mongo, tracer),
+		kc:       kc,
 		exporter: exporter,
 		tracer:   tracer,
 	}
@@ -77,7 +99,7 @@ func (s *Server) Run() {
 	m := metrics.New()
 	m.Collect()
 
-	authController := ac.New(gocloak.NewClient(s.cfg.KeyCloak.URL), s.cfg.KeyCloak, s.tracer)
+	authController := ac.New(s.kc, s.cfg.KeyCloak, s.tracer)
 	authHandler := ah.New(authController, s.tracer, m)
 	pb.RegisterAuthServiceServer(s.srv, authHandler)
 
@@ -94,6 +116,11 @@ func (s *Server) Run() {
 	prompterController := pc.New(prompterClient, s.tracer)
 	prompterHandler := ph.New(prompterController, s.tracer)
 	pb.RegisterPrompterServer(s.srv, prompterHandler)
+
+	stockRepo := sr.New(s.mongo)
+	stockController := sc.New(stockRepo, s.tracer)
+	stockHandler := sh.New(stockController, s.tracer)
+	pb.RegisterStockServer(s.srv, stockHandler)
 
 	log.Info().Msg("starting the server")
 	go s.listen()
@@ -139,14 +166,16 @@ func (s *Server) listenGateway() {
 	if err = pb.RegisterPrompterHandler(ctx, mux, conn); err != nil {
 		log.Panic().Err(err).Msg("failed to register the prompter gateway")
 	}
+	if err = pb.RegisterStockHandler(ctx, mux, conn); err != nil {
+		log.Panic().Err(err).Msg("failed to register the stocj gateway")
+	}
 
 	withCors := cors.New(cors.Options{
 		AllowOriginFunc:  func(origin string) bool { return true },
 		AllowedMethods:   []string{"GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"},
-		AllowedHeaders:   []string{"ACCEPT", "Authorization", "Content-Type", "X-CSRF-Token"},
+		AllowedHeaders:   []string{"ACCEPT", "Authorization", "Content-Type", "X-CSRF-Token", "Access-Control-Allow-Origin", "Origin", "Accept", "ngrok-skip-browser-warning"},
 		ExposedHeaders:   []string{"Link"},
 		AllowCredentials: true,
-		MaxAge:           300,
 	}).Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log.Debug().Str("path", r.URL.Path).Msg("incoming request")
 		if strings.HasPrefix(r.URL.Path, "/api/v1") {
