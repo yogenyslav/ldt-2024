@@ -61,7 +61,7 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
         )
         self._name_matcher = ColbertMatcher(
             checkpoint_name="full_names_stocks.8bits",
-            collection_path="full_names_collection.json",
+            collection_path="./matcher/collections/full_names_collection.json",
         )
 
     def get_merged_df(self, contracts_path, kpgz_path):
@@ -196,6 +196,7 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
         return process_and_merge_stocks(stocks)
 
     def PrepareData(self, request: PrepareDataReq, context: ServicerContext):
+        print(self._code_matcher.match_to_3rd_level_code('вода'))
         # в PrepareDataReq лежит путь до .csv/.xlsx файла
 
         logging.info(request.sources)

@@ -23,9 +23,10 @@ class ColbertMatcher:
             ncells=5,
             centroid_score_threshold=0.7,
             ndocs=512,
+            root='/app/matcher/experiments'
         )
 
-        with Run().context(RunConfig(experiment="searcher")):
+        with Run().context(RunConfig(experiment="searcher", root='/app/matcher/experiments')):
             self.searcher = Searcher(index=checkpoint_name, collection=collection)
         
         if category2code_path:
