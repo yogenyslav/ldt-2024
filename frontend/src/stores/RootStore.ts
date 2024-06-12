@@ -80,6 +80,8 @@ export class RootStore {
                         body: content.response.body,
                         type: content.query.type as IncomingMessageType,
                         status: content.query.status as IncomingMessageStatus,
+                        product: content.query.product,
+                        period: content.query.period,
                     },
                     outcomingMessage: {
                         prompt: content.query.prompt,
@@ -181,7 +183,7 @@ export class RootStore {
         if (this.isFirstMessageInSession()) {
             this.renameSession({
                 id: this.activeSessionId as string,
-                title: message.prompt.slice(0, 25),
+                title: message.prompt?.slice(0, 25) || 'Без названия',
             });
         }
 
@@ -206,7 +208,7 @@ export class RootStore {
 
             this.activeDisplayedSession?.messages.push({
                 outcomingMessage: {
-                    prompt: message.prompt,
+                    prompt: message.prompt || '',
                 },
             });
         });
@@ -252,7 +254,6 @@ export class RootStore {
 
     cancelRequest() {
         this.sendMessage({
-            prompt: '',
             command: ChatCommand.Cancel,
         });
 

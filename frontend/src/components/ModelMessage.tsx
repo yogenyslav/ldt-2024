@@ -29,7 +29,6 @@ const ModelMessage = ({ incomingMessage, isLastMessage }: ModelMessageProps) => 
                                 <Button
                                     onClick={() => {
                                         rootStore.sendMessage({
-                                            prompt: '',
                                             command: ChatCommand.Valid,
                                         });
                                     }}
@@ -48,7 +47,6 @@ const ModelMessage = ({ incomingMessage, isLastMessage }: ModelMessageProps) => 
                                             });
 
                                             rootStore.sendMessage({
-                                                prompt: '',
                                                 command: ChatCommand.Invalid,
                                             });
 
