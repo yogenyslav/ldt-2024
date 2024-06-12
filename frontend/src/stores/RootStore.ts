@@ -138,13 +138,9 @@ export class RootStore {
             runInAction(() => {
                 const data = wsMessage.data;
 
-                if (wsMessage.finished) {
-                    return;
-                }
-
-                if (wsMessage.chunk) {
+                if (wsMessage.chunk && !wsMessage.finished) {
                     this.processIncomingChunk(data as WSIncomingChunk);
-                } else {
+                } else if (!wsMessage.chunk) {
                     this.processIncomingQuery(data as WSIncomingQuery);
                 }
             });
@@ -185,8 +181,6 @@ export class RootStore {
         }
 
         runInAction(() => {
-            console.log('addMessageToActiveSession', message);
-
             if (!this.activeDisplayedSession) {
                 this.activeDisplayedSession = { messages: [] };
             }
@@ -222,7 +216,7 @@ export class RootStore {
                 this.activeDisplayedSession.messages[lastMessageIndex].incomingMessage?.body;
 
             this.activeDisplayedSession.messages[lastMessageIndex].incomingMessage = {
-                body: lastMessageBody + info,
+                body: lastMessageBody ? lastMessageBody + info : info,
                 type: IncomingMessageType.Undefined,
                 status: IncomingMessageStatus.Valid,
             };
