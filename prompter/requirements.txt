@@ -10,3 +10,5 @@ accelerate
 bitsandbytes
 peft
 sentencepiece
+ollama
+python-dotenv
