@@ -2,9 +2,11 @@ package controller
 
 import (
 	"context"
+	"errors"
 
-	"github.com/rs/zerolog/log"
+	"github.com/Nerzal/gocloak/v13"
 	"github.com/yogenyslav/ldt-2024/api/internal/api/auth/model"
+	"github.com/yogenyslav/ldt-2024/api/internal/shared"
 )
 
 // Login выполняет вход пользователя в систему.
@@ -19,13 +21,27 @@ func (ctrl *Controller) Login(ctx context.Context, params model.LoginReq) (model
 		return resp, err
 	}
 
-	info, err := ctrl.kc.RetrospectToken(ctx, token.AccessToken, ctrl.cfg.ClientID, ctrl.cfg.ClientSecret, ctrl.cfg.Realm)
+	userInfo, err := ctrl.kc.GetUserInfo(ctx, token.AccessToken, ctrl.cfg.Realm)
+	if err != nil {
+		return resp, err
+	}
+	if userInfo.Sub == nil {
+		return resp, errors.New("userID is nil")
+	}
+
+	userID := *userInfo.Sub
+
+	groups, err := ctrl.kc.GetUserGroups(ctx, token.AccessToken, ctrl.cfg.Realm, userID, gocloak.GetGroupsParams{})
 	if err != nil {
 		return resp, err
 	}
 
-	log.Debug().Any("permissions", info.Permissions).Msg("token info")
+	roles := make([]shared.UserRole, len(groups))
+	for idx, role := range groups {
+		roles[idx] = shared.RoleFromString(*role.Name)
+	}
+
 	resp.Token = token.AccessToken
-	resp.Role = "admin"
+	resp.Roles = roles
 	return resp, nil
 }

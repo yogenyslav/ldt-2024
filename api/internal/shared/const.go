@@ -1,5 +1,7 @@
 package shared
 
+import "strings"
+
 const (
 	// UsernameKey ключ для получения имени пользователя из контекста.
 	UsernameKey = "x-username"
@@ -11,22 +13,22 @@ const (
 type UserRole int8
 
 const (
-	_ UserRole = iota
-	Admin
-	Analyst
-	Buyer
+	RoleUndefined UserRole = iota
+	RoleAdmin
+	RoleAnalyst
+	RoleBuyer
 )
 
-// ToString возвращает строковое представление роли.
-func (r UserRole) ToString() string {
-	switch r {
-	case Admin:
-		return "ADMIN"
-	case Analyst:
-		return "ANALYST"
-	case Buyer:
-		return "BUYER"
+// RoleFromString конвертирует строку роли в число.
+func RoleFromString(v string) UserRole {
+	switch strings.ToLower(v) {
+	case "admin":
+		return RoleAdmin
+	case "analyst":
+		return RoleAnalyst
+	case "buyer":
+		return RoleBuyer
 	default:
-		return "UNDEFINED"
+		return RoleUndefined
 	}
 }
