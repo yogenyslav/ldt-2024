@@ -11,14 +11,14 @@ type stockController interface {
 	ListProducts(ctx context.Context) ([]*pb.Product, error)
 }
 
-// Handler is a struct that implements stock server.
+// Handler имплементация сервиса Stock.
 type Handler struct {
 	pb.UnimplementedStockServer
 	ctrl   stockController
 	tracer trace.Tracer
 }
 
-// New creates new Handler.
+// New создает новый Handler.
 func New(ctrl stockController, tracer trace.Tracer) *Handler {
 	return &Handler{
 		ctrl:   ctrl,

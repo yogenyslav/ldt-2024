@@ -7,7 +7,7 @@ import (
 	"github.com/yogenyslav/ldt-2024/chat/internal/chat/model"
 )
 
-// SessionDto is a session model for the domain layer.
+// SessionDto модель для передачи сессии внутри сервиса.
 type SessionDto struct {
 	CreatedAt time.Time `json:"created_at"`
 	Title     string    `json:"title"`
@@ -15,23 +15,23 @@ type SessionDto struct {
 	ID        uuid.UUID `json:"id"`
 }
 
-// NewSessionResp is a session create response model.
+// NewSessionResp модель для ответа на запрос создания сессии.
 type NewSessionResp struct {
 	ID uuid.UUID `json:"id"`
 }
 
-// ListResp is a struct for list sessions response.
+// ListResp модель для ответа на запрос списка сессий.
 type ListResp struct {
 	Sessions []SessionDto `json:"sessions"`
 }
 
-// RenameReq is a model for session rename request.
+// RenameReq модель для запроса на переименование сессии.
 type RenameReq struct {
-	Title string    `json:"title" validate:"required,gte=3,max=25"`
+	Title string    `json:"title" validate:"required"`
 	ID    uuid.UUID `json:"id" validate:"required"`
 }
 
-// FindOneResp is a model for find one session request.
+// FindOneResp модель для ответа на запрос получения сессии по id.
 type FindOneResp struct {
 	Title    string              `json:"title"`
 	Content  []SessionContentDto `json:"content"`
@@ -40,7 +40,7 @@ type FindOneResp struct {
 	ID       uuid.UUID           `json:"id"`
 }
 
-// SessionContentDto is a model that holds all domain layer queries and responses for related session.
+// SessionContentDto модель для передачи контента сессии внутри сервиса.
 type SessionContentDto struct {
 	Response model.ResponseDto `json:"response"`
 	Query    model.QueryDto    `json:"query"`

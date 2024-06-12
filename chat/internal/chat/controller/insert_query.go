@@ -6,7 +6,6 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
-	"github.com/yogenyslav/ldt-2024/chat/internal/api/pb"
 	"github.com/yogenyslav/ldt-2024/chat/internal/chat/model"
 	"github.com/yogenyslav/ldt-2024/chat/internal/shared"
 	"github.com/yogenyslav/ldt-2024/chat/pkg"
@@ -14,9 +13,7 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
-// InsertQuery creates new query.
-//
-//nolint:funlen // will be soon refactored
+// InsertQuery добавляет запрос в базу данных.
 func (ctrl *Controller) InsertQuery(ctx context.Context, params model.QueryCreateReq, username string, sessionID uuid.UUID) (model.QueryDto, error) {
 	ctx, span := ctrl.tracer.Start(
 		ctx,
@@ -30,17 +27,20 @@ func (ctrl *Controller) InsertQuery(ctx context.Context, params model.QueryCreat
 	defer span.End()
 
 	var query model.QueryDto
-
 	if params.Prompt == "" {
 		return query, shared.ErrEmptyQueryHint
 	}
 
 	tx, err := ctrl.cr.BeginTx(ctx)
 	if err != nil {
+		log.Error().Err(err).Msg("failed to begin transaction")
 		return query, shared.ErrBeginTx
 	}
 	defer func() {
-		_ = ctrl.cr.RollbackTx(tx) //nolint:errcheck // transaction is either properly closed or nothing can be done
+		err = ctrl.cr.RollbackTx(tx)
+		if err != nil {
+			log.Error().Err(err).Msg("failed to rollback transaction")
+		}
 	}()
 
 	queryID, err := ctrl.cr.InsertQuery(tx, model.QueryDao{
@@ -50,15 +50,13 @@ func (ctrl *Controller) InsertQuery(ctx context.Context, params model.QueryCreat
 		Status:    shared.StatusPending,
 	})
 	if err != nil {
+		log.Error().Err(err).Msg("failed to insert query")
 		return query, shared.ErrCreateQuery
 	}
 
 	tx = pkg.PushSpan(tx, span)
-
-	in := &pb.ExtractReq{Prompt: params.Prompt}
-	meta, err := ctrl.prompter.Extract(tx, in)
+	meta, err := ctrl.extractMeta(tx, params.Prompt)
 	if err != nil {
-		log.Error().Err(err).Msg("failed to extract meta from prompt")
 		return query, err
 	}
 
@@ -67,7 +65,6 @@ func (ctrl *Controller) InsertQuery(ctx context.Context, params model.QueryCreat
 		Type:    shared.QueryType(meta.GetType()),
 		Period:  meta.GetPeriod(),
 	}, queryID); err != nil {
-		log.Error().Err(err).Msg("failed to update query metadata")
 		return query, err
 	}
 
@@ -75,6 +72,7 @@ func (ctrl *Controller) InsertQuery(ctx context.Context, params model.QueryCreat
 		return query, err
 	}
 	if err := ctrl.cr.CommitTx(tx); err != nil {
+		log.Error().Err(err).Msg("failed to commit transaction")
 		return query, shared.ErrCommitTx
 	}
 

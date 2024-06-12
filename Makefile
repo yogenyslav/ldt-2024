@@ -1,5 +1,11 @@
 include .env
 
+.PHONY: deps
+deps:
+	curl -fsSL \
+        https://raw.githubusercontent.com/pressly/goose/master/install.sh |\
+        GOOSE_INSTALL=. sh
+
 .PHONY: lint
 lint:
 	@echo "Starting linter"
@@ -23,7 +29,6 @@ docker_remove: docker_down
 	docker volume rm ${BASE_IMAGE}_jaeger_data
 	docker volume rm ${BASE_IMAGE}_redis_data
 	docker volume rm ${BASE_IMAGE}_redis_conf
-	docker volume rm ${BASE_IMAGE}_prompter_data
 	docker volume rm ${BASE_IMAGE}_mongo_data
 	docker image rm chat
 	docker image rm api
@@ -38,31 +43,31 @@ docker_purge_restart: docker_remove docker_up
 
 .PHONY: migrate_up
 migrate_up:
-	cd migrations && goose postgres "user=${POSTGRES_USER} \
+	cd migrations && ../bin/goose postgres "user=${POSTGRES_USER} \
 		password=${POSTGRES_PASSWORD} dbname=${POSTGRES_DB} sslmode=disable \
 		host=${POSTGRES_HOST} port=${POSTGRES_PORT}" up
 
 .PHONY: migrate_down
 migrate_down:
-	cd migrations && goose postgres "user=${POSTGRES_USER} \
+	cd migrations && ../bin/goose postgres "user=${POSTGRES_USER} \
 		password=${POSTGRES_PASSWORD} dbname=${POSTGRES_DB} sslmode=disable \
 		host=localhost port=${POSTGRES_PORT}" down
 
 .PHONY: migrate_up_test
 migrate_up_test:
-	cd migrations && goose postgres "user=${POSTGRES_TEST_USER} \
+	cd migrations && ../bin/goose postgres "user=${POSTGRES_TEST_USER} \
 		password=${POSTGRES_TEST_PASSWORD} dbname=${POSTGRES_TEST_DB} sslmode=disable \
 		host=${POSTGRES_TEST_HOST} port=${POSTGRES_TEST_PORT}" up
 
 .PHONY: migrate_down_test
 migrate_down_test:
-	cd migrations && goose postgres "user=${POSTGRES_TEST_USER} \
+	cd migrations && ../bin/goose postgres "user=${POSTGRES_TEST_USER} \
 		password=${POSTGRES_TEST_PASSWORD} dbname=${POSTGRES_TEST_DB} sslmode=disable \
 		host=localhost port=${POSTGRES_TEST_PORT}" down
 
 .PHONY: migrate_new
 migrate_new:
-	cd migrations && goose create $(name) sql
+	cd migrations && ../bin/goose create $(name) sql
 
 .PHONY: proto
 proto:
@@ -99,3 +104,6 @@ ollama_up:
 ollama_down:
 	docker stop ollama
 	docker rm ollama
+
+.PHONY: run_all
+run_all: deps migrate_up ollama_up docker_up

@@ -7,7 +7,7 @@ import (
 	"github.com/yogenyslav/ldt-2024/chat/internal/chat/model"
 )
 
-// SessionDao is a session model for the data access layer.
+// SessionDao модель для хранения сессии в базе данных.
 type SessionDao struct {
 	CreatedAt time.Time `db:"created_at"`
 	Username  string    `db:"username"`
@@ -17,7 +17,7 @@ type SessionDao struct {
 	ID        uuid.UUID `db:"id"`
 }
 
-// ToDto converts a SessionDao to a SessionDto.
+// ToDto конвертирует SessionDao в SessionDto.
 func (s SessionDao) ToDto() SessionDto {
 	return SessionDto{
 		CreatedAt: s.CreatedAt,
@@ -27,13 +27,13 @@ func (s SessionDao) ToDto() SessionDto {
 	}
 }
 
-// SessionContentDao is a model that holds all data layer queries and responses for related session.
+// SessionContentDao модель сообщений и запросов в сессии.
 type SessionContentDao struct {
 	Response model.ResponseDao `db:"response"`
 	Query    model.QueryDao    `db:"query"`
 }
 
-// SessionMeta is a model for session meta info.
+// SessionMeta метаинформация о сессии.
 type SessionMeta struct {
 	Username  string `db:"username"`
 	Title     string `db:"title"`

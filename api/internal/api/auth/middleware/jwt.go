@@ -10,7 +10,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-// JWT is a middleware for validating jwt token in request.
+// JWT мидлварь для авторизации по JWT.
 func JWT(kc *gocloak.GoCloak, realm string) auth.AuthFunc {
 	return func(ctx context.Context) (context.Context, error) {
 		token, err := auth.AuthFromMD(ctx, "Bearer")

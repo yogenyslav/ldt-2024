@@ -10,19 +10,19 @@ import (
 
 const coll = "product"
 
-// Repo is a stock repository.
+// Repo репозиторий для работы с продуктами.
 type Repo struct {
 	mongo storage.MongoDatabase
 }
 
-// New creates new Repo.
+// New создает новый репозиторий.
 func New(mongo storage.MongoDatabase) *Repo {
 	return &Repo{
 		mongo: mongo,
 	}
 }
 
-// ListProducts finds all products.
+// ListProducts найти все продукты.
 func (r *Repo) ListProducts(ctx context.Context) ([]model.ProductDao, error) {
 	var products []model.ProductDao
 	err := r.mongo.FindMany(ctx, coll, bson.D{}, &products)

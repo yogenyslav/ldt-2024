@@ -14,7 +14,7 @@ type sessionHandler interface {
 	FindOne(c *fiber.Ctx) error
 }
 
-// SetupSessionRoutes maps the session routes to the session handler.
+// SetupSessionRoutes маппит пути для сессий.
 func SetupSessionRoutes(app *fiber.App, h sessionHandler, kc *gocloak.GoCloak, realm, cipher string) {
 	g := app.Group("/chat/session")
 	g.Use(middleware.JWT(kc, realm, cipher))

@@ -1,7 +1,7 @@
 package shared
 
 var (
-	// UsernameKey is a key for username in context.
+	// UsernameKey ключ для получения имени пользователя из контекста.
 	UsernameKey = "x-username"
 )
 
@@ -9,18 +9,24 @@ const (
 	enumsUndefined = "UNDEFINED"
 )
 
+// ResponseStatus статус ответа.
 type ResponseStatus int8
 
 const (
 	_ ResponseStatus = iota
+	// StatusCreated статус создания.
 	StatusCreated
+	// StatusProcessing статус обработки.
 	StatusProcessing
+	// StatusSuccess статус успешного завершения.
 	StatusSuccess
+	// StatusError статус ошибки.
 	StatusError
+	// StatusCanceled статус отмены.
 	StatusCanceled
 )
 
-// ToString return string representation of ResponseStatus.
+// ToString возвращает строковое представление статуса ответа.
 func (s ResponseStatus) ToString() string {
 	switch s {
 	case StatusCreated:
@@ -37,15 +43,18 @@ func (s ResponseStatus) ToString() string {
 	return enumsUndefined
 }
 
+// QueryType тип запроса.
 type QueryType int8
 
 const (
 	_ QueryType = iota
+	// TypePrediction предсказание.
 	TypePrediction
+	// TypeStock акция.
 	TypeStock
 )
 
-// ToString return string representation of QueryType.
+// ToString возвращает строковое представление типа запроса.
 func (t QueryType) ToString() string {
 	switch t {
 	case TypePrediction:
@@ -56,29 +65,66 @@ func (t QueryType) ToString() string {
 	return enumsUndefined
 }
 
+// QueryCommand команда запроса.
 type QueryCommand string
 
 const (
-	CommandValid   QueryCommand = "valid"
+	// CommandValid команда валидации.
+	CommandValid QueryCommand = "valid"
+	// CommandInvalid команда невалидации.
 	CommandInvalid QueryCommand = "invalid"
-	CommandCancel  QueryCommand = "cancel"
+	// CommandCancel команда отмены.
+	CommandCancel QueryCommand = "cancel"
 )
 
+// QueryStatus статус запроса.
 type QueryStatus int8
 
 const (
 	_ QueryStatus = iota
+	// StatusPending статус ожидания.
 	StatusPending
+	// StatusValid статус валидности.
 	StatusValid
+	// StatusInvalid статус невалидного запроса.
+	StatusInvalid
 )
 
-// ToString return string representation of QueryStatus.
+// ToString возвращает строковое представление статуса запроса.
 func (s QueryStatus) ToString() string {
 	switch s {
 	case StatusPending:
 		return "PENDING"
 	case StatusValid:
 		return "VALID"
+	case StatusInvalid:
+		return "INVALID"
+	}
+	return enumsUndefined
+}
+
+// UserRole роль пользователя.
+type UserRole int8
+
+const (
+	_ UserRole = iota
+	// RoleAdmin администратор.
+	RoleAdmin
+	// RoleAnalyst аналитик.
+	RoleAnalyst
+	// RoleBuyer закупщик.
+	RoleBuyer
+)
+
+// ToString возвращает строковое представление роли пользователя.
+func (r UserRole) ToString() string {
+	switch r {
+	case RoleAdmin:
+		return "ADMIN"
+	case RoleAnalyst:
+		return "ANALYST"
+	case RoleBuyer:
+		return "BUYER"
 	}
 	return enumsUndefined
 }

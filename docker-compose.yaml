@@ -4,7 +4,6 @@ volumes:
   prom_data:
   redis_data:
   redis_conf:
-  prompter_data:
   mongo_data:
 
 services:
@@ -110,15 +109,6 @@ services:
       - "9990:9990"
     depends_on:
       - jaeger
-    volumes:
-      - prompter_data:/root/.cache/huggingface
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [gpu]
 
   chat:
     build:

@@ -12,14 +12,14 @@ type prompterController interface {
 	Extract(ctx context.Context, params model.ExtractReq) (*pb.ExtractedPrompt, error)
 }
 
-// Handler is a struct that implements prompter server.
+// Handler имплементация сервиса Prompter.
 type Handler struct {
 	pb.UnimplementedPrompterServer
 	ctrl   prompterController
 	tracer trace.Tracer
 }
 
-// New creates new Handler.
+// New создает новый Handler.
 func New(ctrl prompterController, tracer trace.Tracer) *Handler {
 	return &Handler{
 		ctrl:   ctrl,

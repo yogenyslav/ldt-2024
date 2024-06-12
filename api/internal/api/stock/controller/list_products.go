@@ -6,7 +6,7 @@ import (
 	"github.com/yogenyslav/ldt-2024/api/internal/api/pb"
 )
 
-// ListProducts return slice of *pb.Product.
+// ListProducts получает список всех продуктов.
 func (ctrl *Controller) ListProducts(ctx context.Context) ([]*pb.Product, error) {
 	ctx, span := ctrl.tracer.Start(ctx, "Controller.ListProducts")
 	defer span.End()

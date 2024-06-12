@@ -8,17 +8,17 @@ import (
 	"github.com/yogenyslav/pkg/storage"
 )
 
-// Repo chat repository.
+// Repo репозиторий чата.
 type Repo struct {
 	pg storage.SQLDatabase
 }
 
-// New creates new Repo.
+// New создает новый Repo.
 func New(pg storage.SQLDatabase) *Repo {
 	return &Repo{pg: pg}
 }
 
-// BeginTx starts new transaction.
+// BeginTx начинает транзакцию.
 func (r *Repo) BeginTx(ctx context.Context) (context.Context, error) {
 	ctx, err := r.pg.BeginSerializable(ctx)
 	if err != nil {
@@ -27,12 +27,12 @@ func (r *Repo) BeginTx(ctx context.Context) (context.Context, error) {
 	return ctx, nil
 }
 
-// CommitTx commits transaction.
+// CommitTx коммитит транзакцию.
 func (r *Repo) CommitTx(ctx context.Context) error {
 	return r.pg.CommitTx(ctx)
 }
 
-// RollbackTx rollbacks transaction.
+// RollbackTx откатывает транзакцию.
 func (r *Repo) RollbackTx(ctx context.Context) error {
 	return r.pg.RollbackTx(ctx)
 }
@@ -43,7 +43,7 @@ const insertQuery = `
 	returning id;
 `
 
-// InsertQuery creates new query and returns its id.
+// InsertQuery создает новый запрос и возвращает его id.
 func (r *Repo) InsertQuery(ctx context.Context, params model.QueryDao) (int64, error) {
 	var id int64
 
@@ -56,7 +56,7 @@ const insertResponse = `
 	values ($1);
 `
 
-// InsertResponse create new response with processing status.
+// InsertResponse создает новый ответ со статусом "processing".
 func (r *Repo) InsertResponse(ctx context.Context, params model.ResponseDao) error {
 	_, err := r.pg.ExecTx(ctx, insertResponse, params.QueryID)
 	return err
@@ -68,7 +68,7 @@ const updateQueryMeta = `
 	where id = $1;
 `
 
-// UpdateQueryMeta updates metadata for query after passing through prompter.
+// UpdateQueryMeta обновляет метаданные запроса по id.
 func (r *Repo) UpdateQueryMeta(ctx context.Context, params model.QueryMeta, id int64) error {
 	_, err := r.pg.ExecTx(ctx, updateQueryMeta, id, params.Product, params.Type, params.Period)
 	return err
@@ -80,7 +80,7 @@ const updateResponse = `
 	where query_id = $1;
 `
 
-// UpdateResponse updates response status by query id.
+// UpdateResponse обновляет ответ по id.
 func (r *Repo) UpdateResponse(ctx context.Context, params model.ResponseDao) error {
 	tag, err := r.pg.Exec(ctx, updateResponse, params.QueryID, params.Body, params.Status)
 	if err != nil {
@@ -98,7 +98,7 @@ const findQueryPrompt = `
 	where id = $1;
 `
 
-// FindQueryPrompt finds query prompt by id.
+// FindQueryPrompt возвращает текст запроса по id.
 func (r *Repo) FindQueryPrompt(ctx context.Context, id int64) (string, error) {
 	var prompt string
 	err := r.pg.Query(ctx, &prompt, findQueryPrompt, id)
@@ -111,7 +111,7 @@ const updateQuery = `
 	where id = $1;
 `
 
-// UpdateQuery updates query by id.
+// UpdateQuery обновляет запрос по id.
 func (r *Repo) UpdateQuery(ctx context.Context, params model.QueryDao) error {
 	tag, err := r.pg.Exec(ctx, updateQuery, params.ID, params.Prompt, params.Status, params.Product, params.Type, params.Period)
 	if err != nil {
@@ -129,7 +129,7 @@ const updateQueryStatus = `
 	where id = $1;
 `
 
-// UpdateQueryStatus updates query status by id.
+// UpdateQueryStatus обновляет статус запроса по id.
 func (r *Repo) UpdateQueryStatus(ctx context.Context, id int64, status shared.QueryStatus) error {
 	tag, err := r.pg.Exec(ctx, updateQueryStatus, id, status)
 	if err != nil {

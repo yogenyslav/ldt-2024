@@ -1,6 +1,6 @@
 package srvconfig
 
-// Config is the struct for the server configuration.
+// Config конфигурация сервера.
 type Config struct {
 	CipherKey   string   `yaml:"cipher_key"`
 	LogLevel    string   `yaml:"log_level"`

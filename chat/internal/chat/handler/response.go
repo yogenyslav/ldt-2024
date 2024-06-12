@@ -5,7 +5,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-// Response is a struct for websocket error responses.
+// Response модель ответов чата.
 type Response struct {
 	Err    string `json:"err,omitempty"`
 	Data   any    `json:"data,omitempty"`

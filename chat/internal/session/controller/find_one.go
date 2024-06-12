@@ -3,6 +3,7 @@ package controller
 import (
 	"context"
 	"errors"
+	"github.com/rs/zerolog/log"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
@@ -12,6 +13,7 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
+// FindOne находит сессию по id.
 func (ctrl *Controller) FindOne(ctx context.Context, id uuid.UUID, username string) (model.FindOneResp, error) {
 	ctx, span := ctrl.tracer.Start(
 		ctx,
@@ -30,6 +32,7 @@ func (ctrl *Controller) FindOne(ctx context.Context, id uuid.UUID, username stri
 		if errors.Is(err, pgx.ErrNoRows) {
 			return resp, shared.ErrNoSessionWithID
 		}
+		log.Error().Err(err).Msg("failed to find meta")
 		return resp, shared.ErrGetSession
 	}
 	if meta.IsDeleted {
@@ -43,6 +46,7 @@ func (ctrl *Controller) FindOne(ctx context.Context, id uuid.UUID, username stri
 
 	contentDB, err := ctrl.repo.FindContent(ctx, id)
 	if err != nil {
+		log.Error().Err(err).Msg("failed to find session content")
 		return resp, shared.ErrGetSession
 	}
 

@@ -4,12 +4,12 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 )
 
-// Metrics is the struct that holds all metrics.
+// Metrics содержит описание всех метрик.
 type Metrics struct {
 	LoginCount prometheus.Counter
 }
 
-// New creates a new Metrics.
+// New создает новый экземпляр метрик.
 func New() *Metrics {
 	return &Metrics{
 		LoginCount: prometheus.NewCounter(prometheus.CounterOpts{
@@ -20,7 +20,7 @@ func New() *Metrics {
 	}
 }
 
-// Collect registers all metrics.
+// Collect регистрирует сборку метрик.
 func (m *Metrics) Collect() {
 	prometheus.MustRegister(m.LoginCount)
 }

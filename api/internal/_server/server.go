@@ -44,7 +44,7 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-// Server main struct that holds dependencies.
+// Server струткура сервера со всеми зависимостями.
 type Server struct {
 	cfg      *config.Config
 	srv      *grpc.Server
@@ -55,7 +55,7 @@ type Server struct {
 	tracer   trace.Tracer
 }
 
-// New creates a new Server instance.
+// New создает новый Server.
 func New(cfg *config.Config) *Server {
 	kc := gocloak.NewClient(cfg.KeyCloak.URL)
 
@@ -86,7 +86,7 @@ func New(cfg *config.Config) *Server {
 	}
 }
 
-// Run setups the server and starts it.
+// Run создает все контроллеры и хендлеры и запускает сервер.
 func (s *Server) Run() {
 	defer s.pg.Close()
 	defer func() {
@@ -190,13 +190,16 @@ func (s *Server) listenGateway() {
 		Handler: withCors,
 	}
 
-	if err = gwServer.ListenAndServe(); err != nil { //nolint:G114 // not a security issue
+	if err = gwServer.ListenAndServe(); err != nil {
 		log.Error().Err(err).Msg("failed to start the gateway server")
 	}
 }
 
 func getOpenAPIHandler() http.Handler {
-	_ = mime.AddExtensionType(".svg", "image/svg+xml")
+	err := mime.AddExtensionType(".svg", "image/svg+xml")
+	if err != nil {
+		log.Error().Err(err).Msg("couldn't add mime type")
+	}
 	subFS, err := fs.Sub(third_party.OpenAPI, "OpenAPI")
 	if err != nil {
 		log.Error().Err(err).Msg("couldn't create sub filesystem")

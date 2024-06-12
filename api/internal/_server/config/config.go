@@ -1,6 +1,6 @@
 package srvconfig
 
-// Config is the struct for the server configuration.
+// Config конфигурация сервера.
 type Config struct {
 	LogLevel    string `yaml:"log_level"`
 	Port        int    `yaml:"port"`

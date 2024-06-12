@@ -34,6 +34,10 @@ definitions:
     type: object
   model.LoginResp:
     properties:
+      roles:
+        items:
+          type: string
+        type: array
       token:
         type: string
     type: object
@@ -48,6 +52,8 @@ definitions:
         type: string
       id:
         type: integer
+      period:
+        type: string
       product:
         type: string
       prompt:
@@ -62,8 +68,6 @@ definitions:
       id:
         type: string
       title:
-        maxLength: 25
-        minLength: 3
         type: string
     required:
     - id

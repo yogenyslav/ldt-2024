@@ -6,13 +6,13 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
-// Controller is a struct that implements prompter business logic.
+// Controller имплементирует методы для работы с Prompter.
 type Controller struct {
 	prompter pb.PrompterClient
 	tracer   trace.Tracer
 }
 
-// New creates new Controller.
+// New создает новый Controller.
 func New(prompter client.GrpcClient, tracer trace.Tracer) *Controller {
 	return &Controller{
 		prompter: pb.NewPrompterClient(prompter.GetConn()),

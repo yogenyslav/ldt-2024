@@ -11,7 +11,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-// Login logs in a user.
+// Login авторизует пользователя.
 func (h *Handler) Login(c context.Context, params *pb.LoginRequest) (*pb.LoginResponse, error) {
 	ctx, err := pkg.GetTraceCtx(c)
 	if err != nil {
@@ -36,10 +36,10 @@ func (h *Handler) Login(c context.Context, params *pb.LoginRequest) (*pb.LoginRe
 		return nil, status.Error(codes.Unauthenticated, err.Error())
 	}
 
-	log.Info().Str("username", req.Username).Msg("user logged in")
 	h.metrics.LoginCount.Inc()
 
 	return &pb.LoginResponse{
 		Token: resp.Token,
+		Roles: resp.Roles,
 	}, status.Error(codes.OK, "login success")
 }
