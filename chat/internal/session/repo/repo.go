@@ -96,7 +96,7 @@ func (r *Repo) FindMeta(ctx context.Context, id uuid.UUID) (model.SessionMeta, e
 const findContent = `
 	select 
 		(r.created_at, r.body, r.status) as response,
-		(q.created_at, q.prompt, q.product, q.status, q.type, q.id) as query
+		(q.created_at, q.prompt, q.product, q.period, q.status, q.type, q.id) as query
 	from chat.query q
 	join
 	    chat.response r

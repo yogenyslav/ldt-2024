@@ -3,6 +3,7 @@ package controller
 import (
 	"context"
 	"errors"
+	"github.com/rs/zerolog/log"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
@@ -31,6 +32,7 @@ func (ctrl *Controller) FindOne(ctx context.Context, id uuid.UUID, username stri
 		if errors.Is(err, pgx.ErrNoRows) {
 			return resp, shared.ErrNoSessionWithID
 		}
+		log.Error().Err(err).Msg("failed to find meta")
 		return resp, shared.ErrGetSession
 	}
 	if meta.IsDeleted {
@@ -44,6 +46,7 @@ func (ctrl *Controller) FindOne(ctx context.Context, id uuid.UUID, username stri
 
 	contentDB, err := ctrl.repo.FindContent(ctx, id)
 	if err != nil {
+		log.Error().Err(err).Msg("failed to find session content")
 		return resp, shared.ErrGetSession
 	}
 
