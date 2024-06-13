@@ -116,7 +116,13 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
                 d['volume'] = None
                 
         return forecast_dict
-        
+    
+    def get_history(self, df):
+        hisory = df[['conclusion_date', 'paid_rub']].copy()
+        hisory = hisory.resample("ME", on='conclusion_date')['paid_rub'].sum().reset_index()
+        hisory = hisory[hisory['paid_rub'] > 0]
+        return hisory
+            
     def get_codes_data(self, merged_df, all_kpgz_codes, forecast_dict, regular_codes):
         codes_stat = merged_df
         codes_stat["execution_duration"] = (
@@ -170,7 +176,8 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
             )
 
             forecast = self.prepare_forecast_dict(forecast_dict.get(code, None), mean_ref_price)
-
+            history = self.get_history(cur_code_df).to_dict(orient="records")
+            
             all_data = cur_code_df.to_dict(orient="records")
             codes_data.append(
                 {
@@ -178,6 +185,7 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
                     "code_name": code_name,
                     "is_regular": code in regular_codes,
                     "forecast": forecast,
+                    "history": history,
                     "median_execution_days": (
                         median_execution_duration
                         if median_execution_duration is not pd.NA
@@ -194,7 +202,7 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
                     "top5_providers": (
                         top5_providers if top5_providers is not pd.NA else None
                     ),
-                    "contracts_in_code": all_data,
+                    "contracts_in_code": all_data[:5],
                 }
             )
 
@@ -269,12 +277,14 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
             years=int(request.period) // 12, months=int(request.period) % 12
         )
         
-        if forecast is not None:
+        if code_info["forecast"] is not None:
             forecast = [
                 x
                 for x in code_info["forecast"]
                 if start_dt.timestamp() <= x["date"].timestamp() <= end_dt.timestamp()
             ]
+        else:
+            forecast = None
             
         code_info["forecast"] = forecast
 
