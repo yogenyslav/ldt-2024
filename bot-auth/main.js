@@ -28,7 +28,7 @@ document.getElementById('login-form').addEventListener('submit', async (event) =
 
   // Send a request to the API to validate the credentials
   try {
-    const response = await fetch('http://localhost:9998/v1/auth/login', {
+    const response = await fetch('http://localhost:9998/api/v1/auth/login', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -40,15 +40,15 @@ document.getElementById('login-form').addEventListener('submit', async (event) =
       // Credentials are valid, do something
       console.log('Login successful!');
       const data = await response.json();
-      console.log('Token:', data.token);
+      console.log('Data:', data);
 
       try {
-      const resp = await fetch('http://localhost:11000/auth', {
+      const resp = await fetch('http://localhost:11000/bot/auth', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ tg_id, token: data.token })
+        body: JSON.stringify({ tg_id, token: data.token, roles: data.roles })
       })
     } catch (error) {
       console.error('An error occurred:', error);

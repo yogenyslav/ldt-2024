@@ -4,6 +4,8 @@ server:
   cors_origins:
     - "*"
   cipher_key: "32-bit cipher hex key"
+  bot_token: "BOT:TOKEN"
+  debug_mode: true
 
 keycloak:
   url: "http://keycloak:8080"
@@ -17,6 +19,13 @@ postgres:
   db: "dev"
   ssl: false
   retry_timeout: 20
+
+redis:
+  username: ""
+  password: "redispass"
+  host: "localhost"
+  port: 6379
+  db: 0
 
 jaeger:
   host: "jaeger"

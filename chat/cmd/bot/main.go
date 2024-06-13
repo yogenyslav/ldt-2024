@@ -7,13 +7,6 @@ import (
 	"github.com/yogenyslav/pkg/loctime"
 )
 
-// @title Chat service API
-// @version 1.0
-// @description Документация API чат-сервиса команды misis.tech
-// @license.name BSD-3-Clause
-// @license.url https://opensource.org/license/bsd-3-clause
-// @host hawk-handy-wolf.ngrok-free.app
-// @BasePath /chat
 func main() {
 	cfg := config.MustNew("./config/config.yaml")
 	level, err := zerolog.ParseLevel(cfg.Server.LogLevel)
@@ -22,6 +15,6 @@ func main() {
 	}
 	zerolog.SetGlobalLevel(level)
 	loctime.SetLocation(loctime.MoscowLocation)
-	srv := server.NewServer(cfg)
-	srv.Run()
+	bot := server.NewBot(cfg)
+	bot.Run()
 }

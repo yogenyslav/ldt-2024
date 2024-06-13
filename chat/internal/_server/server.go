@@ -31,6 +31,7 @@ import (
 	sc "github.com/yogenyslav/ldt-2024/chat/internal/session/controller"
 	sh "github.com/yogenyslav/ldt-2024/chat/internal/session/handler"
 	sr "github.com/yogenyslav/ldt-2024/chat/internal/session/repo"
+	chatresp "github.com/yogenyslav/ldt-2024/chat/pkg/chat_response"
 	"github.com/yogenyslav/ldt-2024/chat/pkg/client"
 	"github.com/yogenyslav/pkg/infrastructure/prom"
 	"github.com/yogenyslav/pkg/infrastructure/tracing"
@@ -52,8 +53,8 @@ type Server struct {
 	kc       *gocloak.GoCloak
 }
 
-// New создает новый сервер.
-func New(cfg *config.Config) *Server {
+// NewServer создает новый сервер.
+func NewServer(cfg *config.Config) *Server {
 	app := fiber.New(fiber.Config{
 		ErrorHandler: srvresp.NewErrorHandler(errStatus).Handler,
 		AppName:      "GKU Chat",
@@ -134,7 +135,7 @@ func (s *Server) Run() {
 	chat.SetupChatRoutes(s.app, chatHandler, s.getWsConfig())
 
 	go s.listen()
-	go prom.HandlePrometheus(s.cfg.Prometheus)
+	go prom.HandlePrometheus(s.cfg.ChatProm)
 
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM, syscall.SIGINT)
@@ -143,7 +144,7 @@ func (s *Server) Run() {
 }
 
 func (s *Server) listen() {
-	addr := fmt.Sprintf(":%d", s.cfg.Server.Port)
+	addr := fmt.Sprintf(":%d", s.cfg.Server.ChatPort)
 	if err := s.app.Listen(addr); err != nil {
 		log.Error().Err(err).Msg("failed to start server")
 	}
@@ -153,7 +154,7 @@ func (s *Server) getWsConfig() websocket.Config {
 	return websocket.Config{
 		RecoverHandler: func(conn *websocket.Conn) {
 			if e := recover(); e != nil {
-				err := conn.WriteJSON(ch.Response{
+				err := conn.WriteJSON(chatresp.Response{
 					Msg: "internal error",
 					Err: fmt.Errorf("can't handle error: %v", e).Error(),
 				})

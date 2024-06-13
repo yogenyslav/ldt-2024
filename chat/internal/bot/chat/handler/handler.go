@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/google/uuid"
+	"github.com/yogenyslav/ldt-2024/chat/internal/bot/state"
 	"github.com/yogenyslav/ldt-2024/chat/internal/chat/model"
 	"github.com/yogenyslav/ldt-2024/chat/internal/shared"
 	chatresp "github.com/yogenyslav/ldt-2024/chat/pkg/chat_response"
@@ -19,16 +20,24 @@ type chatController interface {
 	SessionCleanup(ctx context.Context, sessionID uuid.UUID) error
 }
 
-// Handler имплементирует сервис чата.
+type sessionController interface {
+	NewSession(ctx context.Context, id uuid.UUID, username string) error
+}
+
+// Handler обработчик чата.
 type Handler struct {
-	ctrl   chatController
-	tracer trace.Tracer
+	machine *state.Machine
+	cc      chatController
+	sc      sessionController
+	tracer  trace.Tracer
 }
 
 // New создает новый Handler.
-func New(ctrl chatController, tracer trace.Tracer) *Handler {
+func New(cc chatController, sc sessionController, machine *state.Machine, tracer trace.Tracer) *Handler {
 	return &Handler{
-		ctrl:   ctrl,
-		tracer: tracer,
+		cc:      cc,
+		sc:      sc,
+		machine: machine,
+		tracer:  tracer,
 	}
 }
