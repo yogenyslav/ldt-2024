@@ -244,6 +244,47 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
 
         return process_and_merge_stocks(stocks)
 
+    def get_stocks(self, query):
+        full_name = self._name_matcher.match_to_full_name(query)
+        
+        collection_name = "stocks"
+        collection = mongo_db[collection_name]
+        code_info = collection.find({"name": full_name}, {"_id": False})
+        code_info = list(code_info)
+        
+        assert len(code_info) == 4
+
+        return code_info
+    
+    def get_forecast(self, product, period):
+        code = self._code_matcher.match_to_3rd_level_code(product)
+
+        collection_name = "codes"
+        collection = mongo_db[collection_name]
+        code_info = collection.find_one({"code": code}, {"_id": False})
+
+        if code_info is None:
+            pass  # TODO
+
+        start_dt = convert_to_datetime("2023-01-01T10:00:20.021Z")
+        end_dt = start_dt + relativedelta(
+            years=int(period) // 12, months=int(period) % 12
+        )
+        
+        if code_info["forecast"] is not None:
+            forecast = [
+                x
+                for x in code_info["forecast"]
+                if start_dt.timestamp() <= x["date"].timestamp() <= end_dt.timestamp()
+            ]
+        else:
+            forecast = None
+            
+        code_info["forecast"] = forecast
+
+        code_info = convert_datetime_to_str(code_info)
+        return code_info
+    
     def PrepareData(self, request: PrepareDataReq, context: ServicerContext):
         # в PrepareDataReq лежит путь до .csv/.xlsx файла
 
@@ -277,34 +318,14 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
     def Predict(self, request: PredictReq, context: ServicerContext):
         logging.info(f"predict for {str(request)}")
 
-        code = self._code_matcher.match_to_3rd_level_code(request.product)
-
-        collection_name = "codes"
-        collection = mongo_db[collection_name]
-        code_info = collection.find_one({"code": code}, {"_id": False})
-
-        if code_info is None:
-            pass  # TODO
-
-        start_dt = convert_to_datetime("2023-01-01T10:00:20.021Z")
-        end_dt = start_dt + relativedelta(
-            years=int(request.period) // 12, months=int(request.period) % 12
-        )
-        
-        if code_info["forecast"] is not None:
-            forecast = [
-                x
-                for x in code_info["forecast"]
-                if start_dt.timestamp() <= x["date"].timestamp() <= end_dt.timestamp()
-            ]
-        else:
-            forecast = None
+        if request.type == QueryType.STOCK:
+            resp = self.get_stocks(request.product)
+        elif request.type == QueryType.PREDICTION:
+            resp = self.get_forecast(request.product, request.period)
             
-        code_info["forecast"] = forecast
-
-        code_info = convert_datetime_to_str(code_info)
-        print(code_info)
-        return PredictResp(data=json.dumps(code_info).encode("utf-8"))
+        print(resp)    
+            
+        return PredictResp(data=json.dumps(resp).encode("utf-8"))
 
     def UniqueCodes(self, request: Empty, context: ServicerContext):
         collection_name = "codes"
