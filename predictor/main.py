@@ -191,7 +191,8 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
             history = self.get_history(cur_code_df).to_dict(orient="records")
             history = self.prepare_timeseries(history, mean_ref_price)
             
-            all_data = cur_code_df.to_dict(orient="records")
+            examples = cur_code_df.drop_duplicates(subset=['final_code_kpgz']).iloc[:5].to_dict(orient="records")
+            
             codes_data.append(
                 {
                     "code": code,
@@ -215,7 +216,7 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
                     "top5_providers": (
                         top5_providers if top5_providers is not pd.NA else None
                     ),
-                    "contracts_in_code": all_data[:5],
+                    "example_contracts_in_code": examples,
                 }
             )
 
