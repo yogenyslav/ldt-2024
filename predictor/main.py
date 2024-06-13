@@ -106,6 +106,17 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
 
         return forecast_dict, regular_codes
 
+    def prepare_forecast_dict(self, forecast_dict, ref_price):
+        if forecast_dict is None: return None
+        
+        for d in forecast_dict:
+            if ref_price is not pd.NA:
+                d['volume'] = int(d['value'] // ref_price)
+            else:
+                d['volume'] = None
+                
+        return forecast_dict
+        
     def get_codes_data(self, merged_df, all_kpgz_codes, forecast_dict, regular_codes):
         codes_stat = merged_df
         codes_stat["execution_duration"] = (
@@ -158,7 +169,7 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
                 ["num_nans", "start_to_execute_duration", "execution_duration"], axis=1
             )
 
-            forecast = forecast_dict.get(code, None)
+            forecast = self.prepare_forecast_dict(forecast_dict.get(code, None), mean_ref_price)
 
             all_data = cur_code_df.to_dict(orient="records")
             codes_data.append(
@@ -212,7 +223,6 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
         return process_and_merge_stocks(stocks)
 
     def PrepareData(self, request: PrepareDataReq, context: ServicerContext):
-        print(self._code_matcher.match_to_3rd_level_code("вода"))
         # в PrepareDataReq лежит путь до .csv/.xlsx файла
 
         logging.info(request.sources)
