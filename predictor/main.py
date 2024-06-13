@@ -2,11 +2,13 @@ import os
 import logging
 import re
 import json
+import math
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
 import pandas as pd
 import pymongo
+import numpy as np
 from api import predictor_pb2_grpc
 from api.predictor_pb2 import (
     PredictReq,
@@ -106,22 +108,32 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
 
         return forecast_dict, regular_codes
 
-    def prepare_forecast_dict(self, forecast_dict, ref_price):
-        if forecast_dict is None: return None
+    def prepare_timeseries(self, ts, ref_price):
+        if ts is None: return None
         
-        for d in forecast_dict:
-            if ref_price is not pd.NA:
-                d['volume'] = int(d['value'] // ref_price)
-            else:
-                d['volume'] = None
+        new_ts = []
+        for d in ts:
+            if ref_price is not pd.NA and not math.isnan(d['value']) and ref_price is not np.nan:                
+                new_ts.append({
+                    'date': d['date'],
+                    'value': d['value'],
+                    'volume': int(d['value'] // ref_price),
+                })
                 
-        return forecast_dict
+            else:
+                new_ts.append({
+                    'date': d['date'],
+                    'value': d['value'],
+                    'volume': None,
+                })
+                
+        return new_ts
     
-    def get_history(self, df):
+    def get_history(self, df: pd.DataFrame):
         hisory = df[['conclusion_date', 'paid_rub']].copy()
         hisory = hisory.resample("ME", on='conclusion_date')['paid_rub'].sum().reset_index()
         hisory = hisory[hisory['paid_rub'] > 0]
-        return hisory
+        return hisory.rename({'conclusion_date': 'date', 'paid_rub': 'value'}, axis=1)
             
     def get_codes_data(self, merged_df, all_kpgz_codes, forecast_dict, regular_codes):
         codes_stat = merged_df
@@ -175,8 +187,9 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
                 ["num_nans", "start_to_execute_duration", "execution_duration"], axis=1
             )
 
-            forecast = self.prepare_forecast_dict(forecast_dict.get(code, None), mean_ref_price)
+            forecast = self.prepare_timeseries(forecast_dict.get(code, None), mean_ref_price)
             history = self.get_history(cur_code_df).to_dict(orient="records")
+            history = self.prepare_timeseries(history, mean_ref_price)
             
             all_data = cur_code_df.to_dict(orient="records")
             codes_data.append(
@@ -289,6 +302,7 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
         code_info["forecast"] = forecast
 
         code_info = convert_datetime_to_str(code_info)
+        print(code_info)
         return PredictResp(data=json.dumps(code_info).encode("utf-8"))
 
     def UniqueCodes(self, request: Empty, context: ServicerContext):
