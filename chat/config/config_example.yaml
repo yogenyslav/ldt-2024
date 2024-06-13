@@ -1,5 +1,6 @@
 server:
-  port: 10000
+  chat_port: 10000
+  bot_port: 11000
   log_level: "debug"
   cors_origins:
     - "*"
@@ -31,9 +32,13 @@ jaeger:
   host: "jaeger"
   port: 4318
 
-prometheus:
+chat_prom:
   host: ""
   port: 10001
+
+bot_prom:
+  host: ""
+  port: 11001
 
 api:
   host: "api"
