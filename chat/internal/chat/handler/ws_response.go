@@ -17,10 +17,11 @@ type Response struct {
 func respondError(c *websocket.Conn, msg string, err error) {
 	resp := Response{
 		Msg: msg,
-		Err: err.Error(),
+		Err: "ok",
 	}
 	if err != nil {
 		resp.Finish = true
+		resp.Err = err.Error()
 	}
 	if e := c.WriteJSON(resp); e != nil {
 		log.Warn().Err(e).Msg("failed to write response")

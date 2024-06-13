@@ -15,6 +15,7 @@ from api.predictor_pb2 import (
     UniqueCode,
     UniqueCodesResp,
 )
+from api.prompter_pb2 import QueryType
 from google.protobuf.empty_pb2 import Empty
 from grpc import ServicerContext, server
 from concurrent import futures
@@ -32,7 +33,6 @@ load_dotenv(".env")
 mongo_url = f"mongodb://{os.getenv('MONGO_HOST')}:{os.getenv('MONGO_PORT')}/{os.getenv('MONGO_DB')}"
 mongo_client = pymongo.MongoClient(mongo_url)
 mongo_db = mongo_client[os.getenv("MONGO_DB")]
-
 
 
 def convert_to_datetime(iso_str):
@@ -55,15 +55,17 @@ def parse_filename(filename):
         return quarter, year, account
     return None
 
+
 def convert_datetime_to_str(obj):
     if isinstance(obj, dict):
         return {k: convert_datetime_to_str(v) for k, v in obj.items()}
     elif isinstance(obj, list):
         return [convert_datetime_to_str(i) for i in obj]
     elif isinstance(obj, datetime):
-        return obj.strftime('%Y-%m-%d')
+        return obj.strftime("%Y-%m-%d")
     else:
         return obj
+
 
 class Predictor(predictor_pb2_grpc.PredictorServicer):
     def __init__(self, period_model):
@@ -210,7 +212,7 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
         return process_and_merge_stocks(stocks)
 
     def PrepareData(self, request: PrepareDataReq, context: ServicerContext):
-        print(self._code_matcher.match_to_3rd_level_code('вода'))
+        print(self._code_matcher.match_to_3rd_level_code("вода"))
         # в PrepareDataReq лежит путь до .csv/.xlsx файла
 
         logging.info(request.sources)
@@ -242,10 +244,9 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
 
     def Predict(self, request: PredictReq, context: ServicerContext):
         logging.info(f"predict for {str(request)}")
-        
-        code = self._code_matcher.match_to_3rd_level_code("вода")
-        
-        
+
+        code = self._code_matcher.match_to_3rd_level_code(request.product)
+
         collection_name = "codes"
         collection = mongo_db[collection_name]
         code_info = collection.find_one({"code": code}, {"_id": False})
@@ -266,29 +267,35 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
 
         code_info = convert_datetime_to_str(code_info)
         return PredictResp(data=json.dumps(code_info).encode("utf-8"))
-    
+
     def UniqueCodes(self, request: Empty, context: ServicerContext):
         collection_name = "codes"
         collection = mongo_db[collection_name]
-        out = collection.find({"code": {"$exists": True}},{'_id': False, 'code':True, 'code_name': True, 'is_regular': True})
-        
+        out = collection.find(
+            {"code": {"$exists": True}},
+            {"_id": False, "code": True, "code_name": True, "is_regular": True},
+        )
+
         codes_info = []
         for code_info in out:
-            print(type(code_info['code_name']))
-            
-            if isinstance(code_info['code_name'], float) or code_info['code_name'] is None:
-                code_name = ''
+            print(type(code_info["code_name"]))
+
+            if (
+                isinstance(code_info["code_name"], float)
+                or code_info["code_name"] is None
+            ):
+                code_name = ""
             else:
-                code_name = code_info['code_name']
-            
+                code_name = code_info["code_name"]
+
             codes_info.append(
                 UniqueCode(
-                    segment=code_info['code'], 
-                    name=code_name, 
-                    regular=code_info['is_regular']
-                    )
+                    segment=code_info["code"],
+                    name=code_name,
+                    regular=code_info["is_regular"],
                 )
-        
+            )
+
         return UniqueCodesResp(
             codes=codes_info,
         )
