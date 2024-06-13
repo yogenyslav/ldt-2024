@@ -268,11 +268,14 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
         end_dt = start_dt + relativedelta(
             years=int(request.period) // 12, months=int(request.period) % 12
         )
-        forecast = [
-            x
-            for x in code_info["forecast"]
-            if start_dt.timestamp() <= x["date"].timestamp() <= end_dt.timestamp()
-        ]
+        
+        if forecast is not None:
+            forecast = [
+                x
+                for x in code_info["forecast"]
+                if start_dt.timestamp() <= x["date"].timestamp() <= end_dt.timestamp()
+            ]
+            
         code_info["forecast"] = forecast
 
         code_info = convert_datetime_to_str(code_info)
