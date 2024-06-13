@@ -77,3 +77,13 @@ func (m *Machine) GetSessionID(ctx context.Context, userID int64) (uuid.UUID, er
 	}
 	return uuid.Parse(sessionID)
 }
+
+// SetValidateQuery задать id Query, который необходимо провалидировать.
+func (m *Machine) SetValidateQuery(ctx context.Context, userID, queryID int64) error {
+	return m.client.SetPrimitive(ctx, getKey("validate_query", userID), queryID, shared.UserStateExp)
+}
+
+// GetValidateQuery получить id Query, который надо провалидировать.
+func (m *Machine) GetValidateQuery(ctx context.Context, userID int64) (int64, error) {
+	return m.client.GetInt64(ctx, getKey("validate_query", userID))
+}

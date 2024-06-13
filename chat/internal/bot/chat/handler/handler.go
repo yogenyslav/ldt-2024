@@ -21,7 +21,7 @@ type chatController interface {
 }
 
 type sessionController interface {
-	NewSession(ctx context.Context, id uuid.UUID, username string) error
+	NewSession(ctx context.Context, id uuid.UUID, username string, tg bool, tgID int64) error
 }
 
 // Handler обработчик чата.

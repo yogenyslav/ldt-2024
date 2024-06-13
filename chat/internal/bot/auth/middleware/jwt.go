@@ -24,8 +24,6 @@ func JWT(machine *state.Machine, kc *gocloak.GoCloak, realm string) tele.Middlew
 				return nil
 			}
 
-			log.Debug().Str("realm", realm).Str("token", token).Msg("token")
-
 			userInfo, err := kc.GetUserInfo(ctx, token, realm)
 			if err != nil || userInfo.PreferredUsername == nil {
 				log.Error().Err(err).Msg("failed to get user info")
@@ -36,6 +34,7 @@ func JWT(machine *state.Machine, kc *gocloak.GoCloak, realm string) tele.Middlew
 			}
 
 			c.Set(shared.UsernameKey, *userInfo.PreferredUsername)
+			c.Set(shared.TokenKey, token)
 
 			if c.Callback() != nil {
 				log.Debug().Any("data", c.Callback().Data).Msg("callback")

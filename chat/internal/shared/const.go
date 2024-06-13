@@ -17,6 +17,8 @@ const (
 	TraceCtxKey = "traceCtx"
 	// UserIDKey ключ для получения userID.
 	UserIDKey = "userID"
+	// TokenKey ключ для получения токена.
+	TokenKey = "token"
 	// UsernameKey ключ для получения username.
 	enumsUndefined = "UNDEFINED"
 

@@ -26,7 +26,7 @@ func (h *Handler) NewSession(c *fiber.Ctx) error {
 	}
 
 	id := uuid.New()
-	if err := h.ctrl.NewSession(c.UserContext(), id, username); err != nil {
+	if err := h.ctrl.NewSession(c.UserContext(), id, username, false, 0); err != nil {
 		return err
 	}
 

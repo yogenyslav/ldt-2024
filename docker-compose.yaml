@@ -173,13 +173,14 @@ services:
 
   bot:
     build:
-      context: ./bot
-      dockerfile: Dockerfile
+      context: ./chat
+      dockerfile: BotDockerfile
       target: prod
     restart: always
     image: bot
     ports:
       - "11000:11000"
+      - "11001:11001"
     depends_on:
       - pg
       - api

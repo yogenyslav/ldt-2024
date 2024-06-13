@@ -28,7 +28,7 @@ document.getElementById('login-form').addEventListener('submit', async (event) =
 
   // Send a request to the API to validate the credentials
   try {
-    const response = await fetch('http://localhost:9998/api/v1/auth/login', {
+    const response = await fetch('https://hawk-handy-wolf.ngrok-free.app/api/v1/auth/login', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

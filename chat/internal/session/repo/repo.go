@@ -20,13 +20,13 @@ func New(pg storage.SQLDatabase) *Repo {
 }
 
 const insertOne = `
-	insert into chat.session(id, username, title)
-	values ($1, $2, $3);
+	insert into chat.session(id, username, title, tg, tg_id)
+	values ($1, $2, $3, $4, $5);
 `
 
 // InsertOne создает новую сессию.
 func (r *Repo) InsertOne(ctx context.Context, params model.SessionDao) error {
-	_, err := r.pg.Exec(ctx, insertOne, params.ID, params.Username, params.Title)
+	_, err := r.pg.Exec(ctx, insertOne, params.ID, params.Username, params.Title, params.Tg, params.TgID)
 	return err
 }
 

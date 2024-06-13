@@ -12,6 +12,7 @@ type SessionDto struct {
 	CreatedAt time.Time `json:"created_at"`
 	Title     string    `json:"title"`
 	Tg        bool      `json:"tg"`
+	TgID      int64     `json:"tg_id"`
 	ID        uuid.UUID `json:"id"`
 }
 
