@@ -246,15 +246,15 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
 
     def get_stocks(self, query):
         full_name = self._name_matcher.match_to_full_name(query)
-        
+        print(full_name)
         collection_name = "stocks"
         collection = mongo_db[collection_name]
         code_info = collection.find({"name": full_name}, {"_id": False})
         code_info = list(code_info)
-        
+        print(code_info)
         assert len(code_info) == 4
 
-        return code_info
+        return {'data': code_info}
     
     def get_forecast(self, product, period):
         code = self._code_matcher.match_to_3rd_level_code(product)
