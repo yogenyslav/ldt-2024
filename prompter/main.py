@@ -40,7 +40,7 @@ class Prompter(prompter_pb2_grpc.PrompterServicer):
             yield StreamResp(chunk=chunk)
 
         generator_2 = self.saiga.process_final_request(
-            StreamReq.prompt, PromptType.FINAL_PREDICTION_PART2
+            request.prompt, PromptType.FINAL_PREDICTION_PART2
         )
         for v in generator_2:
             chunk = v["message"]["content"]
