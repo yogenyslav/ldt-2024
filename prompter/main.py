@@ -2,7 +2,7 @@ from api import prompter_pb2_grpc
 from api.prompter_pb2 import ExtractReq, ExtractedPrompt, StreamReq, StreamResp
 from grpc import ServicerContext, server
 from concurrent import futures
-from saiga_ollama import SaigaPrompter, SaigaOutput
+from saiga_ollama import SaigaPrompter, SaigaOutput, PromptType
 from pathlib import Path
 
 
@@ -31,6 +31,14 @@ class Prompter(prompter_pb2_grpc.PrompterServicer):
         for v in generator2:
             yield StreamResp(...)
         """
+        generator_1 = self.saiga.process_final_request(StreamReq.prompt, PromptType.FINAL_PREDICTION_PART1)
+        for v in generator_1:
+            yield StreamResp(chunk=v["message"]["content"])
+
+        generator_2 = self.saiga.process_final_request(StreamReq.prompt, PromptType.FINAL_PREDICTION_PART2)
+        for v in generator_2:
+            yield StreamResp(chunk=v["message"]["content"])
+        
 
 
 def serve():
