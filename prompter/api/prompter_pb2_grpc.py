@@ -44,12 +44,23 @@ class PrompterStub(object):
                 request_serializer=api_dot_prompter__pb2.ExtractReq.SerializeToString,
                 response_deserializer=api_dot_prompter__pb2.ExtractedPrompt.FromString,
                 _registered_method=True)
+        self.RespondStream = channel.unary_stream(
+                '/api.Prompter/RespondStream',
+                request_serializer=api_dot_prompter__pb2.StreamReq.SerializeToString,
+                response_deserializer=api_dot_prompter__pb2.StreamResp.FromString,
+                _registered_method=True)
 
 
 class PrompterServicer(object):
     """Missing associated documentation comment in .proto file."""
 
     def Extract(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def RespondStream(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -62,6 +73,11 @@ def add_PrompterServicer_to_server(servicer, server):
                     servicer.Extract,
                     request_deserializer=api_dot_prompter__pb2.ExtractReq.FromString,
                     response_serializer=api_dot_prompter__pb2.ExtractedPrompt.SerializeToString,
+            ),
+            'RespondStream': grpc.unary_stream_rpc_method_handler(
+                    servicer.RespondStream,
+                    request_deserializer=api_dot_prompter__pb2.StreamReq.FromString,
+                    response_serializer=api_dot_prompter__pb2.StreamResp.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -91,6 +107,33 @@ class Prompter(object):
             '/api.Prompter/Extract',
             api_dot_prompter__pb2.ExtractReq.SerializeToString,
             api_dot_prompter__pb2.ExtractedPrompt.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def RespondStream(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_stream(
+            request,
+            target,
+            '/api.Prompter/RespondStream',
+            api_dot_prompter__pb2.StreamReq.SerializeToString,
+            api_dot_prompter__pb2.StreamResp.FromString,
             options,
             channel_credentials,
             insecure,

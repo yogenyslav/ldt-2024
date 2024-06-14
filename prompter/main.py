@@ -1,5 +1,5 @@
 from api import prompter_pb2_grpc
-from api.prompter_pb2 import ExtractReq, ExtractedPrompt, QueryType
+from api.prompter_pb2 import ExtractReq, ExtractedPrompt, StreamReq, StreamResp
 from grpc import ServicerContext, server
 from concurrent import futures
 from saiga_ollama import SaigaPrompter, SaigaOutput
@@ -20,6 +20,17 @@ class Prompter(prompter_pb2_grpc.PrompterServicer):
         return ExtractedPrompt(
             type=output.type, product=output.product, period=output.period
         )
+
+    def RespondStream(self, request: StreamReq, context):
+        """
+        generator_1 = ...
+        for v in generator1:
+            yield StreamResp(...)
+
+        generator_2 = ...
+        for v in generator2:
+            yield StreamResp(...)
+        """
 
 
 def serve():

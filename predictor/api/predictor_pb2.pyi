@@ -5,13 +5,7 @@ from api import prompter_pb2 as _prompter_pb2
 from google.protobuf.internal import containers as _containers
 from google.protobuf import descriptor as _descriptor
 from google.protobuf import message as _message
-from typing import (
-    ClassVar as _ClassVar,
-    Iterable as _Iterable,
-    Mapping as _Mapping,
-    Optional as _Optional,
-    Union as _Union,
-)
+from typing import ClassVar as _ClassVar, Iterable as _Iterable, Mapping as _Mapping, Optional as _Optional, Union as _Union
 
 DESCRIPTOR: _descriptor.FileDescriptor
 
@@ -41,9 +35,7 @@ class UniqueCodesResp(_message.Message):
     __slots__ = ("codes",)
     CODES_FIELD_NUMBER: _ClassVar[int]
     codes: _containers.RepeatedCompositeFieldContainer[UniqueCode]
-    def __init__(
-        self, codes: _Optional[_Iterable[_Union[UniqueCode, _Mapping]]] = ...
-    ) -> None: ...
+    def __init__(self, codes: _Optional[_Iterable[_Union[UniqueCode, _Mapping]]] = ...) -> None: ...
 
 class UniqueCode(_message.Message):
     __slots__ = ("segment", "name", "regular")

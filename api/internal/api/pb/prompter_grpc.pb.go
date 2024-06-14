@@ -19,7 +19,8 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	Prompter_Extract_FullMethodName = "/api.Prompter/Extract"
+	Prompter_Extract_FullMethodName       = "/api.Prompter/Extract"
+	Prompter_RespondStream_FullMethodName = "/api.Prompter/RespondStream"
 )
 
 // PrompterClient is the client API for Prompter service.
@@ -27,6 +28,7 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type PrompterClient interface {
 	Extract(ctx context.Context, in *ExtractReq, opts ...grpc.CallOption) (*ExtractedPrompt, error)
+	RespondStream(ctx context.Context, in *StreamReq, opts ...grpc.CallOption) (Prompter_RespondStreamClient, error)
 }
 
 type prompterClient struct {
@@ -46,11 +48,44 @@ func (c *prompterClient) Extract(ctx context.Context, in *ExtractReq, opts ...gr
 	return out, nil
 }
 
+func (c *prompterClient) RespondStream(ctx context.Context, in *StreamReq, opts ...grpc.CallOption) (Prompter_RespondStreamClient, error) {
+	stream, err := c.cc.NewStream(ctx, &Prompter_ServiceDesc.Streams[0], Prompter_RespondStream_FullMethodName, opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &prompterRespondStreamClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type Prompter_RespondStreamClient interface {
+	Recv() (*StreamResp, error)
+	grpc.ClientStream
+}
+
+type prompterRespondStreamClient struct {
+	grpc.ClientStream
+}
+
+func (x *prompterRespondStreamClient) Recv() (*StreamResp, error) {
+	m := new(StreamResp)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // PrompterServer is the server API for Prompter service.
 // All implementations must embed UnimplementedPrompterServer
 // for forward compatibility
 type PrompterServer interface {
 	Extract(context.Context, *ExtractReq) (*ExtractedPrompt, error)
+	RespondStream(*StreamReq, Prompter_RespondStreamServer) error
 	mustEmbedUnimplementedPrompterServer()
 }
 
@@ -60,6 +95,9 @@ type UnimplementedPrompterServer struct {
 
 func (UnimplementedPrompterServer) Extract(context.Context, *ExtractReq) (*ExtractedPrompt, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Extract not implemented")
+}
+func (UnimplementedPrompterServer) RespondStream(*StreamReq, Prompter_RespondStreamServer) error {
+	return status.Errorf(codes.Unimplemented, "method RespondStream not implemented")
 }
 func (UnimplementedPrompterServer) mustEmbedUnimplementedPrompterServer() {}
 
@@ -92,6 +130,27 @@ func _Prompter_Extract_Handler(srv interface{}, ctx context.Context, dec func(in
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Prompter_RespondStream_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(StreamReq)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(PrompterServer).RespondStream(m, &prompterRespondStreamServer{stream})
+}
+
+type Prompter_RespondStreamServer interface {
+	Send(*StreamResp) error
+	grpc.ServerStream
+}
+
+type prompterRespondStreamServer struct {
+	grpc.ServerStream
+}
+
+func (x *prompterRespondStreamServer) Send(m *StreamResp) error {
+	return x.ServerStream.SendMsg(m)
+}
+
 // Prompter_ServiceDesc is the grpc.ServiceDesc for Prompter service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -104,6 +163,12 @@ var Prompter_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Prompter_Extract_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "RespondStream",
+			Handler:       _Prompter_RespondStream_Handler,
+			ServerStreams: true,
+		},
+	},
 	Metadata: "api/prompter.proto",
 }

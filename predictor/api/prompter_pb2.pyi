@@ -16,6 +16,18 @@ UNDEFINED: QueryType
 PREDICTION: QueryType
 STOCK: QueryType
 
+class StreamReq(_message.Message):
+    __slots__ = ("prompt",)
+    PROMPT_FIELD_NUMBER: _ClassVar[int]
+    prompt: bytes
+    def __init__(self, prompt: _Optional[bytes] = ...) -> None: ...
+
+class StreamResp(_message.Message):
+    __slots__ = ("chunk",)
+    CHUNK_FIELD_NUMBER: _ClassVar[int]
+    chunk: str
+    def __init__(self, chunk: _Optional[str] = ...) -> None: ...
+
 class ExtractReq(_message.Message):
     __slots__ = ("prompt",)
     PROMPT_FIELD_NUMBER: _ClassVar[int]

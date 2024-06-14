@@ -56,6 +56,15 @@ service Prompter {
       }
     };
   }
+  rpc RespondStream(StreamReq) returns (stream StreamResp) {};
+}
+
+message StreamReq {
+  bytes prompt = 1;
+}
+
+message StreamResp {
+  string chunk = 1;
 }
 
 message ExtractReq {
