@@ -84,6 +84,7 @@ export interface WSMessage {
     data: WSIncomingQuery | WSIncomingChunk;
     finish: boolean;
     chunk: boolean;
+    err?: string;
 }
 
 export interface WSIncomingQuery {

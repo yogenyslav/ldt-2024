@@ -71,14 +71,15 @@ services:
     environment:
       - KEYCLOAK_ADMIN=${KEYCLOAK_ADMIN}
       - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}
-      - KC_DB_URL_HOST=pg
+      - KC_HOSTNAME=${KEYCLOAK_HOSTNAME}
+      - KC_DB_URL_HOST=${KEYCLOAK_DB_HOST}
       - KC_DB_URL_PORT=5432
       - KC_DB_URL_DATABASE=${POSTGRES_DB}
       - KC_DB_USERNAME=${POSTGRES_USER}
       - KC_DB_PASSWORD=${POSTGRES_PASSWORD}
     ports:
       - "8080:8080"
-    command: start-dev --db postgres
+    command: start-dev --db postgres --http-enabled true --proxy edge
 
   redis:
     image: redis:7.2.4
@@ -118,6 +119,8 @@ services:
       context: ./prompter
       dockerfile: Dockerfile
     restart: always
+    env_file:
+      - .env
     image: prompter
     ports:
       - "9990:9990"
@@ -129,6 +132,8 @@ services:
       context: ./predictor
       dockerfile: Dockerfile
     restart: always
+    env_file:
+      - .env
     image: predictor
     ports:
       - "9980:9980"
@@ -143,6 +148,8 @@ services:
       dockerfile: Dockerfile
       target: prod
     restart: always
+    env_file:
+      - .env
     image: chat
     ports:
       - "10000:10000"
@@ -159,6 +166,8 @@ services:
       dockerfile: Dockerfile
       target: prod
     restart: always
+    env_file:
+      - .env
     image: api
     ports:
       - "9999:9999"
@@ -177,6 +186,8 @@ services:
       dockerfile: BotDockerfile
       target: prod
     restart: always
+    env_file:
+      - .env
     image: bot
     ports:
       - "11000:11000"
@@ -194,5 +205,7 @@ services:
         dockerfile: Dockerfile
     container_name: frontend
     restart: always
+    env_file:
+      - .env
     ports:
         - "3000:3000"

@@ -28,6 +28,8 @@ export class RootStore {
     activeSessionLoading: boolean = false;
     isChatDisabled: boolean = false;
     isModelAnswering: boolean = false;
+    chatError: string | null = null;
+    closedWebSocket: WebSocket | null = null;
 
     websocket: WebSocket | null = null;
 
@@ -142,6 +144,13 @@ export class RootStore {
 
                 console.log(wsMessage);
 
+                if (wsMessage.err) {
+                    this.chatError = wsMessage.err;
+
+                    this.isModelAnswering = false;
+                    this.isChatDisabled = false;
+                }
+
                 if (wsMessage.chunk && !wsMessage.finish) {
                     // this.isModelAnswering = true;
                     // this.isChatDisabled = true;
@@ -163,6 +172,11 @@ export class RootStore {
 
         this.websocket.onclose = () => {
             console.log('WebSocket connection closed');
+
+            this.isChatDisabled = true;
+            this.closedWebSocket = this.websocket;
+
+            this.reconnectWebSocket();
         };
 
         this.websocket.onerror = (error) => {
@@ -192,6 +206,7 @@ export class RootStore {
 
     disconnectWebSocket() {
         if (this.websocket) {
+            this.activeSessionId = null;
             this.websocket.close();
         }
     }
@@ -263,5 +278,11 @@ export class RootStore {
 
     private isFirstMessageInSession() {
         return !this.activeDisplayedSession?.messages.length;
+    }
+
+    private reconnectWebSocket() {
+        if (this.activeSessionId) {
+            this.connectWebSocket(this.activeSessionId);
+        }
     }
 }
