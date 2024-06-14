@@ -28,9 +28,9 @@ import (
 	ch "github.com/yogenyslav/ldt-2024/chat/internal/chat/handler"
 	cr "github.com/yogenyslav/ldt-2024/chat/internal/chat/repo"
 	"github.com/yogenyslav/ldt-2024/chat/internal/favorite"
-	"github.com/yogenyslav/ldt-2024/chat/internal/favorite/controller"
-	"github.com/yogenyslav/ldt-2024/chat/internal/favorite/handler"
-	"github.com/yogenyslav/ldt-2024/chat/internal/favorite/repo"
+	fc "github.com/yogenyslav/ldt-2024/chat/internal/favorite/controller"
+	fh "github.com/yogenyslav/ldt-2024/chat/internal/favorite/handler"
+	fr "github.com/yogenyslav/ldt-2024/chat/internal/favorite/repo"
 	"github.com/yogenyslav/ldt-2024/chat/internal/session"
 	sc "github.com/yogenyslav/ldt-2024/chat/internal/session/controller"
 	sh "github.com/yogenyslav/ldt-2024/chat/internal/session/handler"
@@ -138,10 +138,10 @@ func (s *Server) Run() {
 	chatHandler := ch.New(chatController, s.tracer)
 	chat.SetupChatRoutes(s.app, chatHandler, s.getWsConfig())
 
-	favoriteRepo := repo.New(s.pg)
-	favoriteController := controller.New(favoriteRepo, s.tracer)
-	favoriteHandler := handler.New(favoriteController)
-	favorite.SetupFavoriteRoutes(s.app, favoriteHandler)
+	favoriteRepo := fr.New(s.pg)
+	favoriteController := fc.New(favoriteRepo, s.tracer)
+	favoriteHandler := fh.New(favoriteController)
+	favorite.SetupFavoriteRoutes(s.app, favoriteHandler, s.kc, s.cfg.KeyCloak.Realm, s.cfg.Server.CipherKey)
 
 	go s.listen()
 	go prom.HandlePrometheus(s.cfg.ChatProm)
