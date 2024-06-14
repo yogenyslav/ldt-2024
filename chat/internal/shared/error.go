@@ -34,6 +34,8 @@ var (
 	ErrNoResponseWithID = errors.New("no response with such id found")
 	// ErrNoQueryWithID ошибка при отсутствии запроса с запрошенным id.
 	ErrNoQueryWithID = errors.New("no query with such id found")
+	// ErrNoFavoriteWithID ошибка при отсутствии избранного с запрошенным id.
+	ErrNoFavoriteWithID = errors.New("no favorite with such id found")
 )
 
 // 500
@@ -70,4 +72,13 @@ var (
 	ErrUpdateQuery = errors.New("failed to update query")
 	// ErrGetQuery ошибка при неудачной попытке получить запрос.
 	ErrGetQuery = errors.New("failed to get query")
+
+	// ErrUpdateFavorite ошибка при неудачной попытке обновить избранное.
+	ErrUpdateFavorite = errors.New("failed to update favorite")
+	// ErrDeleteFavorite ошибка при неудачной попытке удалить избранное.
+	ErrDeleteFavorite = errors.New("failed to delete favorite")
+	// ErrCreateFavorite ошибка при неудачной попытке создать избранное.
+	ErrCreateFavorite = errors.New("failed to create favorite")
+	// ErrGetFavorite ошибка при неудачной попытке получить избранное.
+	ErrGetFavorite = errors.New("failed to get favorite")
 )

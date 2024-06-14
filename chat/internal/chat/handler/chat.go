@@ -6,6 +6,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/yogenyslav/ldt-2024/chat/internal/chat/model"
 	"github.com/yogenyslav/ldt-2024/chat/internal/shared"
+	chatresp "github.com/yogenyslav/ldt-2024/chat/pkg/chat_response"
 )
 
 func closeHandler(code int, text string) error {
@@ -30,7 +31,7 @@ func (h *Handler) Chat(c *websocket.Conn) {
 	}
 	sessionID, uuidErr := uuid.Parse(c.Params("session_id"))
 	if uuidErr != nil {
-		respondError(c, "invalid session uuid", uuidErr)
+		chatresp.RespondError(c, "invalid session uuid", uuidErr)
 		return
 	}
 	defer func() {
@@ -41,7 +42,7 @@ func (h *Handler) Chat(c *websocket.Conn) {
 
 	var (
 		validate = make(chan int64, 1)
-		out      = make(chan Response)
+		out      = make(chan chatresp.Response)
 		hint     = make(chan int64, 1)
 		cancel   = make(chan struct{}, 1)
 	)
@@ -49,7 +50,7 @@ func (h *Handler) Chat(c *websocket.Conn) {
 	for {
 		var req model.QueryCreateReq
 		if err := c.ReadJSON(&req); err != nil {
-			respondError(c, "failed to read query", err)
+			chatresp.RespondError(c, "failed to read query", err)
 			return
 		}
 		if req.Command == shared.CommandCancel {
@@ -61,25 +62,25 @@ func (h *Handler) Chat(c *websocket.Conn) {
 		case queryID := <-hint:
 			query, err := h.ctrl.Hint(ctx, queryID, req)
 			if err != nil {
-				respondError(c, "failed to process hint", err)
+				chatresp.RespondError(c, "failed to process hint", err)
 				hint <- queryID
 				continue
 			}
-			respondData(c, query)
+			chatresp.RespondData(c, query)
 			validate <- queryID
 			continue
 		case queryID := <-validate:
 			if req.Command == shared.CommandValid {
 				go h.ctrl.Predict(ctx, out, cancel, queryID)
 				if err := h.ctrl.UpdateStatus(ctx, queryID, shared.StatusValid); err != nil {
-					respondError(c, "failed to update status to valid", err)
+					chatresp.RespondError(c, "failed to update status to valid", err)
 					validate <- queryID
 					cancel <- struct{}{}
 					continue
 				}
 			} else if req.Command == shared.CommandInvalid {
 				if err := h.ctrl.UpdateStatus(ctx, queryID, shared.StatusInvalid); err != nil {
-					respondError(c, "failed to update status to invalid", err)
+					chatresp.RespondError(c, "failed to update status to invalid", err)
 					validate <- queryID
 					continue
 				}
@@ -89,10 +90,10 @@ func (h *Handler) Chat(c *websocket.Conn) {
 		default:
 			query, err := h.ctrl.InsertQuery(ctx, req, username, sessionID)
 			if err != nil {
-				respondError(c, err.Error(), err)
+				chatresp.RespondError(c, err.Error(), err)
 				return
 			}
-			respondData(c, query)
+			chatresp.RespondData(c, query)
 			validate <- query.ID
 			continue
 		}

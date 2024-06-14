@@ -22,6 +22,6 @@ func main() {
 	}
 	zerolog.SetGlobalLevel(level)
 	loctime.SetLocation(loctime.MoscowLocation)
-	srv := server.New(cfg)
+	srv := server.NewServer(cfg)
 	srv.Run()
 }

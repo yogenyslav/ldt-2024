@@ -12,7 +12,7 @@ import (
 )
 
 // NewSession создает новую сессию.
-func (ctrl *Controller) NewSession(ctx context.Context, id uuid.UUID, username string) error {
+func (ctrl *Controller) NewSession(ctx context.Context, id uuid.UUID, username string, tg bool, tgID int64) error {
 	ctx, span := ctrl.tracer.Start(
 		ctx,
 		"Controller.NewSession",
@@ -26,6 +26,8 @@ func (ctrl *Controller) NewSession(ctx context.Context, id uuid.UUID, username s
 	if err := ctrl.repo.InsertOne(ctx, model.SessionDao{
 		ID:       id,
 		Username: username,
+		Tg:       tg,
+		TgID:     tgID,
 	}); err != nil {
 		if pkg.CheckDuplicateKey(err) {
 			return shared.ErrSessionDuplicateID
