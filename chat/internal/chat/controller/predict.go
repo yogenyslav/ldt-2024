@@ -3,9 +3,8 @@ package controller
 import (
 	"context"
 	"encoding/json"
-	"fmt"
+	"io"
 	"strings"
-	"time"
 
 	"github.com/yogenyslav/ldt-2024/chat/internal/api/pb"
 	"github.com/yogenyslav/ldt-2024/chat/internal/chat/model"
@@ -46,9 +45,6 @@ func (ctrl *Controller) Predict(ctx context.Context, out chan<- chatresp.Respons
 		return
 	}
 
-	withCancel, finish := context.WithCancel(ctx)
-	defer finish()
-
 	meta, err := ctrl.cr.FindQueryMeta(ctx, queryID)
 	if err != nil {
 		out <- chatresp.Response{Err: err.Error(), Msg: "predict failed"}
@@ -72,8 +68,20 @@ func (ctrl *Controller) Predict(ctx context.Context, out chan<- chatresp.Respons
 	}
 
 	out <- chatresp.Response{Msg: "predict succeeded", Data: data, DataType: meta.Type}
+	ctrl.respondStream(ctx, out, cancel, predict.GetData(), queryID)
+}
 
-	cnt := 0
+func (ctrl *Controller) respondStream(ctx context.Context, out chan<- chatresp.Response, cancel <-chan struct{}, prompt []byte, queryID int64) {
+	withCancel, finish := context.WithCancel(ctx)
+	defer finish()
+
+	in := &pb.StreamReq{Prompt: prompt}
+	stream, err := ctrl.prompter.RespondStream(withCancel, in)
+	if err != nil {
+		out <- chatresp.Response{Err: err.Error(), Msg: "failed to respond stream", Finish: true}
+		return
+	}
+
 	buff := strings.Builder{}
 	for {
 		select {
@@ -98,17 +106,19 @@ func (ctrl *Controller) Predict(ctx context.Context, out chan<- chatresp.Respons
 			}
 			return
 		default:
-			cnt++
-			time.Sleep(time.Second * 1)
-			chunk := fmt.Sprintf("chunk %d", cnt)
-			out <- chatresp.Response{Data: struct {
-				Info string `json:"info"`
-			}{chunk}, Chunk: true,
-			}
-			buff.WriteString(chunk)
-			if cnt >= 10 {
+			resp, err := stream.Recv()
+			if err == io.EOF {
 				finish()
 			}
+			if err != nil {
+				out <- chatresp.Response{Err: err.Error(), Msg: "failed to receive response", Finish: true}
+				return
+			}
+			chunk := resp.GetChunk()
+			out <- chatresp.Response{Data: struct {
+				Info string `json:"info"`
+			}{chunk}, Chunk: true}
+			buff.WriteString(chunk)
 		}
 	}
 }
