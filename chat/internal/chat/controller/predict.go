@@ -77,6 +77,16 @@ func (ctrl *Controller) Predict(ctx context.Context, out chan<- chatresp.Respons
 	}
 
 	out <- chatresp.Response{Msg: "predict succeeded", Data: data, DataType: meta.Type}
+	if meta.Type == shared.TypeStock {
+		if err = ctrl.cr.UpdateResponse(ctx, model.ResponseDao{
+			QueryID: queryID,
+			Status:  shared.StatusSuccess,
+		}); err != nil {
+			out <- chatresp.Response{Err: err.Error(), Msg: "update response failed"}
+		}
+		return
+	}
+
 	err = ctrl.respondStream(ctx, out, cancel, predict.GetData(), meta.Type, queryID)
 }
 
