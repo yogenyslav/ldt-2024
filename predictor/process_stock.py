@@ -184,7 +184,6 @@ def process_and_merge_stocks(
                 axis=0,
             )
             # df = df.append({"name": name, "year": year, "quarter": quarter, "price": 0, "amount": 0, "sum": 0}, ignore_index=True)
-
+    df = df.groupby(["name", "year", "quarter"], as_index=False).sum()
     df.reset_index(drop=True, inplace=True)
-
     return df
