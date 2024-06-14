@@ -6,8 +6,6 @@ import (
 
 // 400
 var (
-	// ErrLoginFailed ошибка при неудачной попытке входа.
-	ErrLoginFailed = errors.New("login failed")
 	// ErrParseBody ошибка при неудачной попытке парсинга тела запроса.
 	ErrParseBody = errors.New("failed to parse body")
 	// ErrInvalidUUID ошибка при неверном значении UUID.
@@ -16,10 +14,14 @@ var (
 	ErrWsProtocolRequired = errors.New("upgrade to websocket is required")
 	// ErrEmptyQueryHint ошибка при пустом query hint.
 	ErrEmptyQueryHint = errors.New("query hint can't be empty")
+	// ErrSessionDuplicateID ошибка при дублировании id сессии.
+	ErrSessionDuplicateID = errors.New("got duplicated session id")
 )
 
 // 401
 var (
+	// ErrLoginFailed ошибка при неудачной попытке входа.
+	ErrLoginFailed = errors.New("login failed")
 	// ErrMissingJWT ошибка при отсутствии JWT.
 	ErrMissingJWT = errors.New("missing JWT")
 	// ErrInvalidJWT ошибка при неверном JWT.
@@ -53,8 +55,6 @@ var (
 
 	// ErrCreateSession ошибка при неудачной попытке создать сессию.
 	ErrCreateSession = errors.New("failed to create session")
-	// ErrSessionDuplicateID ошибка при дублировании id сессии.
-	ErrSessionDuplicateID = errors.New("got duplicated session id")
 	// ErrGetSession ошибка при неудачной попытке получить сессию.
 	ErrGetSession = errors.New("failed to get session")
 	// ErrUpdateSession ошибка при неудачной попытке обновить сессию.
