@@ -120,6 +120,7 @@ func (ctrl *Controller) respondStream(ctx context.Context, out chan<- chatresp.R
 			resp, err := stream.Recv()
 			if err == io.EOF {
 				finish()
+				break
 			}
 			if err != nil {
 				out <- chatresp.Response{Err: err.Error(), Msg: "failed to receive response", Finish: true}
