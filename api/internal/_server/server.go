@@ -25,7 +25,6 @@ import (
 	"github.com/yogenyslav/ldt-2024/api/internal/api/middleware"
 	"github.com/yogenyslav/ldt-2024/api/internal/api/pb"
 	"github.com/yogenyslav/ldt-2024/api/internal/api/predictor/handler"
-	pc "github.com/yogenyslav/ldt-2024/api/internal/api/prompter/controller"
 	ph "github.com/yogenyslav/ldt-2024/api/internal/api/prompter/handler"
 	sc "github.com/yogenyslav/ldt-2024/api/internal/api/stock/controller"
 	sh "github.com/yogenyslav/ldt-2024/api/internal/api/stock/handler"
@@ -123,9 +122,7 @@ func (s *Server) Run() {
 		}
 	}()
 
-	prompterController := pc.New(prompterClient, s.tracer)
-	prompterHandler := ph.New(prompterController, s.tracer)
-	pb.RegisterPrompterServer(s.srv, prompterHandler)
+	pb.RegisterPrompterServer(s.srv, ph.New(prompterClient, s.tracer))
 
 	stockRepo := sr.New(s.mongo)
 	stockController := sc.New(stockRepo, s.tracer)

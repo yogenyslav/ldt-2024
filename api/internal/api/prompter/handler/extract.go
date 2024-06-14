@@ -5,7 +5,6 @@ import (
 
 	"github.com/rs/zerolog/log"
 	"github.com/yogenyslav/ldt-2024/api/internal/api/pb"
-	"github.com/yogenyslav/ldt-2024/api/internal/api/prompter/model"
 	"github.com/yogenyslav/ldt-2024/api/pkg"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
@@ -32,10 +31,7 @@ func (h *Handler) Extract(c context.Context, in *pb.ExtractReq) (*pb.ExtractedPr
 	)
 	defer span.End()
 
-	req := model.ExtractReq{
-		Prompt: in.GetPrompt(),
-	}
-	resp, err := h.ctrl.Extract(ctx, req)
+	resp, err := h.prompter.Extract(ctx, in)
 	if err != nil {
 		log.Error().Err(err).Msg("failed to extract prompt metadata")
 		return nil, status.Error(codes.Internal, err.Error())
