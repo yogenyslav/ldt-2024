@@ -90,3 +90,21 @@ func (r *Repo) DeleteOne(ctx context.Context, queryID int64, username string) er
 	}
 	return nil
 }
+
+const restoreOne = `
+	update chat.favorite_responses
+	set is_deleted = false
+	where query_id = $1 and username = $2 and is_deleted = true;
+`
+
+// RestoreOne восстанавливает предикт в избранное.
+func (r *Repo) RestoreOne(ctx context.Context, queryID int64, username string) error {
+	tag, err := r.pg.Exec(ctx, restoreOne, queryID, username)
+	if err != nil {
+		return shared.ErrCreateSession
+	}
+	if tag.RowsAffected() == 0 {
+		return shared.ErrNoFavoriteWithID
+	}
+	return nil
+}

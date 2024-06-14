@@ -7,6 +7,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/yogenyslav/ldt-2024/chat/internal/favorite/model"
 	"github.com/yogenyslav/ldt-2024/chat/internal/shared"
+	"github.com/yogenyslav/pkg"
 )
 
 // InsertOne добавляет новый предикт в избранное.
@@ -25,6 +26,13 @@ func (ctrl *Controller) InsertOne(ctx context.Context, params model.FavoriteCrea
 		Username: username,
 		Response: response,
 	}); err != nil {
+		if pkg.CheckDuplicateKey(err) {
+			if err = ctrl.repo.RestoreOne(ctx, params.QueryID, username); err != nil {
+				log.Error().Err(err).Msg("failed to restore favorite")
+				return err
+			}
+			return nil
+		}
 		log.Error().Err(err).Msg("failed to insert favorite")
 		return shared.ErrCreateFavorite
 	}
