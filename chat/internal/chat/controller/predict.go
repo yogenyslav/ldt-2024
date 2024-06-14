@@ -76,7 +76,7 @@ func (ctrl *Controller) Predict(ctx context.Context, out chan<- chatresp.Respons
 		return
 	}
 
-	out <- chatresp.Response{Msg: "predict succeeded", Data: data, DataType: meta.Type}
+	out <- chatresp.Response{Msg: "predict succeeded", Data: data, DataType: meta.Type.ToString()}
 	if meta.Type == shared.TypeStock {
 		if err = ctrl.cr.UpdateResponse(ctx, model.ResponseDao{
 			QueryID: queryID,
@@ -87,10 +87,10 @@ func (ctrl *Controller) Predict(ctx context.Context, out chan<- chatresp.Respons
 		return
 	}
 
-	err = ctrl.respondStream(ctx, out, cancel, predict.GetData(), meta.Type, queryID)
+	err = ctrl.respondStream(ctx, out, cancel, predict.GetData(), queryID)
 }
 
-func (ctrl *Controller) respondStream(ctx context.Context, out chan<- chatresp.Response, cancel <-chan struct{}, prompt []byte, dataType shared.QueryType, queryID int64) error {
+func (ctrl *Controller) respondStream(ctx context.Context, out chan<- chatresp.Response, cancel <-chan struct{}, prompt []byte, queryID int64) error {
 	withCancel, finish := context.WithCancel(ctx)
 	defer finish()
 
