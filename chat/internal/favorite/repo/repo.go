@@ -93,13 +93,13 @@ func (r *Repo) DeleteOne(ctx context.Context, queryID int64, username string) er
 
 const restoreOne = `
 	update chat.favorite_responses
-	set is_deleted = false
+	set is_deleted = false, response = $3
 	where query_id = $1 and username = $2 and is_deleted = true;
 `
 
 // RestoreOne восстанавливает предикт в избранное.
-func (r *Repo) RestoreOne(ctx context.Context, queryID int64, username string) error {
-	tag, err := r.pg.Exec(ctx, restoreOne, queryID, username)
+func (r *Repo) RestoreOne(ctx context.Context, params model.FavoriteDao) error {
+	tag, err := r.pg.Exec(ctx, restoreOne, params.QueryID, params.Username, params.Response)
 	if err != nil {
 		return shared.ErrCreateSession
 	}

@@ -27,7 +27,11 @@ func (ctrl *Controller) InsertOne(ctx context.Context, params model.FavoriteCrea
 		Response: response,
 	}); err != nil {
 		if pkg.CheckDuplicateKey(err) {
-			if err = ctrl.repo.RestoreOne(ctx, params.QueryID, username); err != nil {
+			if err = ctrl.repo.RestoreOne(ctx, model.FavoriteDao{
+				QueryID:  params.QueryID,
+				Username: username,
+				Response: response,
+			}); err != nil {
 				log.Error().Err(err).Msg("failed to restore favorite")
 				return err
 			}
