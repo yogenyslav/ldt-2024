@@ -66,14 +66,14 @@ class SaigaPrompter:
             model="saiga", 
             messages=[{"role": "user", "content": prompt}],
             stream=False,
-            options={"temperature": temp})
+            options={"temperature": temp, "num_predict": -2, "top_k": 1})
         return output["message"]["content"]
     
     def generate_response(self, prompt: str, request_type: PromptType):
         conversation = Conversation()
         conversation.add_user_message(prompt)
         prompt = conversation.get_prompt()
-        temp = 0.9 if request_type == PromptType.TIME_NORMALIZER else 0.8
+        temp = 0.92 if request_type == PromptType.TIME_NORMALIZER else 0.8
         response = self.generate(prompt, temp)
         return response
 
