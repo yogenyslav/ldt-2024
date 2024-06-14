@@ -222,7 +222,7 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
 
         return codes_data
 
-    def get_stocks(self, paths):
+    def prepare_stocks_df(self, paths):
         stocks = []
         for path in paths:
             result = parse_filename(path)
@@ -293,7 +293,7 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
         assert len(request.sources) == 15
 
         contracts_path, kpgz_path, all_kpgz_codes_path = request.sources[:3]
-        stocks = self.get_stocks(request.sources[3:])
+        stocks = self.prepare_stocks_df(request.sources[3:])
 
         all_kpgz_codes = pd.read_csv(all_kpgz_codes_path)
         all_kpgz_codes = all_kpgz_codes.set_index("code")
