@@ -162,6 +162,6 @@ const updateResponseData = `
 
 // UpdateResponseData обновляет данные ответа по id.
 func (r *Repo) UpdateResponseData(ctx context.Context, params model.ResponseDao) error {
-	_, err := r.pg.ExecTx(ctx, updateResponseData, params.QueryID, params.Data, params.DataType)
+	_, err := r.pg.Exec(ctx, updateResponseData, params.QueryID, params.Data, params.DataType)
 	return err
 }

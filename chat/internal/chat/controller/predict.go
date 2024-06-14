@@ -41,13 +41,13 @@ func (ctrl *Controller) Predict(ctx context.Context, out chan<- chatresp.Respons
 		QueryID: queryID,
 		Status:  shared.StatusProcessing,
 	}); err != nil {
-		out <- chatresp.Response{Err: err.Error(), Msg: "predict failed"}
+		out <- chatresp.Response{Err: err.Error(), Msg: "update response to processing failed"}
 		return
 	}
 
 	meta, err := ctrl.cr.FindQueryMeta(ctx, queryID)
 	if err != nil {
-		out <- chatresp.Response{Err: err.Error(), Msg: "predict failed"}
+		out <- chatresp.Response{Err: err.Error(), Msg: "find query meta failed"}
 		return
 	}
 
@@ -66,13 +66,13 @@ func (ctrl *Controller) Predict(ctx context.Context, out chan<- chatresp.Respons
 		Data:     predict.GetData(),
 		DataType: meta.Type,
 	}); err != nil {
-		out <- chatresp.Response{Err: err.Error(), Msg: "predict failed"}
+		out <- chatresp.Response{Err: err.Error(), Msg: "update response data failed"}
 		return
 	}
 
 	data := make(map[string]any)
 	if err = json.Unmarshal(predict.GetData(), &data); err != nil {
-		out <- chatresp.Response{Err: err.Error(), Msg: "predict failed"}
+		out <- chatresp.Response{Err: err.Error(), Msg: "failed to unmarshal response data"}
 		return
 	}
 
