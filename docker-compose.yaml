@@ -71,6 +71,7 @@ services:
     environment:
       - KEYCLOAK_ADMIN=${KEYCLOAK_ADMIN}
       - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}
+      - KC_HOSTNAME=${KEYCLOAK_HOSTNAME}
       - KC_DB_URL_HOST=pg
       - KC_DB_URL_PORT=5432
       - KC_DB_URL_DATABASE=${POSTGRES_DB}
@@ -78,7 +79,7 @@ services:
       - KC_DB_PASSWORD=${POSTGRES_PASSWORD}
     ports:
       - "8080:8080"
-    command: start-dev --db postgres
+    command: start-dev --db postgres --http-enabled true --proxy edge
 
   redis:
     image: redis:7.2.4
