@@ -27,6 +27,10 @@ import (
 	cc "github.com/yogenyslav/ldt-2024/chat/internal/chat/controller"
 	ch "github.com/yogenyslav/ldt-2024/chat/internal/chat/handler"
 	cr "github.com/yogenyslav/ldt-2024/chat/internal/chat/repo"
+	"github.com/yogenyslav/ldt-2024/chat/internal/favorite"
+	"github.com/yogenyslav/ldt-2024/chat/internal/favorite/controller"
+	"github.com/yogenyslav/ldt-2024/chat/internal/favorite/handler"
+	"github.com/yogenyslav/ldt-2024/chat/internal/favorite/repo"
 	"github.com/yogenyslav/ldt-2024/chat/internal/session"
 	sc "github.com/yogenyslav/ldt-2024/chat/internal/session/controller"
 	sh "github.com/yogenyslav/ldt-2024/chat/internal/session/handler"
@@ -133,6 +137,11 @@ func (s *Server) Run() {
 	)
 	chatHandler := ch.New(chatController, s.tracer)
 	chat.SetupChatRoutes(s.app, chatHandler, s.getWsConfig())
+
+	favoriteRepo := repo.New(s.pg)
+	favoriteController := controller.New(favoriteRepo, s.tracer)
+	favoriteHandler := handler.New(favoriteController)
+	favorite.SetupFavoriteRoutes(s.app, favoriteHandler)
 
 	go s.listen()
 	go prom.HandlePrometheus(s.cfg.ChatProm)

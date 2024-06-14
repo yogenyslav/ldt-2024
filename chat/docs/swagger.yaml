@@ -1,5 +1,33 @@
 basePath: /chat
 definitions:
+  model.FavoriteCreateReq:
+    properties:
+      id:
+        type: integer
+      response:
+        additionalProperties: {}
+        type: object
+    type: object
+  model.FavoriteDto:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      response:
+        additionalProperties: {}
+        type: object
+      updated_at:
+        type: string
+    type: object
+  model.FavoriteUpdateReq:
+    properties:
+      id:
+        type: integer
+      response:
+        additionalProperties: {}
+        type: object
+    type: object
   model.FindOneResp:
     properties:
       content:
@@ -97,6 +125,8 @@ definitions:
         type: string
       tg:
         type: boolean
+      tg_id:
+        type: integer
       title:
         type: string
     type: object
@@ -144,6 +174,131 @@ paths:
       summary: Авторизация
       tags:
       - auth
+  /favorite:
+    post:
+      consumes:
+      - application/json
+      description: Добавляет новый предикт в избранное.
+      parameters:
+      - description: Параметры запроса
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/model.FavoriteCreateReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Предикт успешно добавлен в избранное
+          schema:
+            type: string
+        "400":
+          description: Некорректный запрос
+          schema:
+            type: string
+      summary: Добавляет новый предикт в избранное.
+      tags:
+      - favorite
+    put:
+      consumes:
+      - application/json
+      description: Обновляет избранный предикт.
+      parameters:
+      - description: Параметры запроса
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/model.FavoriteUpdateReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Предикт успешно обновлен
+          schema:
+            type: string
+        "400":
+          description: Некорректный запрос
+          schema:
+            type: string
+      summary: Обновляет избранный предикт.
+      tags:
+      - favorite
+  /favorite/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Удаляет избранный предикт по QueryID.
+      parameters:
+      - description: QueryID предикта
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Предикт успешно удален
+          schema:
+            type: string
+        "400":
+          description: Некорректный запрос
+          schema:
+            type: string
+        "404":
+          description: Предикт не найден
+          schema:
+            type: string
+      summary: Удаляет избранный предикт по QueryID.
+      tags:
+      - favorite
+    get:
+      consumes:
+      - application/json
+      description: Возвращает избранный предикт по QueryID.
+      parameters:
+      - description: QueryID предикта
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Избранный предикт
+          schema:
+            $ref: '#/definitions/model.FavoriteDto'
+        "400":
+          description: Некорректный запрос
+          schema:
+            type: string
+        "404":
+          description: Предикт не найден
+          schema:
+            type: string
+      summary: Возвращает избранный предикт по QueryID.
+      tags:
+      - favorite
+  /favorite/list:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает список избранных предиктов.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Список избранных предиктов
+          schema:
+            items:
+              $ref: '#/definitions/model.FavoriteDto'
+            type: array
+      summary: Возвращает список избранных предиктов.
+      tags:
+      - favorite
   /session/{id}:
     delete:
       consumes:
