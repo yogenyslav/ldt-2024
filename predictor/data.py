@@ -18,6 +18,7 @@ contracts_map_columns = {
     "Конечное наименование КПГЗ": "final_name_kpgz",
     "Реестровый номер в РК": "registry_number_in_rk",
     "Исполнено поставщиком": "provider",
+    "№ версии": 'version_number',
 }
 
 

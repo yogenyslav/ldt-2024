@@ -3,8 +3,10 @@ import logging
 import re
 import json
 import math
+from collections import defaultdict
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
+from pprint import pprint
 
 import pandas as pd
 import pymongo
@@ -109,32 +111,100 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
         return forecast_dict, regular_codes
 
     def prepare_timeseries(self, ts, ref_price):
-        if ts is None: return None
-        
+        if ts is None:
+            return None
+
         new_ts = []
         for d in ts:
-            if ref_price is not pd.NA and not math.isnan(d['value']) and ref_price is not np.nan:                
-                new_ts.append({
-                    'date': d['date'],
-                    'value': d['value'],
-                    'volume': int(d['value'] // ref_price),
-                })
-                
+            if (
+                ref_price is not pd.NA
+                and not math.isnan(d["value"])
+                and ref_price is not np.nan
+            ):
+                new_ts.append(
+                    {
+                        "date": d["date"],
+                        "value": d["value"],
+                        "volume": int(d["value"] // ref_price),
+                    }
+                )
+
             else:
-                new_ts.append({
-                    'date': d['date'],
-                    'value': d['value'],
-                    'volume': None,
-                })
-                
+                new_ts.append(
+                    {
+                        "date": d["date"],
+                        "value": d["value"],
+                        "volume": None,
+                    }
+                )
+
         return new_ts
-    
+
     def get_history(self, df: pd.DataFrame):
-        hisory = df[['conclusion_date', 'paid_rub']].copy()
-        hisory = hisory.resample("ME", on='conclusion_date')['paid_rub'].sum().reset_index()
-        hisory = hisory[hisory['paid_rub'] > 0]
-        return hisory.rename({'conclusion_date': 'date', 'paid_rub': 'value'}, axis=1)
-            
+        hisory = df[["conclusion_date", "paid_rub"]].copy()
+        hisory = (
+            hisory.resample("ME", on="conclusion_date")["paid_rub"].sum().reset_index()
+        )
+        hisory = hisory[hisory["paid_rub"] > 0]
+        return hisory.rename({"conclusion_date": "date", "paid_rub": "value"}, axis=1)
+
+    def get_formated_purchase(
+        self, cur_code_df, code_distrib, forecast, median_execution_duration
+    ):
+        if forecast is None:
+            return None
+        raws_by_date = defaultdict(list)
+
+        median_execution_duration = (
+            median_execution_duration if median_execution_duration is not None else 30
+        )
+
+        for code, fraction in zip(
+            code_distrib["final_code_kpgz"], code_distrib["paid_rub"]
+        ):
+            code_df = cur_code_df[
+                ["name_spgz", "id_spgz", "version_number", "final_name_kpgz"]
+            ][cur_code_df["final_code_kpgz"] == code].dropna(axis=1)
+            name_spgz = code_df["name_spgz"].iloc[0]
+            id_spgz = int(code_df["id_spgz"].iloc[0])
+            version_number = int(code_df["version_number"].iloc[0])
+            final_name_kpgz = code_df["final_name_kpgz"].iloc[0]
+
+            for forecast_point in forecast:
+                start_date = forecast_point["date"]
+                end_date = forecast_point["date"] + relativedelta(
+                    days=median_execution_duration
+                )
+                year = end_date.year
+                if forecast_point["volume"] is None:
+                    amount = None
+                else:
+                    amount = int(forecast_point["volume"] * fraction)
+
+                nmc = forecast_point["value"] * fraction
+                raw = {
+                    "DeliverySchedule": {
+                        "start_date": start_date,
+                        "end_date": end_date,
+                        "year": year,
+                        "deliveryAmount": amount,
+                    },
+                    "entityId": id_spgz,
+                    "id": version_number,
+                    "nmc": nmc,
+                    "purchaseAmount": amount,
+                    "spgzCharacteristics": {
+                        "spgzId": id_spgz,
+                        "spgzName": name_spgz,
+                        "kpgzCode": code,
+                        "kpgzName": final_name_kpgz,
+                    },
+                }
+
+                raws_by_date[convert_datetime_to_str(start_date)].append(raw)
+
+        return raws_by_date
+
     def get_codes_data(self, merged_df, all_kpgz_codes, forecast_dict, regular_codes):
         codes_stat = merged_df
         codes_stat["execution_duration"] = (
@@ -187,12 +257,29 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
                 ["num_nans", "start_to_execute_duration", "execution_duration"], axis=1
             )
 
-            forecast = self.prepare_timeseries(forecast_dict.get(code, None), mean_ref_price)
+            forecast = self.prepare_timeseries(
+                forecast_dict.get(code, None), mean_ref_price
+            )
             history = self.get_history(cur_code_df).to_dict(orient="records")
             history = self.prepare_timeseries(history, mean_ref_price)
-            
-            examples = cur_code_df.drop_duplicates(subset=['final_code_kpgz']).iloc[:5].to_dict(orient="records")
-            
+
+            examples = (
+                cur_code_df.drop_duplicates(subset=["final_code_kpgz"])
+                .iloc[:5]
+                .to_dict(orient="records")
+            )
+
+            code_distrib = (
+                cur_code_df.groupby("final_code_kpgz")["paid_rub"]
+                .sum()
+                .sort_values(ascending=False)[:20]
+            )
+            code_distrib = (code_distrib / code_distrib.sum()).reset_index()
+
+            raws_by_date = self.get_formated_purchase(
+                cur_code_df, code_distrib, forecast, median_execution_duration
+            )
+
             codes_data.append(
                 {
                     "code": code,
@@ -200,10 +287,11 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
                     "is_regular": code in regular_codes,
                     "forecast": forecast,
                     "history": history,
+                    "raws_by_date": raws_by_date,
                     "median_execution_days": (
                         median_execution_duration
                         if median_execution_duration is not pd.NA
-                        else None
+                        else 30
                     ),
                     "mean_start_to_execute_days": (
                         mean_start_to_execute_duration
@@ -246,16 +334,16 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
 
     def get_stocks(self, query):
         full_name = self._name_matcher.match_to_full_name(query)
-        
+
         collection_name = "stocks"
         collection = mongo_db[collection_name]
         code_info = collection.find({"name": full_name}, {"_id": False})
         code_info = list(code_info)
-        
+
         assert len(code_info) == 4
 
         return code_info
-    
+
     def get_forecast(self, product, period):
         code = self._code_matcher.match_to_3rd_level_code(product)
 
@@ -266,11 +354,13 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
         if code_info is None:
             pass  # TODO
 
-        start_dt = convert_to_datetime("2023-01-01T10:00:20.021Z")
+        start_dt = self.cur_date
         end_dt = start_dt + relativedelta(
             years=int(period) // 12, months=int(period) % 12
         )
-        
+
+        raws_by_date = code_info.pop("raws_by_date")
+
         if code_info["forecast"] is not None:
             forecast = [
                 x
@@ -279,12 +369,24 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
             ]
         else:
             forecast = None
-            
+
+        if forecast is None:
+            raws = None
+        elif len(forecast) > 0:
+            raws = raws_by_date.get(convert_datetime_to_str(forecast[0]["date"]), None)
+        else:
+            raws = []
+
         code_info["forecast"] = forecast
+        code_info["raws"] = raws
 
         code_info = convert_datetime_to_str(code_info)
         return code_info
-    
+
+    @property
+    def cur_date(self):
+        return convert_to_datetime("2023-01-01T10:00:20.021Z")
+
     def PrepareData(self, request: PrepareDataReq, context: ServicerContext):
         # в PrepareDataReq лежит путь до .csv/.xlsx файла
 
@@ -305,6 +407,8 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
             merged_df, all_kpgz_codes, forecast_dict, regular_codes
         )
 
+        pprint(codes_data)
+
         collection_name = "codes"
         collection = mongo_db[collection_name]
         collection.insert_many(codes_data)
@@ -322,9 +426,9 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
             resp = self.get_stocks(request.product)
         elif request.type == QueryType.PREDICTION:
             resp = self.get_forecast(request.product, request.period)
-            
-        print(resp)    
-            
+
+        pprint(resp)
+
         return PredictResp(data=json.dumps(resp).encode("utf-8"))
 
     def UniqueCodes(self, request: Empty, context: ServicerContext):
