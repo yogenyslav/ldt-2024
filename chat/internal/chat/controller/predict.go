@@ -71,7 +71,7 @@ func (ctrl *Controller) Predict(ctx context.Context, out chan<- chatresp.Respons
 		return
 	}
 
-	out <- chatresp.Response{Msg: "predict succeeded", Data: data}
+	out <- chatresp.Response{Msg: "predict succeeded", Data: data, DataType: meta.Type}
 
 	cnt := 0
 	buff := strings.Builder{}
