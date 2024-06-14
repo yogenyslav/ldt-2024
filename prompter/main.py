@@ -31,14 +31,21 @@ class Prompter(prompter_pb2_grpc.PrompterServicer):
         for v in generator2:
             yield StreamResp(...)
         """
-        generator_1 = self.saiga.process_final_request(StreamReq.prompt, PromptType.FINAL_PREDICTION_PART1)
+        generator_1 = self.saiga.process_final_request(
+            StreamReq.prompt, PromptType.FINAL_PREDICTION_PART1
+        )
         for v in generator_1:
-            yield StreamResp(chunk=v["message"]["content"])
+            chunk = v["message"]["content"]
+            print(chunk)
+            yield StreamResp(chunk=chunk)
 
-        generator_2 = self.saiga.process_final_request(StreamReq.prompt, PromptType.FINAL_PREDICTION_PART2)
+        generator_2 = self.saiga.process_final_request(
+            StreamReq.prompt, PromptType.FINAL_PREDICTION_PART2
+        )
         for v in generator_2:
-            yield StreamResp(chunk=v["message"]["content"])
-        
+            chunk = v["message"]["content"]
+            print(chunk)
+            yield StreamResp(chunk=chunk)
 
 
 def serve():
