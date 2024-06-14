@@ -24,6 +24,7 @@ type chatRepo interface {
 	UpdateQuery(ctx context.Context, params model.QueryDao) error
 	UpdateQueryStatus(ctx context.Context, id int64, status shared.QueryStatus) error
 	FindQueryMeta(ctx context.Context, id int64) (model.QueryMeta, error)
+	UpdateResponseData(ctx context.Context, params model.ResponseDao) error
 }
 
 type sessionRepo interface {

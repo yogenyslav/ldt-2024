@@ -61,6 +61,15 @@ func (ctrl *Controller) Predict(ctx context.Context, out chan<- chatresp.Respons
 		return
 	}
 
+	if err = ctrl.cr.UpdateResponseData(ctx, model.ResponseDao{
+		QueryID:  queryID,
+		Data:     predict.GetData(),
+		DataType: meta.Type,
+	}); err != nil {
+		out <- chatresp.Response{Err: err.Error(), Msg: "predict failed"}
+		return
+	}
+
 	data := make(map[string]any)
 	if err = json.Unmarshal(predict.GetData(), &data); err != nil {
 		out <- chatresp.Response{Err: err.Error(), Msg: "predict failed"}
@@ -68,10 +77,10 @@ func (ctrl *Controller) Predict(ctx context.Context, out chan<- chatresp.Respons
 	}
 
 	out <- chatresp.Response{Msg: "predict succeeded", Data: data, DataType: meta.Type}
-	ctrl.respondStream(ctx, out, cancel, predict.GetData(), queryID)
+	err = ctrl.respondStream(ctx, out, cancel, predict.GetData(), meta.Type, queryID)
 }
 
-func (ctrl *Controller) respondStream(ctx context.Context, out chan<- chatresp.Response, cancel <-chan struct{}, prompt []byte, queryID int64) {
+func (ctrl *Controller) respondStream(ctx context.Context, out chan<- chatresp.Response, cancel <-chan struct{}, prompt []byte, dataType shared.QueryType, queryID int64) error {
 	withCancel, finish := context.WithCancel(ctx)
 	defer finish()
 
@@ -79,7 +88,7 @@ func (ctrl *Controller) respondStream(ctx context.Context, out chan<- chatresp.R
 	stream, err := ctrl.prompter.RespondStream(withCancel, in)
 	if err != nil {
 		out <- chatresp.Response{Err: err.Error(), Msg: "failed to respond stream", Finish: true}
-		return
+		return err
 	}
 
 	buff := strings.Builder{}
@@ -93,8 +102,9 @@ func (ctrl *Controller) respondStream(ctx context.Context, out chan<- chatresp.R
 				Body:    buff.String(),
 			}); err != nil {
 				out <- chatresp.Response{Err: err.Error(), Msg: "cancel failed", Finish: true}
+				return err
 			}
-			return
+			return nil
 		case <-withCancel.Done():
 			out <- chatresp.Response{Msg: "finished", Finish: true}
 			if err := ctrl.cr.UpdateResponse(ctx, model.ResponseDao{
@@ -103,8 +113,9 @@ func (ctrl *Controller) respondStream(ctx context.Context, out chan<- chatresp.R
 				Body:    buff.String(),
 			}); err != nil {
 				out <- chatresp.Response{Err: err.Error(), Msg: "failed to save response", Finish: true}
+				return err
 			}
-			return
+			return nil
 		default:
 			resp, err := stream.Recv()
 			if err == io.EOF {
@@ -112,7 +123,7 @@ func (ctrl *Controller) respondStream(ctx context.Context, out chan<- chatresp.R
 			}
 			if err != nil {
 				out <- chatresp.Response{Err: err.Error(), Msg: "failed to receive response", Finish: true}
-				return
+				return err
 			}
 			chunk := resp.GetChunk()
 			out <- chatresp.Response{Data: struct {

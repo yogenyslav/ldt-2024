@@ -153,3 +153,15 @@ func (r *Repo) FindQueryMeta(ctx context.Context, id int64) (model.QueryMeta, er
 	err := r.pg.Query(ctx, &meta, findQueryMeta, id)
 	return meta, err
 }
+
+const updateResponseData = `
+	update chat.response
+	set data = $2, data_type = $3
+	where query_id = $1;
+`
+
+// UpdateResponseData обновляет данные ответа по id.
+func (r *Repo) UpdateResponseData(ctx context.Context, params model.ResponseDao) error {
+	_, err := r.pg.ExecTx(ctx, updateResponseData, params.QueryID, params.Data, params.DataType)
+	return err
+}
