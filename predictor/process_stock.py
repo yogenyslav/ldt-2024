@@ -184,7 +184,10 @@ def process_and_merge_stocks(
                 axis=0,
             )
             # df = df.append({"name": name, "year": year, "quarter": quarter, "price": 0, "amount": 0, "sum": 0}, ignore_index=True)
-
+    df = df.groupby(["name", "year", "quarter"], as_index=False).sum()
     df.reset_index(drop=True, inplace=True)
-
-    return df
+    values_to_drop = ["1", "105.34", "105.35", "105.36"]
+    df.loc[df.amount != 0, "price"] = (
+        df.loc[df.amount != 0, "sum"] / df.loc[df.amount != 0, "amount"]
+    )
+    return df[~df.name.isin(values_to_drop)]
