@@ -74,21 +74,6 @@ class Prompter(prompter_pb2_grpc.PrompterServicer):
                     for c in outp_text:
                         time.sleep(0.01)
                         yield StreamResp(chunk=c)
-            generator_2 = self.model.process_final_request(
-                request.prompt, PromptType.FINAL_PREDICTION_PART2
-            )
-            last_msg = ""
-            for line in generator_2.iter_lines():
-                if line:
-                    decoded_line = line.decode("utf-8")
-                    message = json.loads(decoded_line)
-                    print(message)
-                    msg_text = message["result"]["alternatives"][0]["message"]["text"]
-                    outp_text = msg_text[len(last_msg) :]
-                    last_msg = msg_text
-                    for c in outp_text:
-                        time.sleep(0.01)
-                        yield StreamResp(chunk=c)
 
 
 logging.basicConfig(level=logging.DEBUG)

@@ -175,15 +175,13 @@ class YaGPTPrompter:
             prompter_output.product = None
         return prompter_output
 
-    def process_final_request(self, data: str, prompt_type: PromptType):
+    def process_final_request(self, data: str):
         inp = json.loads(data)
         request = ""
-        if prompt_type == PromptType.FINAL_PREDICTION_PART1:
-            request = self.prepare_prompt1(inp)
-            request += """ЗАПРОС: Оформи отчет в MARKDOWN. Убери None, где нет информации. 
-            В своем отчете укажи всю предоставленную информацию. Не добавляй информацию, которой нет в исходных данных. 
-            Добавь суммаризацию, в которой скажи то, что информацию о закупках можно поменять в соответствии с потребностями заказчика."""
-        if prompt_type == PromptType.FINAL_PREDICTION_PART2:
-            request = self.prepare_prompt2(inp)
-            request += "ЗАПРОС: Оформи эту информацию в MARKDOWN таблице"
-        return self._generate_responce(request, prompt_type, stream=True)
+        request = self.prepare_prompt1(inp)
+        request += """ЗАПРОС 1: Оформи отчет в MARKDOWN. Убери None, где нет информации. 
+        В своем отчете укажи всю предоставленную информацию. Не добавляй информацию, которой нет в исходных данных. 
+        Добавь суммаризацию, в которой скажи то, что информацию о закупках можно поменять в соответствии с потребностями заказчика."""
+        request += self.prepare_prompt2(inp)
+        request += "ЗАПРОС 2: Оформи эту информацию в MARKDOWN таблице"
+        return self._generate_responce(request, PromptType.FINAL_PREDICTION_PART1, stream=True)
