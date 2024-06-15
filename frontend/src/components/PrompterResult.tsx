@@ -20,7 +20,7 @@ const PrompterResult = ({ period, product, type }: Props) => {
                             <PackageSearch className='w-4 h-4 text-gray-500 dark:text-gray-400' />
                         </CardHeader>
                         <CardContent>
-                            <div className='text-2xl font-bold'>
+                            <div className='text-lg font-bold'>
                                 {mapIncomingMessageTypeToText(type)}
                             </div>
                         </CardContent>
@@ -34,7 +34,7 @@ const PrompterResult = ({ period, product, type }: Props) => {
                             <FileBox className='w-4 h-4 text-gray-500 dark:text-gray-400' />
                         </CardHeader>
                         <CardContent>
-                            <div className='text-2xl font-bold'>{product}</div>
+                            <div className='text-lg font-bold'>{product}</div>
                         </CardContent>
                     </Card>
                 )}

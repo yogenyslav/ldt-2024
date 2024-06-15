@@ -69,6 +69,11 @@ body:has(.dashboard) {
     overflow: hidden;
 }
 
+main:has(.chat) {
+    max-width: 100vw;
+    overflow-x: scroll;
+}
+
 .chat {
     max-height: calc(100vh - 3.5rem);
     overflow-y: scroll;
