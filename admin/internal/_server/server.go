@@ -65,7 +65,7 @@ func New(cfg *config.Config) *Server {
 	}))
 	app.Use(recovermw.New())
 	app.Use(otelfiber.Middleware())
-	app.Use("/swagger/*", swagger.HandlerDefault)
+	app.Use("/admin/swagger/*", swagger.HandlerDefault)
 
 	exporter := tracing.MustNewExporter(context.Background(), cfg.Jaeger.URL())
 	provider := tracing.MustNewTraceProvider(exporter, "admin")
