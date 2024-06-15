@@ -133,7 +133,7 @@ export interface DisplayedIncomingMessage {
     product?: string;
     period?: string;
     prediction?: { forecast: PurchasePlan[]; history: PurchasePlan[] };
-    stocks?: Stock[];
+    stocks?: StockResponse['data'];
     outputJson?: OutputJson;
 }
 

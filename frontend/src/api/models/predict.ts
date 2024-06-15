@@ -46,7 +46,11 @@ export interface ExampleContract {
 }
 
 export interface StockResponse {
-    data: Stock[];
+    data: {
+        id: number;
+        name: string;
+        history: Stock[];
+    }[];
 }
 
 export interface Stock {

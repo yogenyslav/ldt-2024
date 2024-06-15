@@ -5,4 +5,11 @@ export interface LoginParams {
 
 export interface LoginResponse {
     token: string;
+    roles: Role[];
+}
+
+export enum Role {
+    Admin = 'ADMIN',
+    Analyst = 'ANALYST',
+    Buyer = 'BUYER',
 }
