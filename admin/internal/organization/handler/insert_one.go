@@ -17,7 +17,7 @@ import (
 // @Produce json
 // @Param Authorization header string true "access token"
 // @Param body body model.OrganizationCreateReq true "Параметры создания организации"
-// @Success 201 {object} model.OrganizationCreateResp "ID созданной организации"
+// @Success 201 "ID созданной организации"
 // @Failure 400 {object} string "Неверные параметры запроса"
 // @Router /organization [post]
 func (h *Handler) InsertOne(c *fiber.Ctx) error {
@@ -32,10 +32,10 @@ func (h *Handler) InsertOne(c *fiber.Ctx) error {
 		return shared.ErrCtxConvertType
 	}
 
-	resp, err := h.ctrl.InsertOne(c.UserContext(), req, username)
+	err := h.ctrl.InsertOne(c.UserContext(), req, username)
 	if err != nil {
 		return err
 	}
 
-	return c.Status(http.StatusCreated).JSON(resp)
+	return c.SendStatus(http.StatusCreated)
 }

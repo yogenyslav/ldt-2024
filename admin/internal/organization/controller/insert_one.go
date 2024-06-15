@@ -12,7 +12,7 @@ import (
 )
 
 // InsertOne создает новую организацию.
-func (ctrl *Controller) InsertOne(ctx context.Context, params model.OrganizationCreateReq, username string) (model.OrganizationCreateResp, error) {
+func (ctrl *Controller) InsertOne(ctx context.Context, params model.OrganizationCreateReq, username string) error {
 	ctx, span := ctrl.tracer.Start(
 		ctx,
 		"Controller.InsertOrganization",
@@ -23,8 +23,6 @@ func (ctrl *Controller) InsertOne(ctx context.Context, params model.Organization
 	)
 	defer span.End()
 
-	var resp model.OrganizationCreateResp
-
 	s3Bucket := getOrganizationTitle(params.Title)
 	err := ctrl.s3.CreateBucket(ctx, &minios3.Bucket{
 		Name:   s3Bucket,
@@ -32,19 +30,18 @@ func (ctrl *Controller) InsertOne(ctx context.Context, params model.Organization
 	})
 	if err != nil {
 		log.Error().Err(err).Msg("failed to create bucket")
-		return resp, shared.ErrCreateOrganization
+		return shared.ErrCreateOrganization
 	}
 
-	id, err := ctrl.repo.InsertOne(ctx, model.OrganizationDao{
+	err = ctrl.repo.InsertOne(ctx, model.OrganizationDao{
 		Username: username,
 		Title:    params.Title,
 		S3Bucket: s3Bucket,
 	})
 	if err != nil {
 		log.Error().Err(err).Msg("failed to insert organization")
-		return resp, shared.ErrCreateOrganization
+		return shared.ErrCreateOrganization
 	}
 
-	resp.ID = id
-	return resp, nil
+	return nil
 }

@@ -182,10 +182,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "201": {
-                        "description": "ID созданной организации",
-                        "schema": {
-                            "$ref": "#/definitions/model.OrganizationCreateResp"
-                        }
+                        "description": "ID созданной организации"
                     },
                     "400": {
                         "description": "Неверные параметры запроса",
@@ -470,14 +467,6 @@ const docTemplate = `{
             "properties": {
                 "title": {
                     "type": "string"
-                }
-            }
-        },
-        "model.OrganizationCreateResp": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "integer"
                 }
             }
         },
