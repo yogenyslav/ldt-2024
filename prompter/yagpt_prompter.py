@@ -181,9 +181,8 @@ class YaGPTPrompter:
         inp = json.loads(data)
         request = ""
         request = self.prepare_prompt1(inp)
-        request += """ЗАПРОС 1: Оформи отчет в MARKDOWN. Убери None, где нет информации. 
+        request += self.prepare_prompt2(inp)
+        request += """ЗАПРОС 1: Оформи отчет в MARKDOWN, где нужно, добавь таблицы. Убери None, где нет информации. 
         В своем отчете укажи всю предоставленную информацию. Не добавляй информацию, которой нет в исходных данных. 
         Добавь суммаризацию, в которой скажи то, что информацию о закупках можно поменять в соответствии с потребностями заказчика."""
-        request += self.prepare_prompt2(inp)
-        request += "ЗАПРОС 2: Оформи эту информацию в MARKDOWN таблице"
         return self._generate_responce(request, PromptType.FINAL_PREDICTION_PART1, stream=True)
