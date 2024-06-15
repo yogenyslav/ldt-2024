@@ -16,6 +16,7 @@ import {
     ModelResponseType,
     PredictionResponse,
     StockResponse,
+    UNAUTHORIZED_ERR,
 } from '@/api/models';
 import { LOCAL_STORAGE_KEY } from '@/auth/AuthProvider';
 import { WS_URL } from '@/config';
@@ -168,6 +169,12 @@ export class RootStore {
 
                 if (wsMessage.err) {
                     this.chatError = wsMessage.err;
+
+                    if (wsMessage.err === UNAUTHORIZED_ERR) {
+                        localStorage.removeItem(LOCAL_STORAGE_KEY);
+
+                        window.location.href = '/login';
+                    }
 
                     this.isModelAnswering = false;
                     this.isChatDisabled = false;

@@ -7,6 +7,7 @@ import { useToast } from './ui/use-toast';
 import { useState } from 'react';
 import Prediction from './Prediction';
 import Stocks from './Stocks';
+import PrompterResult from './PrompterResult';
 
 type ModelMessageProps = {
     incomingMessage: DisplayedIncomingMessage;
@@ -24,17 +25,21 @@ const ModelMessage = ({ incomingMessage, isLastMessage }: ModelMessageProps) => 
                 return (
                     <>
                         <div className='prose prose-stone'>
-                            <p>{`продукт: ${incomingMessage.product}, период: ${incomingMessage.period}, тип: ${incomingMessage.type}`}</p>
+                            <PrompterResult
+                                product={incomingMessage.product}
+                                period={incomingMessage.period}
+                                type={incomingMessage.type}
+                            />
                         </div>
                         {isLastMessage && (
-                            <div className='flex items-center gap-2 flex-wrap'>
+                            <div className='flex items-center gap-2 flex-wrap mt-1'>
                                 <Button
                                     onClick={() => {
                                         rootStore.sendMessage({
                                             command: ChatCommand.Valid,
                                         });
                                     }}
-                                    variant='outline'
+                                    variant='default'
                                     className='flex-1'
                                 >
                                     Продолжить
@@ -78,7 +83,13 @@ const ModelMessage = ({ incomingMessage, isLastMessage }: ModelMessageProps) => 
                                     forecast={incomingMessage.prediction.forecast}
                                 />
                             )}
-                            {incomingMessage.stocks && <Stocks stocks={incomingMessage.stocks} />}
+                            {incomingMessage.stocks && (
+                                <Stocks
+                                    stocks={incomingMessage.stocks.sort(
+                                        (a, b) => a.quarter - b.quarter
+                                    )}
+                                />
+                            )}
                             <div className='prose prose-stone'>
                                 <p>{incomingMessage.body}</p>
                             </div>
@@ -100,7 +111,11 @@ const ModelMessage = ({ incomingMessage, isLastMessage }: ModelMessageProps) => 
                 return (
                     <>
                         <div className='prose prose-stone'>
-                            <p>{`продукт: ${incomingMessage.product}, период: ${incomingMessage.period}, тип: ${incomingMessage.type}`}</p>
+                            <PrompterResult
+                                product={incomingMessage.product}
+                                period={incomingMessage.period}
+                                type={incomingMessage.type}
+                            />
                         </div>
                     </>
                 );
