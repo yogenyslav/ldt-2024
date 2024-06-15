@@ -22,6 +22,6 @@ func SetupFavoriteRoutes(app *fiber.App, h favoriteHandler, kc *gocloak.GoCloak,
 	g.Post("/", h.InsertOne)
 	g.Get("/list", h.List)
 	g.Get("/:id", h.FindOne)
-	g.Put("", h.UpdateOne)
+	g.Put("/", h.UpdateOne)
 	g.Delete("/:id", h.DeleteOne)
 }
