@@ -9,11 +9,13 @@ from api.prompter_pb2 import QueryType
 
 load_dotenv(".env")
 
-@dataclass 
+
+@dataclass
 class PrompterOutput:
     type: QueryType
     product: str | None = None
     period: str | None = None
+
 
 class PromptType(Enum):
     CLASSFIER = "classifier"
@@ -22,12 +24,13 @@ class PromptType(Enum):
     FINAL_PREDICTION_PART1 = "final_prediction_part1"
     FINAL_PREDICTION_PART2 = "final_prediction_part2"
 
+
 class YaGPTPrompter:
     def __init__(
         self,
         prompts_path: str = "./prompts.json",
     ) -> PrompterOutput:
-        
+
         self._yandex_api_key = os.getenv("YANDEX_API_KEY")
         self._yandex_folder_id = os.getenv("YANDEX_FOLDER_ID")
         self._prompts = json.load(open(prompts_path))
@@ -35,7 +38,7 @@ class YaGPTPrompter:
 
         self._headers = {
             "Content-Type": "application/json",
-            "Authorization": f"Api-Key {self._yandex_api_key}"
+            "Authorization": f"Api-Key {self._yandex_api_key}",
         }
 
         model_choice = os.getenv("MODEL_CHOICE")
@@ -47,18 +50,12 @@ class YaGPTPrompter:
             "completionOptions": {
                 "stream": False,
                 "temperature": 0.3,
-                "maxTokens": "5000"
+                "maxTokens": "5000",
             },
             "messages": [
-                {
-                "role": "system",
-                "text": "Ты — умный ассистент."
-                },
-                {
-                "role": "user",
-                "text": prompt
-                }
-            ]
+                {"role": "system", "text": "Ты — умный ассистент."},
+                {"role": "user", "text": prompt},
+            ],
         }
 
     def prepare_prompt1(self, data: dict) -> str:
@@ -68,7 +65,7 @@ class YaGPTPrompter:
         prompt += f"Наименование категории: {data['code_name']}\n"
         prompt += f"Регулярная/нерегулярная: {'регулярная' if data['is_regular'] else 'нерегулярная'}\n"
         prompt += f"Прогноз закупок:\n"
-        for i, forecast in enumerate(data['forecast'], start=1):
+        for i, forecast in enumerate(data["forecast"], start=1):
             prompt += f"Закупка № {i}\n"
             prompt += f"Рекомендуемая дата заключения: {forecast['date']}\n"
             prompt += f"Рекомендуемая сумма закупки: {forecast['value']}\n"
@@ -78,20 +75,24 @@ class YaGPTPrompter:
         prompt += f"Средняя референсная цена: {data['mean_ref_price']}\n"
 
         prompt += "Топ 5 поставщиков этой категории по объему закупок:\n"
-        for i, seller in enumerate(data['top5_providers'], start=1):
+        for i, seller in enumerate(data["top5_providers"], start=1):
             prompt += f"Поставщик {i}, код исполнителя: {seller}\n"
         return prompt
-        
+
     def prepare_prompt2(self, data: dict) -> str:
         prompt = ""
-        for i, deal in enumerate(data['contracts_in_code'], start=1):
+        for i, deal in enumerate(data["contracts_in_code"], start=1):
             prompt += f"Контракт № {i}:\n"
             prompt += f"Код СПГЗ: {deal['id_spgz']}\n"
             prompt += f"Конечное наименование КПГЗ: {deal['name_spgz']}\n"
             prompt += f"Наименование ГК: {deal['item_name_gk']}\n"
             prompt += f"Дата регистрации контракта: {deal['conclusion_date']}\n"
-            prompt += f"Дата начала выполнения контракта: {deal['execution_term_from']}\n"
-            prompt += f"Дата окончания выполнения контракта: {deal['execution_term_until']}\n"
+            prompt += (
+                f"Дата начала выполнения контракта: {deal['execution_term_from']}\n"
+            )
+            prompt += (
+                f"Дата окончания выполнения контракта: {deal['execution_term_until']}\n"
+            )
             prompt += f"Дата окончания срока действия: {deal['end_date_of_validity']}\n"
             prompt += f"Оплачено, руб.: {deal['paid_rub']}\n"
             prompt += f"Цена ГК при заключении, руб.: {deal['gk_price_rub']}\n"
@@ -105,18 +106,30 @@ class YaGPTPrompter:
 
         return prompt
 
-    def _generate_responce(self, prompt: str, request_type: PromptType, stream: bool = False):
+    def _generate_responce(
+        self, prompt: str, request_type: PromptType, stream: bool = False
+    ):
         prepared_prompt = self._prepare_prompt(prompt, request_type)
-        response = requests.post(self._url, headers=self._headers, data=json.dumps(prepared_prompt), stream=stream)
+        response = requests.post(
+            self._url,
+            headers=self._headers,
+            data=json.dumps(prepared_prompt),
+            stream=stream,
+        )
         if not stream:
             output = json.loads(response.content.decode("utf-8"))
             output = output["result"]["alternatives"][-1]["message"]["text"]
         else:
-            output = requests.post(self._url, headers=self._headers, data=json.dumps(prepared_prompt), stream=True)
+            output = requests.post(
+                self._url,
+                headers=self._headers,
+                data=json.dumps(prepared_prompt),
+                stream=True,
+            )
         return output
-    
+
     def process_request(self, request: str):
-        
+
         prompter_output = PrompterOutput(type=QueryType.UNDEFINED)
 
         inp = self._prompts["classifier"].format(request=request)
@@ -131,34 +144,36 @@ class YaGPTPrompter:
 
         else:
             prompter_output.type = QueryType.UNDEFINED
-        
+
         if prompter_output.type != QueryType.UNDEFINED:
             inp = self._prompts["product_extractor"].format(request=request)
             outp = self._generate_responce(inp, PromptType.PRODUCT_EXTRACTOR)
             if not ("Название продукта" in outp and "Период прогнозирования" in outp):
                 prompter_output.type = QueryType.UNDEFINED
             else:
-                prompter_output.product = outp.split("Название продукта:")[1].split("\n")[
-                    0
-                ]
+                prompter_output.product = outp.split("Название продукта:")[1].split(
+                    "\n"
+                )[0]
                 prompter_output.period = outp.split("Период прогнозирования:")[1].split(
                     "\n"
                 )[0]
-        
+
         if prompter_output.type == QueryType.PREDICTION:
             inp = self._prompts["time_normalizer"].format(request=request)
             outp = self._generate_responce(inp, PromptType.TIME_NORMALIZER)
             if "Период (в месяцах)" not in outp:
                 prompter_output.period = outp
             else:
-                prompter_output.period = outp.split("Период (в месяцах):")[1].split("\n")[0]
+                prompter_output.period = outp.split("Период (в месяцах):")[1].split(
+                    "\n"
+                )[0]
                 if not prompter_output.period.isdigit():
                     prompter_output.type = QueryType.UNDEFINED
 
         if prompter_output.type == QueryType.STOCK:
             prompter_output.product = None
         return prompter_output
-    
+
     def process_final_request(self, data: str, prompt_type: PromptType):
         inp = json.loads(data)
         if prompt_type == PromptType.FINAL_PREDICTION_PART1:

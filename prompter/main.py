@@ -41,16 +41,16 @@ class Prompter(prompter_pb2_grpc.PrompterServicer):
         for v in generator2:
             yield StreamResp(...)
         """
-        generator_1 = self.model.process_final_request(
-            request.prompt, PromptType.FINAL_PREDICTION_PART1
-        )
         if self.model_choice == "saiga":
+            generator_1 = self.model.process_final_request(
+                request.prompt, PromptType.FINAL_PREDICTION_PART1
+            )
             for v in generator_1:
                 chunk = v["message"]["content"]
                 print(chunk)
                 yield StreamResp(chunk=chunk)
 
-            generator_2 = self.saiga.process_final_request(
+            generator_2 = self.model.process_final_request(
                 request.prompt, PromptType.FINAL_PREDICTION_PART2
             )
             for v in generator_2:
@@ -67,10 +67,10 @@ class Prompter(prompter_pb2_grpc.PrompterServicer):
                     decoded_line = line.decode("utf-8")
                     message = json.loads(decoded_line)
                     msg_text = message["result"]["alternatives"][0]["message"]["text"]
-                    outp_text = msg_text[len(last_msg):]
+                    outp_text = msg_text[len(last_msg) :]
                     last_msg = msg_text
                     for c in outp_text:
-                        time.sleep(0.2)
+                        time.sleep(0.01)
                         yield StreamResp(chunk=c)
             generator_2 = self.model.process_final_request(
                 request.prompt, PromptType.FINAL_PREDICTION_PART2
@@ -81,12 +81,11 @@ class Prompter(prompter_pb2_grpc.PrompterServicer):
                     decoded_line = line.decode("utf-8")
                     message = json.loads(decoded_line)
                     msg_text = message["result"]["alternatives"][0]["message"]["text"]
-                    outp_text = msg_text[len(last_msg):]
+                    outp_text = msg_text[len(last_msg) :]
                     last_msg = msg_text
                     for c in outp_text:
-                        time.sleep(0.2)
+                        time.sleep(0.01)
                         yield StreamResp(chunk=c)
-            
 
 
 def serve():
