@@ -13,7 +13,7 @@ import (
 // @host api.misis.larek.tech
 // @BasePath /admin
 func main() {
-	cfg := config.MustNew("./config.yaml")
+	cfg := config.MustNew("./config/config.yaml")
 	srv := server.New(cfg)
 	srv.Run()
 }
