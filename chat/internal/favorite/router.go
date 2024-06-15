@@ -14,6 +14,7 @@ type favoriteHandler interface {
 	DeleteOne(c *fiber.Ctx) error
 }
 
+// SetupFavoriteRoutes настраивает маршруты для избранных предиктов.
 func SetupFavoriteRoutes(app *fiber.App, h favoriteHandler, kc *gocloak.GoCloak, realm, cipher string) {
 	g := app.Group("/chat/favorite")
 	g.Use(middleware.JWT(kc, realm, cipher))

@@ -7,8 +7,6 @@ import (
 	"github.com/yogenyslav/ldt-2024/api/internal/api/pb"
 	"github.com/yogenyslav/ldt-2024/api/internal/shared"
 	"github.com/yogenyslav/ldt-2024/api/pkg"
-	"go.opentelemetry.io/otel/attribute"
-	"go.opentelemetry.io/otel/trace"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -29,7 +27,6 @@ func (h *Handler) PrepareData(c context.Context, in *pb.PrepareDataReq) (*emptyp
 	ctx, span := h.tracer.Start(
 		ctx,
 		"Handler.PrepareData",
-		trace.WithAttributes(attribute.StringSlice("product", in.GetSources())),
 	)
 	defer span.End()
 
