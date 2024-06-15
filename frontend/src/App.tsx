@@ -7,6 +7,8 @@ import { RequireUnauth } from './auth/RequireUnauth';
 import { Dashboard } from './components/Dashboard';
 import { Toaster } from './components/ui/toaster';
 import SavedPredictions from './pages/SavedPredictions';
+import Organizations from './pages/Organizations';
+import { Pages } from './router/constants';
 
 function App() {
     return (
@@ -16,7 +18,7 @@ function App() {
             <AuthProvider>
                 <Routes>
                     <Route
-                        path='/login'
+                        path={`/${Pages.Login}`}
                         element={
                             <RequireUnauth>
                                 <Login />
@@ -24,7 +26,7 @@ function App() {
                         }
                     />
                     <Route
-                        path='/chat/:sessionId'
+                        path={`/${Pages.Chat}/:sessionId`}
                         element={
                             <RequireAuth>
                                 <Dashboard>
@@ -34,11 +36,21 @@ function App() {
                         }
                     />
                     <Route
-                        path='/saved'
+                        path={`/${Pages.SavedPredictions}`}
                         element={
                             <RequireAuth>
                                 <Dashboard>
                                     <SavedPredictions />
+                                </Dashboard>
+                            </RequireAuth>
+                        }
+                    />
+                    <Route
+                        path={`/${Pages.Organizatinos}`}
+                        element={
+                            <RequireAuth>
+                                <Dashboard>
+                                    <Organizations />
                                 </Dashboard>
                             </RequireAuth>
                         }

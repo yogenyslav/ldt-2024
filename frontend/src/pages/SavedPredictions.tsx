@@ -31,7 +31,7 @@ const SavedPredictions = () => {
         <div className='saved flex gap-4 flex-col'>
             {isLoading ? (
                 <div>Loading...</div>
-            ) : savedPredictions ? (
+            ) : savedPredictions.length ? (
                 savedPredictions.map((savedPrediction) => (
                     <>
                         <SavedOutputJson
@@ -41,7 +41,7 @@ const SavedPredictions = () => {
                     </>
                 ))
             ) : (
-                <div>Нет сохраненных прогнозов</div>
+                <div>Нет сохраненных планов закупок</div>
             )}
         </div>
     );

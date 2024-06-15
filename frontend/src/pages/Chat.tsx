@@ -51,6 +51,16 @@ const Chat = observer(() => {
         }
     }, [rootStore, sessionId, navigate, toast]);
 
+    useEffect(() => {
+        if (rootStore.chatError) {
+            toast({
+                title: 'Ошибка',
+                description: rootStore.chatError,
+                variant: 'destructive',
+            });
+        }
+    }, [rootStore.chatError, toast]);
+
     const handleKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
         if (event.key === 'Enter' && !event.shiftKey) {
             event.preventDefault();
