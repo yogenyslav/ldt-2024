@@ -1,4 +1,4 @@
-import { CircleUser, Menu, Package2, SaveAll, Search, SquarePen } from 'lucide-react';
+import { Building, CircleUser, Menu, Package2, SaveAll, Search, SquarePen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
@@ -17,6 +17,7 @@ import { LoaderButton } from './ui/loader-button';
 import { useEffect } from 'react';
 import { useStores } from '@/hooks/useStores';
 import { toast } from './ui/use-toast';
+import { Pages } from '@/router/constants';
 
 type DashboardProps = {
     children: React.ReactNode;
@@ -39,16 +40,6 @@ export function Dashboard({ children }: DashboardProps) {
             });
         });
     }, [rootStore]);
-
-    useEffect(() => {
-        if (rootStore.chatError) {
-            toast({
-                title: 'Ошибка',
-                description: rootStore.chatError,
-                variant: 'destructive',
-            });
-        }
-    }, [rootStore.chatError]);
 
     return (
         <>
@@ -145,18 +136,29 @@ export function Dashboard({ children }: DashboardProps) {
 }
 
 const Navigation = () => {
+    const location = useLocation();
+
     return (
         <>
-            <Link to='/chat' className='flex items-center gap-2'>
+            <Link
+                to={location.pathname === `/${Pages.Chat}` ? '/chat-new' : `/${Pages.Chat}`}
+                className='flex items-center gap-2'
+            >
                 <LoaderButton className='flex w-full items-center gap-3 rounded-lg px-3 py-2 my-2 text-muted-foreground transition-all hover:text-secondary hover:bg-slate-200 bg-slate-200'>
                     <SquarePen className='h-4 w-4' />
                     Новый чат
                 </LoaderButton>
             </Link>
-            <Link to='/saved' className='flex items-center gap-2'>
+            <Link to={`/${Pages.SavedPredictions}`} className='flex items-center gap-2'>
                 <LoaderButton className='flex w-full items-center gap-3 rounded-lg px-3 py-2 my-2 text-muted-foreground transition-all hover:text-secondary hover:bg-slate-200 bg-slate-200'>
                     <SaveAll className='h-4 w-4' />
                     Сохраненные планы
+                </LoaderButton>
+            </Link>
+            <Link to={`/${Pages.Organizatinos}`} className='flex items-center gap-2'>
+                <LoaderButton className='flex w-full items-center gap-3 rounded-lg px-3 py-2 my-2 text-muted-foreground transition-all hover:text-secondary hover:bg-slate-200 bg-slate-200'>
+                    <Building className='h-4 w-4' />
+                    Организации
                 </LoaderButton>
             </Link>
         </>

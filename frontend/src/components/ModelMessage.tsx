@@ -114,7 +114,7 @@ const ModelMessage = ({ incomingMessage, isLastMessage }: ModelMessageProps) => 
                                 <StocksGroup stocksGroup={incomingMessage.stocks} />
                             )}
                             {incomingMessage.type === IncomingMessageType.Prediction && (
-                                <div className='flex gap-2'>
+                                <div className='flex gap-2 flex-wrap'>
                                     <LoaderButton
                                         variant='outline'
                                         onClick={() => {
@@ -148,11 +148,11 @@ const ModelMessage = ({ incomingMessage, isLastMessage }: ModelMessageProps) => 
                                         }}
                                         isLoading={isSaving}
                                     >
-                                        Сохранить прогноз
+                                        Сохранить план закупки
                                     </LoaderButton>
 
                                     <Button variant='outline' onClick={downloadFile}>
-                                        Загрузить прогноз (.json)
+                                        Загрузить план закупки (.json)
                                     </Button>
                                 </div>
                             )}

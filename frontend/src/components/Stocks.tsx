@@ -30,9 +30,9 @@ const Stocks = ({ stocks }: Props) => {
         fill: hslStringToHex(rootStyles.getPropertyValue('--primary').trim()),
     }));
 
-    const dataPrice = stocks.map((stock) => ({
+    const dataSum = stocks.map((stock) => ({
         x: `${stock.year} ${mapQuarterToLabel(stock.quarter)}`,
-        y: stock.price,
+        y: stock.sum,
         fill: '#e11d48',
     }));
 
@@ -51,7 +51,7 @@ const Stocks = ({ stocks }: Props) => {
             <div className='rounded-lg border p-2 mt-4'>
                 <div>
                     <BasicBarChart
-                        data={dataPrice}
+                        data={dataSum}
                         title='Остатки товара (стоимость)'
                         xLabel='Кварталы'
                     />
