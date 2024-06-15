@@ -5,12 +5,14 @@ import pandas as pd
 from attrs import define
 from numpy.polynomial.chebyshev import Chebyshev
 from sklearn.metrics import r2_score
-
+from sklearn.preprocessing import MinMaxScaler
+from scipy.optimize import curve_fit
 
 @define
 class FittedTrendModel:
     model: Any
     one_month_step: float
+    scaler: MinMaxScaler
     last_date: np.datetime64
     last_value: float
 
@@ -20,7 +22,6 @@ class Model:
         self,
         df: pd.DataFrame,
         period_model: Any,
-        trend_model: Optional[Any] = None,
         regular_codes: Optional[tuple] = None,
         value_column: str = "paid_rub",
         date_column: str = "conclusion_date",
@@ -32,10 +33,6 @@ class Model:
         segments_counts = self._df["depth3_code_kpgz"].value_counts()
         self._uniq_segments = self.filter_regular_codes(segments_counts, regular_codes)
 
-        if trend_model is None:
-            trend_model = Chebyshev
-
-        self._trend_model = trend_model
         self._period_model = period_model
 
         self._trend_models_by_segment, self._periods_df = self.fit()
@@ -65,6 +62,26 @@ class Model:
 
         return segments
 
+    def fit_trend(self, x_data, y_data):
+        def app_func(x, *params):
+            log_func = params[0] * np.log(params[1] * x + params[2])
+            poly_func = params[3] * x + params[4]
+            sin_func = params[5] * (np.sin(params[6] * (x + params[7])) + params[6]*x)
+            return  (np.clip(log_func, 0, None) + poly_func + sin_func) * params[8] + params[9]
+
+        bounds = ([0,0,0,0, 0, 0, 0, 0, 0.0001, 0], [np.inf, np.inf, np.inf, np.inf,np.inf, np.inf, np.inf, np.pi/2, np.inf, np.inf])
+        try:
+            popt_func, pcov_func = curve_fit(app_func, x_data, y_data, p0=[0,1,0,1,0, 0., 1., 0, 1, 0], maxfev=5000, bounds=bounds)
+            def output_func(x):
+                return app_func(x, *popt_func)
+        except Exception as ex:
+            print(ex)
+            model = Chebyshev.fit(x_data, y_data, 1)
+            def output_func(x):
+                return model(x)
+
+        return output_func
+    
     def train_trend_models(
         self, segments: Iterable[str], min_dates_records: int = 3, min_r2: float = 0.7
     ) -> dict[str, Any]:
@@ -90,16 +107,19 @@ class Model:
                 - filtered_df[self._date_column].astype(np.int64).min()
             )
 
+            scaler = MinMaxScaler()
             X = filtered_df["date_norm"]
             y = filtered_df[self._value_column]
+            y = scaler.fit_transform(y.to_numpy().reshape(-1, 1)).reshape(-1)
 
-            fitted_model = self._trend_model.fit(X, y, 1)
+            fitted_model = self.fit_trend(X, y)
 
             if r2_score(y, fitted_model(X)) < min_r2:
                 continue
 
             fitted_model = FittedTrendModel(
                 model=fitted_model,
+                scaler=scaler,
                 one_month_step=filtered_df["date_norm"].iloc[1]
                 - filtered_df["date_norm"].iloc[0],
                 last_date=filtered_df[self._date_column].iloc[-1],
@@ -151,6 +171,7 @@ class Model:
         last_date = segment_period_info["last_date"].iloc[0]
 
         fitted_trend_model = self._trend_models_by_segment[segment]
+        scaler = fitted_trend_model.scaler
         last_fitted_date = fitted_trend_model.last_date
         last_value = fitted_trend_model.last_value
         one_month_step = fitted_trend_model.one_month_step
@@ -164,6 +185,7 @@ class Model:
         dates_norm = dates_norm[1:]
 
         forecasted_values = fitted_trend_model.model(dates_norm)
+        forecasted_values = scaler.inverse_transform(forecasted_values.reshape(-1,1)).reshape(-1)
 
         first_index = period - (last_fitted_date - last_date).days // 30 - 1
 
