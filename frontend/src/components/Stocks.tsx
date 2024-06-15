@@ -38,20 +38,24 @@ const Stocks = ({ stocks }: Props) => {
 
     return (
         <div className='w-full'>
-            <div className='mt-4'>
-                <BasicBarChart
-                    data={dataAmount}
-                    title='Остатки товара (количетство)'
-                    xLabel='Кварталы'
-                />
+            <div className='rounded-lg border p-2 mt-4'>
+                <div>
+                    <BasicBarChart
+                        data={dataAmount}
+                        title='Остатки товара (количетство)'
+                        xLabel='Кварталы'
+                    />
+                </div>
             </div>
 
-            <div className='mt-4'>
-                <BasicBarChart
-                    data={dataPrice}
-                    title='Остатки товара (стоимость)'
-                    xLabel='Кварталы'
-                />
+            <div className='rounded-lg border p-2 mt-4'>
+                <div>
+                    <BasicBarChart
+                        data={dataPrice}
+                        title='Остатки товара (стоимость)'
+                        xLabel='Кварталы'
+                    />
+                </div>
             </div>
 
             <Table className='w-full mt-4'>

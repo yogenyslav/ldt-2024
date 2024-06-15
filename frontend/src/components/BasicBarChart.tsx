@@ -100,6 +100,7 @@ const BasicBarChart = ({ data, title, xLabel }: Props) => {
                                     rootStyles.getPropertyValue('--primary').trim()
                                 )}
                                 activeBar={<Rectangle />}
+                                radius={[10, 10, 0, 0]}
                             />
                         </BarChart>
                     </ResponsiveContainer>

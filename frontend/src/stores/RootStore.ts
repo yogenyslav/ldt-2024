@@ -187,11 +187,14 @@ export class RootStore {
                     this.processIncomingStock(data as StockResponse);
                 }
 
-                if ((wsMessage.finish || !wsMessage.chunk) && !wsMessage.data_type) {
+                if (
+                    (wsMessage.finish || !wsMessage.chunk) &&
+                    !(wsMessage.data_type === ModelResponseType.Prediction)
+                ) {
                     this.isModelAnswering = false;
                 }
 
-                if (wsMessage.finish) {
+                if (wsMessage.finish || wsMessage.data_type === ModelResponseType.Stock) {
                     this.isChatDisabled = false;
                 }
             });

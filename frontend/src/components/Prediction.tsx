@@ -25,7 +25,8 @@ const Prediction = ({ history, forecast }: Props) => {
 
     return (
         <>
-            <div>
+            <div className='rounded-lg border p-2'>
+                {' '}
                 <BasicBarChart
                     data={data.map(({ date, value, fill }) => ({
                         x: date,
