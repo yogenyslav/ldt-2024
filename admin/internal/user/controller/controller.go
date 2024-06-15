@@ -24,9 +24,10 @@ type Controller struct {
 }
 
 // New создает новый Controller.
-func New(repo userOrgRepo, kc *gocloak.GoCloak, tracer trace.Tracer) *Controller {
+func New(repo userOrgRepo, cfg *config.KeyCloakConfig, kc *gocloak.GoCloak, tracer trace.Tracer) *Controller {
 	return &Controller{
 		repo:   repo,
+		cfg:    cfg,
 		kc:     kc,
 		tracer: tracer,
 	}
