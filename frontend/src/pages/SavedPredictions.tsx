@@ -18,7 +18,7 @@ const SavedPredictions = () => {
             .catch(() => {
                 toast({
                     title: 'Ошибка',
-                    description: 'Не удалось загрузить сохраненные прогнозы',
+                    description: 'Не удалось загрузить сохраненные планы закупок',
                     variant: 'destructive',
                 });
             })

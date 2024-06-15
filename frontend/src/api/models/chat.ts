@@ -1,11 +1,5 @@
 import { OutputJson } from './favorites';
-import {
-    ModelResponseType,
-    PredictionResponse,
-    PurchasePlan,
-    Stock,
-    StockResponse,
-} from './predict';
+import { ModelResponseType, PredictionResponse, PurchasePlan, StockResponse } from './predict';
 
 export interface ShortSession {
     id: string;

@@ -28,6 +28,24 @@ const ModelMessage = ({ incomingMessage, isLastMessage }: ModelMessageProps) => 
     const [showInvalidButton, setShowInvalidButton] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
 
+    console.log(incomingMessage.type);
+
+    const downloadFile = () => {
+        if (incomingMessage.outputJson) {
+            const data = JSON.stringify(incomingMessage.outputJson);
+
+            const blob = new Blob([data], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'result.json';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+        }
+    };
+
     const getModelResonse = () => {
         switch (incomingMessage.status) {
             case IncomingMessageStatus.Pending:
@@ -133,7 +151,7 @@ const ModelMessage = ({ incomingMessage, isLastMessage }: ModelMessageProps) => 
                                         Сохранить прогноз
                                     </LoaderButton>
 
-                                    <Button variant='outline' onClick={() => {}}>
+                                    <Button variant='outline' onClick={downloadFile}>
                                         Загрузить прогноз (.json)
                                     </Button>
                                 </div>

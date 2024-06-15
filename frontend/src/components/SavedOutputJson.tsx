@@ -71,7 +71,7 @@ const SavedOutputJson = ({ outputJson }: Props) => {
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Сохраненные прогнозы</CardTitle>
+                <CardTitle>Сохраненные планы закупок</CardTitle>
                 <div className='ml-auto gap-2 flex'>
                     <LoaderButton variant='outline' isLoading={isDeleting} onClick={handleDelete}>
                         Удалить

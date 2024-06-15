@@ -156,7 +156,7 @@ const Navigation = () => {
             <Link to='/saved' className='flex items-center gap-2'>
                 <LoaderButton className='flex w-full items-center gap-3 rounded-lg px-3 py-2 my-2 text-muted-foreground transition-all hover:text-secondary hover:bg-slate-200 bg-slate-200'>
                     <SaveAll className='h-4 w-4' />
-                    Сохраненные прогнозы
+                    Сохраненные планы
                 </LoaderButton>
             </Link>
         </>
