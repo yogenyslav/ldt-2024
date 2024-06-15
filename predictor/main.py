@@ -307,21 +307,21 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
 
     def prepare_stocks_df(self, paths):
         stocks = []
-        for path in paths:
-            result = parse_filename(path)
+        for obj in paths:
+            result = parse_filename(obj.name)
             if result:
                 quarter, year, stock_type = result
                 stock_type = StockType._value2member_map_.get(int(stock_type), None)
                 quarter = Quarters._value2member_map_.get(int(quarter), None)
             else:
-                raise ValueError(f"Wrong pattern for sotcks file: {path}")
+                raise ValueError(f"Wrong pattern for sotcks file: {obj.name}")
 
             if stock_type is None or quarter is None:
                 raise ValueError(
                     f"Not valid stock info: stock_type={stock_type}, quarter={quarter}"
                 )
 
-            raw_stock = pd.read_excel(path)
+            raw_stock = pd.read_excel(obj.path)
             stock = Stock(raw_stock, stock_type, quarter, year)
             stocks.append(stock)
 
@@ -411,15 +411,23 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
     def cur_date(self):
         return convert_to_datetime("2023-01-01T10:00:20.021Z")
 
+    def parse_sources(self, sources):
+        contracts_path = [x.path for x in sources if x.name.startswith('Выгрузка контрактов по Заказчику')][0]
+        kpgz_path = [x.path for x in sources if x.name.startswith('КПГЗ ,СПГЗ, СТЕ')][0]
+        stocks_path = [x for x in sources if x.name.startswith('Ведомость остатков')]
+        
+        return contracts_path, kpgz_path, stocks_path
+    
     def PrepareData(self, request: PrepareDataReq, context: ServicerContext):
         # в PrepareDataReq лежит путь до .csv/.xlsx файла
 
         logging.info(request.sources)
-
-        assert len(request.sources) == 15
-
-        contracts_path, kpgz_path, all_kpgz_codes_path = request.sources[:3]
-        stocks = self.prepare_stocks_df(request.sources[3:])
+        assert len(request.sources) == 14
+        
+        contracts_path, kpgz_path, stocks_path = self.parse_sources(request.sources)
+        all_kpgz_codes_path = './all_kpgz_codes2name.csv'
+        
+        stocks = self.prepare_stocks_df(stocks_path)
 
         all_kpgz_codes = pd.read_csv(all_kpgz_codes_path)
         all_kpgz_codes = all_kpgz_codes.set_index("code")
