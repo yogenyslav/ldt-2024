@@ -118,7 +118,7 @@ func (s *Server) Run() {
 	userRepo := ur.New(s.pg)
 	userController := uc.New(userRepo, s.kc, s.tracer)
 	userHandler := uh.New(userController, s.tracer)
-	user.SetupUserRoutes(s.app, userHandler, s.kc, s.cfg.KeyCloak.Realm, s.cfg.Server.CipherKey)
+	user.SetupUserRoutes(s.app, userHandler, s.kc, s.cfg.KeyCloak.Realm, s.cfg.Server.CipherKey, userRepo)
 
 	organizationRepo := or.New(s.pg)
 	organizationController := oc.New(organizationRepo, s.s3, pb.NewPredictorClient(apiClient.GetConn()), s.tracer)
