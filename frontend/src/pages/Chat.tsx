@@ -39,8 +39,6 @@ const Chat = observer(() => {
                     });
                 });
         } else {
-            rootStore.setActiveSessionId(sessionId);
-
             rootStore.getSession({ id: sessionId }).catch(() => {
                 toast({
                     title: 'Ошибка',

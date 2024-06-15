@@ -32,7 +32,7 @@ const ModelMessage = ({ incomingMessage, isLastMessage }: ModelMessageProps) => 
                             />
                         </div>
                         {isLastMessage && (
-                            <div className='flex items-center gap-2 flex-wrap mt-1'>
+                            <div className='flex items-center gap-2 flex-wrap mt-2'>
                                 <Button
                                     onClick={() => {
                                         rootStore.sendMessage({

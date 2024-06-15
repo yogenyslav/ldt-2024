@@ -58,7 +58,7 @@ export class RootStore {
     async deleteSession({ id }: DeleteSessionParams) {
         return ChatApiService.deleteSession({ id }).then(() => {
             if (this.activeSessionId === id) {
-                this.activeSessionId = null;
+                this.setActiveSessionId(null);
                 this.activeSession = null;
             }
         });
@@ -116,10 +116,8 @@ export class RootStore {
         this.connectWebSocket(session.id);
     }
 
-    setActiveSessionId(id: string) {
-        if (id !== this.activeSession?.id) {
-            // this.disconnectWebSocket();
-
+    setActiveSessionId(id: string | null) {
+        if (id !== this.activeSessionId) {
             this.activeSessionId = id;
         }
     }
@@ -131,8 +129,6 @@ export class RootStore {
     async createSession() {
         return ChatApiService.createSession().then(async ({ id }) => {
             this.activeDisplayedSession = null;
-
-            this.setActiveSessionId(id);
 
             this.getSessions();
 
@@ -243,7 +239,7 @@ export class RootStore {
 
     disconnectWebSocket() {
         if (this.websocket) {
-            this.activeSessionId = null;
+            this.setActiveSessionId(null);
             this.websocket.close();
         }
     }
