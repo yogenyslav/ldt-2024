@@ -37,7 +37,6 @@ load_dotenv(".env")
 
 mongo_url = f"mongodb://{os.getenv('MONGO_HOST')}:{os.getenv('MONGO_PORT')}"
 mongo_client = pymongo.MongoClient(mongo_url)
-# mongo_db = mongo_client[os.getenv("MONGO_DB")]
 
 
 def convert_to_datetime(iso_str):
@@ -369,22 +368,31 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
         rows_by_date = code_info.pop("rows_by_date")
 
         if code_info["forecast"] is not None:
-            forecast = [
+            forecast_start_filtered = [
                 x
                 for x in code_info["forecast"]
-                if start_dt.timestamp() <= x["date"].timestamp() <= end_dt.timestamp()
+                if start_dt.timestamp() <= x["date"].timestamp()
             ]
-            out_id = forecast[0]["id"] + (hash(code) % int(1e9))
+            closest_purchase = forecast_start_filtered[0]
+            forecast = [
+                x
+                for x in forecast_start_filtered
+                if x["date"].timestamp() <= end_dt.timestamp()
+            ]
+            
         else:
             forecast = None
-            out_id = None
+            closest_purchase = None
 
         if forecast is None:
             rows = None
+            out_id = None
         elif len(forecast) > 0:
             rows = rows_by_date.get(convert_datetime_to_str(forecast[0]["date"]), None)
+            out_id = (hash(str(forecast[0]["id"])) + hash(code) + hash(organization))%int(1e9)
         else:
             rows = []
+            out_id = None
 
         output_json = {
             "id": out_id,
@@ -394,6 +402,7 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
 
         code_info["forecast"] = forecast
         code_info["output_json"] = output_json
+        code_info["closest_purchase"] = closest_purchase
 
         code_info = convert_datetime_to_str(code_info)
         return code_info
