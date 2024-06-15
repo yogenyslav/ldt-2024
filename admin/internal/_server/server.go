@@ -17,6 +17,7 @@ import (
 	"github.com/gofiber/swagger"
 	"github.com/rs/zerolog/log"
 	"github.com/yogenyslav/ldt-2024/admin/config"
+	_ "github.com/yogenyslav/ldt-2024/admin/docs"
 	"github.com/yogenyslav/ldt-2024/admin/internal/api/pb"
 	"github.com/yogenyslav/ldt-2024/admin/internal/auth"
 	ac "github.com/yogenyslav/ldt-2024/admin/internal/auth/controller"
