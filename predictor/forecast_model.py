@@ -15,6 +15,7 @@ class FittedTrendModel:
     scaler: MinMaxScaler
     last_date: np.datetime64
     last_value: float
+    max_value: float
 
 
 class Model:
@@ -67,11 +68,11 @@ class Model:
             log_func = params[0] * np.log(params[1] * x + params[2])
             poly_func = params[3] * x + params[4]
             sin_func = params[5] * (np.sin(params[6] * (x + params[7])) + params[6]*x)
-            return  (np.clip(log_func, 0, None) + poly_func + sin_func) * params[8] + params[9]
+            return  (np.clip(log_func, 0, None) + poly_func) * params[8] + params[9] + sin_func
 
-        bounds = ([0,0,0,0, 0, 0, 0, 0, 0.0001, 0], [np.inf, np.inf, np.inf, np.inf,np.inf, np.inf, np.inf, np.pi/2, np.inf, np.inf])
+        bounds = ([0.01,0,0.001,0, 0, 0.001, 0, 0, 0.0001, 0], [np.inf, np.inf, np.inf, np.inf,np.inf, 0.1, np.inf, np.pi/2, np.inf, np.inf])
         try:
-            popt_func, pcov_func = curve_fit(app_func, x_data, y_data, p0=[0,1,0,1,0, 0., 1., 0, 1, 0], maxfev=5000, bounds=bounds)
+            popt_func, pcov_func = curve_fit(app_func, x_data, y_data, p0=[0.05,1,0.5,1,0, 0.001, 1., 0, 1, 0], maxfev=5000, bounds=bounds)
             def output_func(x):
                 return app_func(x, *popt_func)
         except Exception as ex:
@@ -97,7 +98,8 @@ class Model:
 
             if (filtered_df[self._value_column] > 0).sum() < min_dates_records:
                 continue
-
+            
+            filtered_df['init_value'] = filtered_df[self._value_column]
             filtered_df[self._value_column] = filtered_df[self._value_column].cumsum()
             filtered_df["date_norm"] = (
                 filtered_df[self._date_column].astype(np.int64)
@@ -124,6 +126,7 @@ class Model:
                 - filtered_df["date_norm"].iloc[0],
                 last_date=filtered_df[self._date_column].iloc[-1],
                 last_value=filtered_df[self._value_column].iloc[-1],
+                max_value=filtered_df['init_value'].max()
             )
 
             trend_models_by_segment[segment] = fitted_model
@@ -175,6 +178,7 @@ class Model:
         last_fitted_date = fitted_trend_model.last_date
         last_value = fitted_trend_model.last_value
         one_month_step = fitted_trend_model.one_month_step
+        max_value = fitted_trend_model.max_value
 
         dates = pd.date_range(
             start=last_fitted_date,
@@ -197,6 +201,7 @@ class Model:
         i = first_index
         while i < len(forecasted_values):
             value = forecasted_values[i] - sum_values[-1]
+            value = np.clip(value, -1, max_value*1.5)
             if value > 0:
                 periods_values.append({dates[i + 1]: value})
                 sum_values.append(forecasted_values[i])
