@@ -39,7 +39,7 @@ const list = `
 // List возвращает список пользователей по организации.
 func (r *Repo) List(ctx context.Context, organization string) ([]string, error) {
 	var users []string
-	err := r.pg.Query(ctx, users, list, organization)
+	err := r.pg.Query(ctx, &users, list, organization)
 	return users, err
 }
 
