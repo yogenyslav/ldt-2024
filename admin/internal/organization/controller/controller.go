@@ -11,7 +11,7 @@ import (
 )
 
 type organizationRepo interface {
-	InsertOne(ctx context.Context, params model.OrganizationDao) error
+	InsertOne(ctx context.Context, params model.OrganizationDao) (int64, error)
 	FindOne(ctx context.Context, username string) (model.OrganizationDao, error)
 	UpdateOne(ctx context.Context, params model.OrganizationDao) error
 }

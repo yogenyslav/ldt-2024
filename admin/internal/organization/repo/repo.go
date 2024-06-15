@@ -20,7 +20,8 @@ func New(pg storage.SQLDatabase) *Repo {
 
 const insertOne = `
 	insert into adm.organization (username, title, s3_bucket)
-	values ($1, $2, $3);
+	values ($1, $2, $3)
+	returning id;
 `
 
 const addToOrganization = `
@@ -29,21 +30,22 @@ const addToOrganization = `
 `
 
 // InsertOne вставляет новую организацию.
-func (r *Repo) InsertOne(ctx context.Context, params model.OrganizationDao) error {
+func (r *Repo) InsertOne(ctx context.Context, params model.OrganizationDao) (int64, error) {
+	var id int64
 	tx, err := r.pg.BeginSerializable(ctx)
 	if err != nil {
-		return err
+		return id, err
 	}
 	defer r.pg.RollbackTx(tx)
 
-	if _, err := r.pg.ExecTx(tx, insertOne, params.Username, params.Title, params.S3Bucket); err != nil {
-		return err
+	if err := r.pg.QueryTx(tx, &id, insertOne, params.Username, params.Title, params.S3Bucket); err != nil {
+		return id, err
 	}
 
 	if _, err := r.pg.ExecTx(tx, addToOrganization, params.Username, params.Title); err != nil {
-		return err
+		return id, err
 	}
-	return r.pg.CommitTx(tx)
+	return id, r.pg.CommitTx(tx)
 }
 
 const findOne = `

@@ -52,13 +52,15 @@ func JWT(kc *gocloak.GoCloak, realm, cipher string, repo UserOrganizationRepo) f
 			return shared.ErrForbidden
 		}
 
-		org, err := repo.FindOrganization(c.UserContext(), *userInfo.PreferredUsername)
-		if err != nil {
-			return err
+		if c.Path() != "/admin/organization" {
+			org, err := repo.FindOrganization(c.UserContext(), *userInfo.PreferredUsername)
+			if err != nil {
+				return err
+			}
+			c.Locals(shared.OrganizationKey, org)
 		}
 
 		c.Locals(shared.UsernameKey, *userInfo.PreferredUsername)
-		c.Locals(shared.OrganizationKey, org)
 		c.SetUserContext(pkg.PushToken(c.UserContext(), authToken))
 		return c.Next()
 	}

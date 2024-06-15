@@ -9,7 +9,7 @@ import (
 )
 
 type organizationController interface {
-	InsertOne(ctx context.Context, params model.OrganizationCreateReq, username string) error
+	InsertOne(ctx context.Context, params model.OrganizationCreateReq, username string) (model.OrganizationCreateResp, error)
 	FindOne(ctx context.Context, username string) (model.OrganizationDto, error)
 	UpdateOne(ctx context.Context, params model.OrganizationUpdateReq, username string) error
 	ImportData(ctx context.Context, mpArchive *multipart.FileHeader, org string) error

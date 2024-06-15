@@ -24,6 +24,11 @@ definitions:
       title:
         type: string
     type: object
+  model.OrganizationCreateResp:
+    properties:
+      id:
+        type: integer
+    type: object
   model.OrganizationDto:
     properties:
       created_at:
@@ -166,6 +171,8 @@ paths:
       responses:
         "201":
           description: ID созданной организации
+          schema:
+            $ref: '#/definitions/model.OrganizationCreateResp'
         "400":
           description: Неверные параметры запроса
           schema:
