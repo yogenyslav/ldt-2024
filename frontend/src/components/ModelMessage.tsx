@@ -1,4 +1,4 @@
-import { ClipboardIcon } from 'lucide-react';
+import { ClipboardIcon, SaveIcon } from 'lucide-react';
 import { Avatar, AvatarFallback } from './ui/avatar';
 import { Button } from './ui/button';
 import { ChatCommand, DisplayedIncomingMessage, IncomingMessageStatus } from '@/api/models';
@@ -9,6 +9,8 @@ import Prediction from './Prediction';
 import Stocks from './Stocks';
 import PrompterResult from './PrompterResult';
 import MarkdownPreview from '@uiw/react-markdown-preview';
+import { LoaderButton } from './ui/loader-button';
+import FavoritesApiService from '@/api/FavoritesApiService';
 
 type ModelMessageProps = {
     incomingMessage: DisplayedIncomingMessage;
@@ -19,6 +21,7 @@ const ModelMessage = ({ incomingMessage, isLastMessage }: ModelMessageProps) => 
     const { rootStore } = useStores();
     const { toast } = useToast();
     const [showInvalidButton, setShowInvalidButton] = useState(true);
+    const [isSaving, setIsSaving] = useState(false);
 
     const getModelResonse = () => {
         switch (incomingMessage.status) {
@@ -91,6 +94,42 @@ const ModelMessage = ({ incomingMessage, isLastMessage }: ModelMessageProps) => 
                                     )}
                                 />
                             )}
+                            <div className='flex gap-2'>
+                                <LoaderButton
+                                    variant='outline'
+                                    onClick={() => {
+                                        console.log(incomingMessage.predictionResponse);
+
+                                        if (incomingMessage.predictionResponse) {
+                                            setIsSaving(true);
+
+                                            FavoritesApiService.createFavorite({
+                                                id: 1,
+                                                response: incomingMessage.predictionResponse,
+                                            })
+                                                .then(() => {
+                                                    setIsSaving(false);
+                                                    toast({
+                                                        title: 'Успех',
+                                                        description: 'Ответ сохранен в избранное',
+                                                    });
+                                                })
+                                                .catch(() => {
+                                                    setIsSaving(false);
+                                                    toast({
+                                                        title: 'Ошибка',
+                                                        description:
+                                                            'Не удалось сохранить ответ в избранное',
+                                                        variant: 'destructive',
+                                                    });
+                                                });
+                                        }
+                                    }}
+                                    isLoading={isSaving}
+                                >
+                                    Сохранить прогноз
+                                </LoaderButton>
+                            </div>
                             <div className='prose prose-stone'>
                                 <MarkdownPreview
                                     source={incomingMessage.body}

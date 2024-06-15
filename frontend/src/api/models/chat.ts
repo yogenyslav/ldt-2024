@@ -133,6 +133,7 @@ export interface DisplayedIncomingMessage {
     period?: string;
     prediction?: { forecast: PurchasePlan[]; history: PurchasePlan[] };
     stocks?: Stock[];
+    predictionResponse?: PredictionResponse;
 }
 
 export const UNAUTHORIZED_ERR = 'invalid JWT';

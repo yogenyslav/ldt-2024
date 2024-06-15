@@ -105,6 +105,7 @@ export class RootStore {
                               }
                             : undefined,
                         stocks: stocks?.data,
+                        predictionResponse: prediction ? prediction : undefined,
                     },
                     outcomingMessage: {
                         prompt: content.query.prompt,
@@ -293,7 +294,8 @@ export class RootStore {
         }
     }
 
-    private processIncomingPrediction({ forecast, history }: PredictionResponse) {
+    private processIncomingPrediction(data: PredictionResponse) {
+        const { forecast, history } = data;
         console.log('processIncomingPrediction', forecast, history);
 
         const session = this.activeDisplayedSession;
@@ -311,6 +313,7 @@ export class RootStore {
 
         incomingMessage.prediction = { forecast, history };
         lastMessage.incomingMessage = incomingMessage;
+        lastMessage.incomingMessage.predictionResponse = data;
 
         if (this.activeDisplayedSession) {
             this.activeDisplayedSession.messages[lastMessageIndex] = lastMessage;
