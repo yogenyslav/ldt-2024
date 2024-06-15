@@ -37,6 +37,7 @@ docker_remove: docker_down
 	docker image rm bot
 	docker image rm prompter
 	docker image rm predictor
+	docker image rm admin
 
 .PHONY: docker_restart
 docker_restart: docker_down docker_up
@@ -99,6 +100,7 @@ tests:
 .PHONY: swag
 swag:
 	cd ./chat && swag init -g cmd/server/main.go -o ./docs
+	cd ./admin && swag init -g cmd/server/main.go -o ./docs
 
 .PHONY: ollama_up
 ollama_up:

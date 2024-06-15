@@ -198,7 +198,25 @@ services:
       - jaeger
       - keycloak
       - redis
-  
+
+  admin:
+    build:
+      context: ./admin
+      dockerfile: Dockerfile
+      target: prod
+    restart: always
+    env_file:
+      - .env
+    image: admin
+    ports:
+      - "12000:12000"
+      - "12001:12001"
+    depends_on:
+      - pg
+      - api
+      - jaeger
+      - keycloak
+
   frontend:
     build:
         context: ./frontend

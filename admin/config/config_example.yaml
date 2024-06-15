@@ -1,0 +1,43 @@
+server:
+  port: 12000
+  log_level: "debug"
+  cors_origins:
+    - "*"
+  cipher_key: "32 bit hex value"
+
+keycloak:
+  url: "http://localhost:8080"
+  client_id: "ldt"
+  client_secret: "secret"
+  realm: "ldt"
+  admin_realm: "master"
+  user: "admin"
+  password: "admin"
+
+postgres:
+  user: "pguser"
+  password: "pgpass"
+  host: "localhost"
+  port: 5432
+  db: "dev"
+  ssl: false
+  retry_timeout: 20
+
+jaeger:
+  host: "localhost"
+  port: 4318
+
+s3:
+  host: "s3"
+  port: 9000
+  access_key: "sdfsdf"
+  secret_key: "sdfsdfsdf"
+  ssl: false
+
+prom:
+  host: ""
+  port: 12001
+
+api:
+  host: "localhost"
+  port: 9999
