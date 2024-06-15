@@ -103,6 +103,13 @@ const ModelMessage = ({ incomingMessage, isLastMessage }: ModelMessageProps) => 
                                 variant='ghost'
                                 size='icon'
                                 className='w-4 h-4 hover:bg-transparent text-stone-400 hover:text-stone-900'
+                                onClick={() => {
+                                    navigator.clipboard.writeText(incomingMessage.body);
+                                    toast({
+                                        title: 'Скопировано',
+                                        description: 'Текст ответа скопирован в буфер обмена',
+                                    });
+                                }}
                             >
                                 <ClipboardIcon className='w-4 h-4' />
                                 <span className='sr-only'>Копировать</span>
