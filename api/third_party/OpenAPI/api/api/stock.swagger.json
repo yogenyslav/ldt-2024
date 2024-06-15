@@ -53,6 +53,14 @@
             }
           }
         },
+        "parameters": [
+          {
+            "name": "organization",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
         "tags": [
           "stock"
         ],

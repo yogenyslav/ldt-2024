@@ -11,7 +11,6 @@ import (
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
-	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -27,7 +26,7 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type StockClient interface {
-	ListProducts(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ListProductsResp, error)
+	ListProducts(ctx context.Context, in *ListProductsReq, opts ...grpc.CallOption) (*ListProductsResp, error)
 }
 
 type stockClient struct {
@@ -38,7 +37,7 @@ func NewStockClient(cc grpc.ClientConnInterface) StockClient {
 	return &stockClient{cc}
 }
 
-func (c *stockClient) ListProducts(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ListProductsResp, error) {
+func (c *stockClient) ListProducts(ctx context.Context, in *ListProductsReq, opts ...grpc.CallOption) (*ListProductsResp, error) {
 	out := new(ListProductsResp)
 	err := c.cc.Invoke(ctx, Stock_ListProducts_FullMethodName, in, out, opts...)
 	if err != nil {
@@ -51,7 +50,7 @@ func (c *stockClient) ListProducts(ctx context.Context, in *emptypb.Empty, opts 
 // All implementations must embed UnimplementedStockServer
 // for forward compatibility
 type StockServer interface {
-	ListProducts(context.Context, *emptypb.Empty) (*ListProductsResp, error)
+	ListProducts(context.Context, *ListProductsReq) (*ListProductsResp, error)
 	mustEmbedUnimplementedStockServer()
 }
 
@@ -59,7 +58,7 @@ type StockServer interface {
 type UnimplementedStockServer struct {
 }
 
-func (UnimplementedStockServer) ListProducts(context.Context, *emptypb.Empty) (*ListProductsResp, error) {
+func (UnimplementedStockServer) ListProducts(context.Context, *ListProductsReq) (*ListProductsResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListProducts not implemented")
 }
 func (UnimplementedStockServer) mustEmbedUnimplementedStockServer() {}
@@ -76,7 +75,7 @@ func RegisterStockServer(s grpc.ServiceRegistrar, srv StockServer) {
 }
 
 func _Stock_ListProducts_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(emptypb.Empty)
+	in := new(ListProductsReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -88,7 +87,7 @@ func _Stock_ListProducts_Handler(srv interface{}, ctx context.Context, dec func(
 		FullMethod: Stock_ListProducts_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(StockServer).ListProducts(ctx, req.(*emptypb.Empty))
+		return srv.(StockServer).ListProducts(ctx, req.(*ListProductsReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }

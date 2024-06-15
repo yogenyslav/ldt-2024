@@ -52,7 +52,7 @@ class PredictorStub(object):
                 _registered_method=True)
         self.UniqueCodes = channel.unary_unary(
                 '/api.Predictor/UniqueCodes',
-                request_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+                request_serializer=api_dot_predictor__pb2.UniqueCodesReq.SerializeToString,
                 response_deserializer=api_dot_predictor__pb2.UniqueCodesResp.FromString,
                 _registered_method=True)
 
@@ -93,7 +93,7 @@ def add_PredictorServicer_to_server(servicer, server):
             ),
             'UniqueCodes': grpc.unary_unary_rpc_method_handler(
                     servicer.UniqueCodes,
-                    request_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+                    request_deserializer=api_dot_predictor__pb2.UniqueCodesReq.FromString,
                     response_serializer=api_dot_predictor__pb2.UniqueCodesResp.SerializeToString,
             ),
     }
@@ -176,7 +176,7 @@ class Predictor(object):
             request,
             target,
             '/api.Predictor/UniqueCodes',
-            google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+            api_dot_predictor__pb2.UniqueCodesReq.SerializeToString,
             api_dot_predictor__pb2.UniqueCodesResp.FromString,
             options,
             channel_credentials,

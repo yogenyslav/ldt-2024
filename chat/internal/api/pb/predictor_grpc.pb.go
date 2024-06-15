@@ -31,7 +31,7 @@ const (
 type PredictorClient interface {
 	PrepareData(ctx context.Context, in *PrepareDataReq, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	Predict(ctx context.Context, in *PredictReq, opts ...grpc.CallOption) (*PredictResp, error)
-	UniqueCodes(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*UniqueCodesResp, error)
+	UniqueCodes(ctx context.Context, in *UniqueCodesReq, opts ...grpc.CallOption) (*UniqueCodesResp, error)
 }
 
 type predictorClient struct {
@@ -60,7 +60,7 @@ func (c *predictorClient) Predict(ctx context.Context, in *PredictReq, opts ...g
 	return out, nil
 }
 
-func (c *predictorClient) UniqueCodes(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*UniqueCodesResp, error) {
+func (c *predictorClient) UniqueCodes(ctx context.Context, in *UniqueCodesReq, opts ...grpc.CallOption) (*UniqueCodesResp, error) {
 	out := new(UniqueCodesResp)
 	err := c.cc.Invoke(ctx, Predictor_UniqueCodes_FullMethodName, in, out, opts...)
 	if err != nil {
@@ -75,7 +75,7 @@ func (c *predictorClient) UniqueCodes(ctx context.Context, in *emptypb.Empty, op
 type PredictorServer interface {
 	PrepareData(context.Context, *PrepareDataReq) (*emptypb.Empty, error)
 	Predict(context.Context, *PredictReq) (*PredictResp, error)
-	UniqueCodes(context.Context, *emptypb.Empty) (*UniqueCodesResp, error)
+	UniqueCodes(context.Context, *UniqueCodesReq) (*UniqueCodesResp, error)
 	mustEmbedUnimplementedPredictorServer()
 }
 
@@ -89,7 +89,7 @@ func (UnimplementedPredictorServer) PrepareData(context.Context, *PrepareDataReq
 func (UnimplementedPredictorServer) Predict(context.Context, *PredictReq) (*PredictResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Predict not implemented")
 }
-func (UnimplementedPredictorServer) UniqueCodes(context.Context, *emptypb.Empty) (*UniqueCodesResp, error) {
+func (UnimplementedPredictorServer) UniqueCodes(context.Context, *UniqueCodesReq) (*UniqueCodesResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UniqueCodes not implemented")
 }
 func (UnimplementedPredictorServer) mustEmbedUnimplementedPredictorServer() {}
@@ -142,7 +142,7 @@ func _Predictor_Predict_Handler(srv interface{}, ctx context.Context, dec func(i
 }
 
 func _Predictor_UniqueCodes_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(emptypb.Empty)
+	in := new(UniqueCodesReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -154,7 +154,7 @@ func _Predictor_UniqueCodes_Handler(srv interface{}, ctx context.Context, dec fu
 		FullMethod: Predictor_UniqueCodes_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PredictorServer).UniqueCodes(ctx, req.(*emptypb.Empty))
+		return srv.(PredictorServer).UniqueCodes(ctx, req.(*UniqueCodesReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
