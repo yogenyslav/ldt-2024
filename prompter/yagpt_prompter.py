@@ -4,6 +4,7 @@ from enum import Enum
 import json
 import requests
 from dotenv import load_dotenv
+import time
 
 from api.prompter_pb2 import QueryType
 
@@ -109,6 +110,7 @@ class YaGPTPrompter:
     def _generate_responce(
         self, prompt: str, request_type: PromptType, stream: bool = False
     ):
+        time.sleep(1) # TODO: sorry for this abomination, I'll fix this later 
         prepared_prompt = self._prepare_prompt(prompt, request_type)
         response = requests.post(
             self._url,
