@@ -11,7 +11,7 @@
         "version": "1.0"
     },
     "host": "api.misis.larek.tech",
-    "basePath": "/chat",
+    "basePath": "/admin",
     "paths": {
         "/auth/login": {
             "post": {

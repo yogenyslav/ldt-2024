@@ -521,7 +521,7 @@ const docTemplate = `{
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
 	Host:             "api.misis.larek.tech",
-	BasePath:         "/chat",
+	BasePath:         "/admin",
 	Schemes:          []string{},
 	Title:            "Admin service API",
 	Description:      "Документация API админ-сервиса команды misis.tech",

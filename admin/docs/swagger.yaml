@@ -1,4 +1,4 @@
-basePath: /chat
+basePath: /admin
 definitions:
   model.LoginReq:
     properties:
