@@ -8,6 +8,7 @@ import { useState } from 'react';
 import Prediction from './Prediction';
 import Stocks from './Stocks';
 import PrompterResult from './PrompterResult';
+import MarkdownPreview from '@uiw/react-markdown-preview';
 
 type ModelMessageProps = {
     incomingMessage: DisplayedIncomingMessage;
@@ -91,7 +92,10 @@ const ModelMessage = ({ incomingMessage, isLastMessage }: ModelMessageProps) => 
                                 />
                             )}
                             <div className='prose prose-stone'>
-                                <p>{incomingMessage.body}</p>
+                                <MarkdownPreview
+                                    source={incomingMessage.body}
+                                    style={{ padding: 16 }}
+                                />
                             </div>
                         </div>
                         <div className='flex items-center gap-2 py-2'>
