@@ -108,48 +108,6 @@ const docTemplate = `{
                     }
                 }
             },
-            "put": {
-                "description": "Обновить организацию",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "organization"
-                ],
-                "summary": "Обновить организацию",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "access token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "description": "Параметры обновления организации",
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/model.OrganizationUpdateReq"
-                        }
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "Организация обновлена"
-                    },
-                    "400": {
-                        "description": "Неверные параметры запроса",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            },
             "post": {
                 "description": "Создает новую организацию.",
                 "consumes": [
@@ -487,17 +445,6 @@ const docTemplate = `{
                 "created_at": {
                     "type": "string"
                 },
-                "id": {
-                    "type": "integer"
-                },
-                "title": {
-                    "type": "string"
-                }
-            }
-        },
-        "model.OrganizationUpdateReq": {
-            "type": "object",
-            "properties": {
                 "id": {
                     "type": "integer"
                 },

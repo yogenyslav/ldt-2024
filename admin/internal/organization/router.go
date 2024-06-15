@@ -9,7 +9,6 @@ import (
 type organizationHandler interface {
 	InsertOne(c *fiber.Ctx) error
 	FindOne(c *fiber.Ctx) error
-	UpdateOne(c *fiber.Ctx) error
 	ImportData(c *fiber.Ctx) error
 }
 
@@ -20,6 +19,5 @@ func SetupOrganizationRoutes(app *fiber.App, h organizationHandler, kc *gocloak.
 
 	g.Post("/", h.InsertOne)
 	g.Get("/", h.FindOne)
-	g.Put("/", h.UpdateOne)
 	g.Post("/import", h.ImportData)
 }

@@ -38,13 +38,6 @@ definitions:
       title:
         type: string
     type: object
-  model.OrganizationUpdateReq:
-    properties:
-      id:
-        type: integer
-      title:
-        type: string
-    type: object
   model.UserCreateReq:
     properties:
       email:
@@ -178,34 +171,6 @@ paths:
           schema:
             type: string
       summary: Создает новую организацию.
-      tags:
-      - organization
-    put:
-      consumes:
-      - application/json
-      description: Обновить организацию
-      parameters:
-      - description: access token
-        in: header
-        name: Authorization
-        required: true
-        type: string
-      - description: Параметры обновления организации
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/model.OrganizationUpdateReq'
-      produces:
-      - application/json
-      responses:
-        "204":
-          description: Организация обновлена
-        "400":
-          description: Неверные параметры запроса
-          schema:
-            type: string
-      summary: Обновить организацию
       tags:
       - organization
   /organization/import:
