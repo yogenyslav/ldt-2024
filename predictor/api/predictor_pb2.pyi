@@ -29,7 +29,12 @@ class PredictReq(_message.Message):
     type: _prompter_pb2.QueryType
     product: str
     period: str
-    def __init__(self, type: _Optional[_Union[_prompter_pb2.QueryType, str]] = ..., product: _Optional[str] = ..., period: _Optional[str] = ...) -> None: ...
+    def __init__(
+        self,
+        type: _Optional[_Union[_prompter_pb2.QueryType, str]] = ...,
+        product: _Optional[str] = ...,
+        period: _Optional[str] = ...,
+    ) -> None: ...
 
 class PredictResp(_message.Message):
     __slots__ = ("data",)
@@ -53,4 +58,9 @@ class UniqueCode(_message.Message):
     segment: str
     name: str
     regular: bool
-    def __init__(self, segment: _Optional[str] = ..., name: _Optional[str] = ..., regular: bool = ...) -> None: ...
+    def __init__(
+        self,
+        segment: _Optional[str] = ...,
+        name: _Optional[str] = ...,
+        regular: bool = ...,
+    ) -> None: ...

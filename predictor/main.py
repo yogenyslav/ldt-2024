@@ -30,7 +30,7 @@ from data import merge_contracts_with_kpgz, prepare_contracts_df, prepare_kpgz_d
 from forecast_model import Model
 from period_model import PeriodPredictor
 from process_stock import process_and_merge_stocks, StockType, Quarters, Stock
-from matcher import ColbertMatcher
+from matcher import ColbertMatcher, YaMatcher
 
 load_dotenv(".env")
 
@@ -72,17 +72,10 @@ def convert_datetime_to_str(obj):
 
 
 class Predictor(predictor_pb2_grpc.PredictorServicer):
-    def __init__(self, period_model):
+    def __init__(self, period_model, code_matcher, name_matcher):
         self._period_model = period_model
-        self._code_matcher = ColbertMatcher(
-            checkpoint_name="3rd_level_codes.8bits",
-            collection_path="./matcher/collections/collection_3rd_level_codes.json",
-            category2code_path="./matcher/collections/category2code.json",
-        )
-        self._name_matcher = ColbertMatcher(
-            checkpoint_name="full_names_stocks.8bits",
-            collection_path="./matcher/collections/full_names_collection.json",
-        )
+        self._code_matcher = code_matcher
+        self._name_matcher = name_matcher
 
     def get_merged_df(self, contracts_path, kpgz_path):
         contracts_df = pd.read_excel(contracts_path, nrows=3699)
@@ -123,7 +116,7 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
             ):
                 new_ts.append(
                     {
-                        'id': i,
+                        "id": i,
                         "date": d["date"],
                         "value": d["value"],
                         "volume": int(d["value"] // ref_price),
@@ -133,7 +126,7 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
             else:
                 new_ts.append(
                     {
-                        'id': i,
+                        "id": i,
                         "date": d["date"],
                         "value": d["value"],
                         "volume": None,
@@ -335,28 +328,30 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
         return process_and_merge_stocks(stocks)
 
     def get_stocks(self, query):
-        full_names = self._name_matcher.match_to_full_name(query)
+        full_names = self._name_matcher.match_stocks(query)
 
         top_stocks = []
-        
+
         collection_name = "stocks"
         collection = mongo_db[collection_name]
-        
+
         for i, name in enumerate(full_names):
             stock_info = collection.find({"name": name}, {"_id": False})
             stock_info = list(stock_info)
             assert len(stock_info) == 4
-            
-            top_stocks.append({
-                'id': i,
-                'name': name,
-                'history': stock_info,
-            })
 
-        return {'data' : top_stocks}
+            top_stocks.append(
+                {
+                    "id": i,
+                    "name": name,
+                    "history": stock_info,
+                }
+            )
+
+        return {"data": top_stocks}
 
     def get_forecast(self, product, period):
-        code = self._code_matcher.match_to_3rd_level_code(product)
+        code = self._code_matcher.match_code(product)
 
         collection_name = "codes"
         collection = mongo_db[collection_name]
@@ -378,7 +373,7 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
                 for x in code_info["forecast"]
                 if start_dt.timestamp() <= x["date"].timestamp() <= end_dt.timestamp()
             ]
-            out_id = forecast[0]['id'] + (hash(code) % int(1e9))
+            out_id = forecast[0]["id"] + (hash(code) % int(1e9))
         else:
             forecast = None
             out_id = None
@@ -390,14 +385,12 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
         else:
             rows = []
 
-        
-        
-        output_json =  {
-                        'id': out_id,
-                        "CustomerId": 1, #TODO
-                        'rows': rows,
-                        }
-        
+        output_json = {
+            "id": out_id,
+            "CustomerId": 1,  # TODO
+            "rows": rows,
+        }
+
         code_info["forecast"] = forecast
         code_info["output_json"] = output_json
 
@@ -488,8 +481,35 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
 def serve():
     period_model = PeriodPredictor.load_from_checkpoint("checkpoints/periods_model")
 
+    matcher_type = os.getenv("MATCHER")
+
+    if matcher_type == "colbert":
+        code_matcher = ColbertMatcher(
+            checkpoint_name="3rd_level_codes.8bits",
+            collection_path="./matcher/collections/collection_3rd_level_codes.json",
+            category2code_path="./matcher/collections/category2code.json",
+        )
+        name_matcher = ColbertMatcher(
+            checkpoint_name="full_names_stocks.8bits",
+            collection_path="./matcher/collections/full_names_collection.json",
+        )
+    elif matcher_type == "ya":
+        folder_id = os.getenv("FOLDER_ID")
+        api_key = os.getenv("API_KEY")
+        name_matcher = YaMatcher(
+            "./matcher/embeds", folder_id=folder_id, api_key=api_key
+        )
+        code_matcher = name_matcher
+
     s = server(futures.ThreadPoolExecutor(max_workers=10))
-    predictor_pb2_grpc.add_PredictorServicer_to_server(Predictor(period_model), s)
+    predictor_pb2_grpc.add_PredictorServicer_to_server(
+        Predictor(
+            period_model=period_model,
+            code_matcher=code_matcher,
+            name_matcher=name_matcher,
+        ),
+        s,
+    )
     s.add_insecure_port("[::]:9980")
     print("starting server")
     s.start()

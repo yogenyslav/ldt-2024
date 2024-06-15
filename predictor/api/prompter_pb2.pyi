@@ -12,6 +12,7 @@ class QueryType(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     UNDEFINED: _ClassVar[QueryType]
     PREDICTION: _ClassVar[QueryType]
     STOCK: _ClassVar[QueryType]
+
 UNDEFINED: QueryType
 PREDICTION: QueryType
 STOCK: QueryType
@@ -30,4 +31,9 @@ class ExtractedPrompt(_message.Message):
     type: QueryType
     product: str
     period: str
-    def __init__(self, type: _Optional[_Union[QueryType, str]] = ..., product: _Optional[str] = ..., period: _Optional[str] = ...) -> None: ...
+    def __init__(
+        self,
+        type: _Optional[_Union[QueryType, str]] = ...,
+        product: _Optional[str] = ...,
+        period: _Optional[str] = ...,
+    ) -> None: ...

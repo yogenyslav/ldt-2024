@@ -18,7 +18,7 @@ contracts_map_columns = {
     "Конечное наименование КПГЗ": "final_name_kpgz",
     "Реестровый номер в РК": "registry_number_in_rk",
     "Исполнено поставщиком": "provider",
-    "№ версии": 'version_number',
+    "№ версии": "version_number",
 }
 
 
@@ -29,23 +29,31 @@ kpgz_map_columns = {
     "Реестровый номер в РК": "registry_number_in_rk",
 }
 
-def get_depth34_code_kpgz(df, min_month_count = 3, filter_service=True):
-    init_df = df[['final_code_kpgz', 'conclusion_date']]
-    df = df[['final_code_kpgz', 'conclusion_date']].copy()
+
+def get_depth34_code_kpgz(df, min_month_count=3, filter_service=True):
+    init_df = df[["final_code_kpgz", "conclusion_date"]]
+    df = df[["final_code_kpgz", "conclusion_date"]].copy()
     if filter_service:
-        df = df[df['final_code_kpgz'].str.startswith('01.')]
-    df['str_dt'] = df['conclusion_date'].dt.strftime('%Y-%m')
-    df = df.drop_duplicates(subset=['final_code_kpgz', 'str_dt'])
-    
-    depth4 = df['final_code_kpgz'].str.slice(0, 11).value_counts().reset_index()
-    depth4['depth3'] = depth4['final_code_kpgz'].str.slice(0, 8)
-    depth4['depth3_count'] = depth4.groupby(['depth3'])['count'].transform('sum')
-    
-    good_depth4 = depth4.groupby(['depth3'])['count'].apply(lambda x: (x > min_month_count).all())
+        df = df[df["final_code_kpgz"].str.startswith("01.")]
+    df["str_dt"] = df["conclusion_date"].dt.strftime("%Y-%m")
+    df = df.drop_duplicates(subset=["final_code_kpgz", "str_dt"])
+
+    depth4 = df["final_code_kpgz"].str.slice(0, 11).value_counts().reset_index()
+    depth4["depth3"] = depth4["final_code_kpgz"].str.slice(0, 8)
+    depth4["depth3_count"] = depth4.groupby(["depth3"])["count"].transform("sum")
+
+    good_depth4 = depth4.groupby(["depth3"])["count"].apply(
+        lambda x: (x > min_month_count).all()
+    )
     good_depth4 = set(good_depth4[good_depth4].index.to_list())
-    
-    depth34 = np.where(init_df['final_code_kpgz'].str.slice(0, 8).isin(good_depth4), init_df['final_code_kpgz'].str.slice(0, 11), init_df['final_code_kpgz'].str.slice(0, 8))
+
+    depth34 = np.where(
+        init_df["final_code_kpgz"].str.slice(0, 8).isin(good_depth4),
+        init_df["final_code_kpgz"].str.slice(0, 11),
+        init_df["final_code_kpgz"].str.slice(0, 8),
+    )
     return depth34
+
 
 def prepare_contracts_df(df: pd.DataFrame) -> pd.DataFrame:
     df = df[contracts_map_columns.keys()]
@@ -61,7 +69,7 @@ def prepare_contracts_df(df: pd.DataFrame) -> pd.DataFrame:
         df["end_date_of_validity"], dayfirst=True
     )
 
-    df["depth3_code_kpgz"] = get_depth34_code_kpgz(df) #TODO change names
+    df["depth3_code_kpgz"] = get_depth34_code_kpgz(df)  # TODO change names
     df["depth3_code_kpgz"] = df["depth3_code_kpgz"].astype(pd.StringDtype())
 
     df["registry_number_in_rk"] = df["registry_number_in_rk"].astype(pd.StringDtype())
