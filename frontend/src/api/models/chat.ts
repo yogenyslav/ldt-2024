@@ -1,3 +1,4 @@
+import { OutputJson } from './favorites';
 import {
     ModelResponseType,
     PredictionResponse,
@@ -133,6 +134,7 @@ export interface DisplayedIncomingMessage {
     period?: string;
     prediction?: { forecast: PurchasePlan[]; history: PurchasePlan[] };
     stocks?: Stock[];
+    outputJson?: OutputJson;
 }
 
 export const UNAUTHORIZED_ERR = 'invalid JWT';

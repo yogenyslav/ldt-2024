@@ -1,3 +1,5 @@
+import { OutputJson } from './favorites';
+
 export interface PurchasePlan {
     date: string;
     value: number; // стоимость закупки в рублях
@@ -20,6 +22,7 @@ export interface PredictionResponse {
     mean_start_to_execute_days: number;
     median_execution_days: number;
     top5_providers: number[];
+    output_json: OutputJson;
 }
 
 export interface ExampleContract {

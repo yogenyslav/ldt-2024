@@ -6,6 +6,7 @@ import { AuthProvider } from './auth/AuthProvider';
 import { RequireUnauth } from './auth/RequireUnauth';
 import { Dashboard } from './components/Dashboard';
 import { Toaster } from './components/ui/toaster';
+import SavedPredictions from './pages/SavedPredictions';
 
 function App() {
     return (
@@ -28,6 +29,16 @@ function App() {
                             <RequireAuth>
                                 <Dashboard>
                                     <Chat />
+                                </Dashboard>
+                            </RequireAuth>
+                        }
+                    />
+                    <Route
+                        path='/saved'
+                        element={
+                            <RequireAuth>
+                                <Dashboard>
+                                    <SavedPredictions />
                                 </Dashboard>
                             </RequireAuth>
                         }

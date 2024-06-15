@@ -5,12 +5,13 @@ import { useToast } from './ui/use-toast';
 import { Loader2, TrashIcon } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Pages } from '@/router/constants';
+import { observer } from 'mobx-react-lite';
 
 type Props = {
     session: ShortSession;
 };
 
-const SessionHistoryItem = ({ session }: Props) => {
+const SessionHistoryItem = observer(({ session }: Props) => {
     const { rootStore } = useStores();
     const [isDeleting, setIsDeleting] = useState(false);
     const { toast } = useToast();
@@ -46,7 +47,11 @@ const SessionHistoryItem = ({ session }: Props) => {
 
     return (
         <Link to={`/chat/${session.id}`}>
-            <div className='session-history-item bg-gray-100 hover:bg-gray-200 rounded-lg p-4 transition-colors duration-300 hover:cursor-pointer'>
+            <div
+                className={`session-history-item hover:bg-gray-200 rounded-lg p-4 transition-colors duration-300 hover:cursor-pointer ${
+                    rootStore.activeSessionId === session.id ? 'bg-slate-200' : 'bg-gray-100'
+                }`}
+            >
                 <h3 className='text-sm font-medium mb-1'>
                     {session.title || session.id.slice(0, 8)}...
                 </h3>
@@ -75,6 +80,6 @@ const SessionHistoryItem = ({ session }: Props) => {
             </div>
         </Link>
     );
-};
+});
 
 export default SessionHistoryItem;

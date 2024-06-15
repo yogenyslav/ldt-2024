@@ -1,4 +1,4 @@
-import { CircleUser, Menu, Package2, Search, SquarePen } from 'lucide-react';
+import { CircleUser, Menu, Package2, SaveAll, Search, SquarePen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
@@ -14,6 +14,9 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/auth';
 import SessionsHistory from './SessionsHistory';
 import { LoaderButton } from './ui/loader-button';
+import { useEffect } from 'react';
+import { useStores } from '@/hooks/useStores';
+import { toast } from './ui/use-toast';
 
 type DashboardProps = {
     children: React.ReactNode;
@@ -23,8 +26,29 @@ export function Dashboard({ children }: DashboardProps) {
     const navigate = useNavigate();
     const auth = useAuth();
     const location = useLocation();
+    const { rootStore } = useStores();
 
     const from = location.state?.from?.pathname || '/';
+
+    useEffect(() => {
+        rootStore.getSessions().catch(() => {
+            toast({
+                title: 'Ошибка',
+                description: 'Не удалось загрузить сессии',
+                variant: 'destructive',
+            });
+        });
+    }, [rootStore]);
+
+    useEffect(() => {
+        if (rootStore.chatError) {
+            toast({
+                title: 'Ошибка',
+                description: rootStore.chatError,
+                variant: 'destructive',
+            });
+        }
+    }, [rootStore.chatError]);
 
     return (
         <>
@@ -127,6 +151,12 @@ const Navigation = () => {
                 <LoaderButton className='flex w-full items-center gap-3 rounded-lg px-3 py-2 my-2 text-muted-foreground transition-all hover:text-secondary hover:bg-slate-200 bg-slate-200'>
                     <SquarePen className='h-4 w-4' />
                     Новый чат
+                </LoaderButton>
+            </Link>
+            <Link to='/saved' className='flex items-center gap-2'>
+                <LoaderButton className='flex w-full items-center gap-3 rounded-lg px-3 py-2 my-2 text-muted-foreground transition-all hover:text-secondary hover:bg-slate-200 bg-slate-200'>
+                    <SaveAll className='h-4 w-4' />
+                    Сохраненные прогнозы
                 </LoaderButton>
             </Link>
         </>

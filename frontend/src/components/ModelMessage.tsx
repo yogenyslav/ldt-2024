@@ -8,6 +8,9 @@ import { useState } from 'react';
 import Prediction from './Prediction';
 import Stocks from './Stocks';
 import PrompterResult from './PrompterResult';
+import MarkdownPreview from '@uiw/react-markdown-preview';
+import { LoaderButton } from './ui/loader-button';
+import FavoritesApiService from '@/api/FavoritesApiService';
 
 type ModelMessageProps = {
     incomingMessage: DisplayedIncomingMessage;
@@ -18,6 +21,7 @@ const ModelMessage = ({ incomingMessage, isLastMessage }: ModelMessageProps) => 
     const { rootStore } = useStores();
     const { toast } = useToast();
     const [showInvalidButton, setShowInvalidButton] = useState(true);
+    const [isSaving, setIsSaving] = useState(false);
 
     const getModelResonse = () => {
         switch (incomingMessage.status) {
@@ -32,7 +36,7 @@ const ModelMessage = ({ incomingMessage, isLastMessage }: ModelMessageProps) => 
                             />
                         </div>
                         {isLastMessage && (
-                            <div className='flex items-center gap-2 flex-wrap mt-1'>
+                            <div className='flex items-center gap-2 flex-wrap mt-2'>
                                 <Button
                                     onClick={() => {
                                         rootStore.sendMessage({
@@ -90,8 +94,51 @@ const ModelMessage = ({ incomingMessage, isLastMessage }: ModelMessageProps) => 
                                     )}
                                 />
                             )}
+                            <div className='flex gap-2'>
+                                <LoaderButton
+                                    variant='outline'
+                                    onClick={() => {
+                                        console.log(incomingMessage.outputJson);
+
+                                        if (incomingMessage.outputJson) {
+                                            setIsSaving(true);
+
+                                            FavoritesApiService.createFavorite({
+                                                id: 1,
+                                                response: incomingMessage.outputJson,
+                                            })
+                                                .then(() => {
+                                                    setIsSaving(false);
+                                                    toast({
+                                                        title: 'Успех',
+                                                        description: 'Прогноз сохранен в избранное',
+                                                    });
+                                                })
+                                                .catch(() => {
+                                                    setIsSaving(false);
+                                                    toast({
+                                                        title: 'Ошибка',
+                                                        description:
+                                                            'Не удалось сохранить ответ в избранное',
+                                                        variant: 'destructive',
+                                                    });
+                                                });
+                                        }
+                                    }}
+                                    isLoading={isSaving}
+                                >
+                                    Сохранить прогноз
+                                </LoaderButton>
+
+                                <Button variant='outline' onClick={() => {}}>
+                                    Загрузить прогноз (.json)
+                                </Button>
+                            </div>
                             <div className='prose prose-stone'>
-                                <p>{incomingMessage.body}</p>
+                                <MarkdownPreview
+                                    source={incomingMessage.body}
+                                    style={{ padding: 16 }}
+                                />
                             </div>
                         </div>
                         <div className='flex items-center gap-2 py-2'>
@@ -99,6 +146,13 @@ const ModelMessage = ({ incomingMessage, isLastMessage }: ModelMessageProps) => 
                                 variant='ghost'
                                 size='icon'
                                 className='w-4 h-4 hover:bg-transparent text-stone-400 hover:text-stone-900'
+                                onClick={() => {
+                                    navigator.clipboard.writeText(incomingMessage.body);
+                                    toast({
+                                        title: 'Скопировано',
+                                        description: 'Текст ответа скопирован в буфер обмена',
+                                    });
+                                }}
                             >
                                 <ClipboardIcon className='w-4 h-4' />
                                 <span className='sr-only'>Копировать</span>
