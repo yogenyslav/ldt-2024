@@ -17,6 +17,7 @@ from api.predictor_pb2 import (
     PredictResp,
     PrepareDataReq,
     UniqueCode,
+    UniqueCodesReq,
     UniqueCodesResp,
 )
 from api.prompter_pb2 import QueryType
@@ -34,9 +35,9 @@ from matcher import ColbertMatcher, YaMatcher
 
 load_dotenv(".env")
 
-mongo_url = f"mongodb://{os.getenv('MONGO_HOST')}:{os.getenv('MONGO_PORT')}/{os.getenv('MONGO_DB')}"
+mongo_url = f"mongodb://{os.getenv('MONGO_HOST')}:{os.getenv('MONGO_PORT')}"
 mongo_client = pymongo.MongoClient(mongo_url)
-mongo_db = mongo_client[os.getenv("MONGO_DB")]
+# mongo_db = mongo_client[os.getenv("MONGO_DB")]
 
 
 def convert_to_datetime(iso_str):
@@ -327,13 +328,13 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
 
         return process_and_merge_stocks(stocks)
 
-    def get_stocks(self, query):
+    def get_stocks(self, query, organization):
         full_names = self._name_matcher.match_stocks(query)
 
         top_stocks = []
 
         collection_name = "stocks"
-        collection = mongo_db[collection_name]
+        collection = mongo_client[organization][collection_name]
 
         for i, name in enumerate(full_names):
             stock_info = collection.find({"name": name}, {"_id": False})
@@ -350,11 +351,11 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
 
         return {"data": top_stocks}
 
-    def get_forecast(self, product, period):
+    def get_forecast(self, product, period, organization):
         code = self._code_matcher.match_code(product)
 
         collection_name = "codes"
-        collection = mongo_db[collection_name]
+        collection = mongo_client[organization][collection_name]
         code_info = collection.find_one({"code": code}, {"_id": False})
 
         if code_info is None:
@@ -387,7 +388,7 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
 
         output_json = {
             "id": out_id,
-            "CustomerId": 1,  # TODO
+            "CustomerId": organization,
             "rows": rows,
         }
 
@@ -421,14 +422,12 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
             merged_df, all_kpgz_codes, forecast_dict, regular_codes
         )
 
-        pprint(codes_data)
-
         collection_name = "codes"
-        collection = mongo_db[collection_name]
+        collection = mongo_client[request.organization][collection_name]
         collection.insert_many(codes_data)
 
         collection_name = "stocks"
-        collection = mongo_db[collection_name]
+        collection = mongo_client[request.organization][collection_name]
         collection.insert_many(stocks.to_dict(orient="records"))
 
         return Empty()
@@ -437,17 +436,17 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
         logging.info(f"predict for {str(request)}")
 
         if request.type == QueryType.STOCK:
-            resp = self.get_stocks(request.product)
+            resp = self.get_stocks(request.product, request.organization)
         elif request.type == QueryType.PREDICTION:
-            resp = self.get_forecast(request.product, request.period)
+            resp = self.get_forecast(request.product, request.period, request.organization)
 
         pprint(resp)
 
         return PredictResp(data=json.dumps(resp).encode("utf-8"))
 
-    def UniqueCodes(self, request: Empty, context: ServicerContext):
+    def UniqueCodes(self, request: UniqueCodesReq, context: ServicerContext):
         collection_name = "codes"
-        collection = mongo_db[collection_name]
+        collection = mongo_client[request.organization][collection_name]
         out = collection.find(
             {"code": {"$exists": True}},
             {"_id": False, "code": True, "code_name": True, "is_regular": True},
