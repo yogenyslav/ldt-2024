@@ -151,7 +151,7 @@ class SaigaPrompter:
             request = self.prepare_prompt1(inp)
             request += "ЗАПРОС: Оформи отчет в MARKDOWN. Убери None, где нет информации. В своем отчете укажи всю предоставленную информацию. Не добавляй информацию, которой нет в исходных данных."
         if prompt_type == PromptType.FINAL_PREDICTION_PART2:
-            request = self.prepare_prompt1(inp)
+            request = self.prepare_prompt2(inp)
             request += "ЗАПРОС: Оформи эту информацию в MARKDOWN таблице"
         return self.generate_response_stream(request, prompt_type)
 
