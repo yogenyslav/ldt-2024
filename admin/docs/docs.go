@@ -512,7 +512,6 @@ const docTemplate = `{
                 "email",
                 "first_name",
                 "last_name",
-                "organization",
                 "password",
                 "roles",
                 "username"
