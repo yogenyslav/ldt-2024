@@ -643,6 +643,13 @@ const docTemplate = `{
                 "created_at": {
                     "type": "string"
                 },
+                "data": {
+                    "type": "object",
+                    "additionalProperties": {}
+                },
+                "data_type": {
+                    "type": "string"
+                },
                 "status": {
                     "type": "string"
                 }
@@ -685,7 +692,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "hawk-handy-wolf.ngrok-free.app",
+	Host:             "api.misis.larek.tech",
 	BasePath:         "/chat",
 	Schemes:          []string{},
 	Title:            "Chat service API",

@@ -10,7 +10,7 @@
         },
         "version": "1.0"
     },
-    "host": "hawk-handy-wolf.ngrok-free.app",
+    "host": "api.misis.larek.tech",
     "basePath": "/chat",
     "paths": {
         "/auth/login": {
@@ -635,6 +635,13 @@
                     "type": "string"
                 },
                 "created_at": {
+                    "type": "string"
+                },
+                "data": {
+                    "type": "object",
+                    "additionalProperties": {}
+                },
+                "data_type": {
                     "type": "string"
                 },
                 "status": {

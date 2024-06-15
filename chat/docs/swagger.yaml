@@ -107,6 +107,11 @@ definitions:
         type: string
       created_at:
         type: string
+      data:
+        additionalProperties: {}
+        type: object
+      data_type:
+        type: string
       status:
         type: string
     type: object
@@ -130,7 +135,7 @@ definitions:
       title:
         type: string
     type: object
-host: hawk-handy-wolf.ngrok-free.app
+host: api.misis.larek.tech
 info:
   contact: {}
   description: Документация API чат-сервиса команды misis.tech
