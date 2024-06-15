@@ -176,6 +176,7 @@ class YaGPTPrompter:
 
     def process_final_request(self, data: str, prompt_type: PromptType):
         inp = json.loads(data)
+        request = ""
         if prompt_type == PromptType.FINAL_PREDICTION_PART1:
             request = self.prepare_prompt1(inp)
             request += """ЗАПРОС: Оформи отчет в MARKDOWN. Убери None, где нет информации. 
