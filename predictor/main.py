@@ -115,7 +115,7 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
             return None
 
         new_ts = []
-        for d in ts:
+        for i, d in enumerate(ts):
             if (
                 ref_price is not pd.NA
                 and not math.isnan(d["value"])
@@ -123,6 +123,7 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
             ):
                 new_ts.append(
                     {
+                        'id': i,
                         "date": d["date"],
                         "value": d["value"],
                         "volume": int(d["value"] // ref_price),
@@ -132,6 +133,7 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
             else:
                 new_ts.append(
                     {
+                        'id': i,
                         "date": d["date"],
                         "value": d["value"],
                         "volume": None,
@@ -153,7 +155,7 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
     ):
         if forecast is None:
             return None
-        raws_by_date = defaultdict(list)
+        rows_by_date = defaultdict(list)
 
         median_execution_duration = (
             median_execution_duration if median_execution_duration is not None else 30
@@ -201,9 +203,9 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
                     },
                 }
 
-                raws_by_date[convert_datetime_to_str(start_date)].append(raw)
+                rows_by_date[convert_datetime_to_str(start_date)].append(raw)
 
-        return raws_by_date
+        return rows_by_date
 
     def get_codes_data(self, merged_df, all_kpgz_codes, forecast_dict, regular_codes):
         codes_stat = merged_df
@@ -276,7 +278,7 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
             )
             code_distrib = (code_distrib / code_distrib.sum()).reset_index()
 
-            raws_by_date = self.get_formated_purchase(
+            rows_by_date = self.get_formated_purchase(
                 cur_code_df, code_distrib, forecast, median_execution_duration
             )
 
@@ -287,7 +289,7 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
                     "is_regular": code in regular_codes,
                     "forecast": forecast,
                     "history": history,
-                    "raws_by_date": raws_by_date,
+                    "rows_by_date": rows_by_date,
                     "median_execution_days": (
                         median_execution_duration
                         if median_execution_duration is not pd.NA
@@ -333,16 +335,25 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
         return process_and_merge_stocks(stocks)
 
     def get_stocks(self, query):
-        full_name = self._name_matcher.match_to_full_name(query)
+        full_names = self._name_matcher.match_to_full_name(query)
 
+        top_stocks = []
+        
         collection_name = "stocks"
         collection = mongo_db[collection_name]
-        code_info = collection.find({"name": full_name}, {"_id": False})
-        code_info = list(code_info)
+        
+        for i, name in enumerate(full_names):
+            stock_info = collection.find({"name": name}, {"_id": False})
+            stock_info = list(stock_info)
+            assert len(stock_info) == 4
+            
+            top_stocks.append({
+                'id': i,
+                'name': name,
+                'history': stock_info,
+            })
 
-        assert len(code_info) == 4
-
-        return code_info
+        return {'data' : top_stocks}
 
     def get_forecast(self, product, period):
         code = self._code_matcher.match_to_3rd_level_code(product)
@@ -359,7 +370,7 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
             years=int(period) // 12, months=int(period) % 12
         )
 
-        raws_by_date = code_info.pop("raws_by_date")
+        rows_by_date = code_info.pop("rows_by_date")
 
         if code_info["forecast"] is not None:
             forecast = [
@@ -367,18 +378,28 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
                 for x in code_info["forecast"]
                 if start_dt.timestamp() <= x["date"].timestamp() <= end_dt.timestamp()
             ]
+            out_id = forecast[0]['id'] + (hash(code) % int(1e9))
         else:
             forecast = None
+            out_id = None
 
         if forecast is None:
-            raws = None
+            rows = None
         elif len(forecast) > 0:
-            raws = raws_by_date.get(convert_datetime_to_str(forecast[0]["date"]), None)
+            rows = rows_by_date.get(convert_datetime_to_str(forecast[0]["date"]), None)
         else:
-            raws = []
+            rows = []
 
+        
+        
+        output_json =  {
+                        'id': out_id,
+                        "CustomerId": 1, #TODO
+                        'rows': rows,
+                        }
+        
         code_info["forecast"] = forecast
-        code_info["raws"] = raws
+        code_info["output_json"] = output_json
 
         code_info = convert_datetime_to_str(code_info)
         return code_info

@@ -38,5 +38,5 @@ class ColbertMatcher:
         return self.category2code[self.searcher.collection[results[0][0]]]
     
     def match_to_full_name(self, query: str) -> str:
-        results = self.searcher.search(query, k=1)
-        return self.searcher.collection[results[0][0]]
+        results = self.searcher.search(query, k=5)
+        return [self.searcher.collection[x] for x in results[0]]
