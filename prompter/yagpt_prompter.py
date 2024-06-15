@@ -118,6 +118,7 @@ class YaGPTPrompter:
         )
         if not stream:
             output = json.loads(response.content.decode("utf-8"))
+            print(output)
             output = output["result"]["alternatives"][-1]["message"]["text"]
         else:
             output = requests.post(
