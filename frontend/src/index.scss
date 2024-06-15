@@ -83,6 +83,11 @@ main:has(.chat) {
     }
 }
 
+.saved {
+    max-height: calc(100vh - 3.5rem);
+    overflow-y: scroll;
+}
+
 @media screen and (max-width: 768px) {
     .session-history-item {
         &__delete-button {

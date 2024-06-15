@@ -105,7 +105,7 @@ export class RootStore {
                               }
                             : undefined,
                         stocks: stocks?.data,
-                        predictionResponse: prediction ? prediction : undefined,
+                        outputJson: prediction?.output_json,
                     },
                     outcomingMessage: {
                         prompt: content.query.prompt,
@@ -313,7 +313,7 @@ export class RootStore {
 
         incomingMessage.prediction = { forecast, history };
         lastMessage.incomingMessage = incomingMessage;
-        lastMessage.incomingMessage.predictionResponse = data;
+        lastMessage.incomingMessage.outputJson = data.output_json;
 
         if (this.activeDisplayedSession) {
             this.activeDisplayedSession.messages[lastMessageIndex] = lastMessage;

@@ -1,4 +1,4 @@
-import { ClipboardIcon, SaveIcon } from 'lucide-react';
+import { ClipboardIcon } from 'lucide-react';
 import { Avatar, AvatarFallback } from './ui/avatar';
 import { Button } from './ui/button';
 import { ChatCommand, DisplayedIncomingMessage, IncomingMessageStatus } from '@/api/models';
@@ -98,20 +98,20 @@ const ModelMessage = ({ incomingMessage, isLastMessage }: ModelMessageProps) => 
                                 <LoaderButton
                                     variant='outline'
                                     onClick={() => {
-                                        console.log(incomingMessage.predictionResponse);
+                                        console.log(incomingMessage.outputJson);
 
-                                        if (incomingMessage.predictionResponse) {
+                                        if (incomingMessage.outputJson) {
                                             setIsSaving(true);
 
                                             FavoritesApiService.createFavorite({
                                                 id: 1,
-                                                response: incomingMessage.predictionResponse,
+                                                response: incomingMessage.outputJson,
                                             })
                                                 .then(() => {
                                                     setIsSaving(false);
                                                     toast({
                                                         title: 'Успех',
-                                                        description: 'Ответ сохранен в избранное',
+                                                        description: 'Прогноз сохранен в избранное',
                                                     });
                                                 })
                                                 .catch(() => {
@@ -129,6 +129,10 @@ const ModelMessage = ({ incomingMessage, isLastMessage }: ModelMessageProps) => 
                                 >
                                     Сохранить прогноз
                                 </LoaderButton>
+
+                                <Button variant='outline' onClick={() => {}}>
+                                    Загрузить прогноз (.json)
+                                </Button>
                             </div>
                             <div className='prose prose-stone'>
                                 <MarkdownPreview
