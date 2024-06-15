@@ -14,8 +14,10 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	recovermw "github.com/gofiber/fiber/v2/middleware/recover"
+	"github.com/gofiber/swagger"
 	"github.com/rs/zerolog/log"
 	"github.com/yogenyslav/ldt-2024/admin/config"
+	_ "github.com/yogenyslav/ldt-2024/admin/docs"
 	"github.com/yogenyslav/ldt-2024/admin/internal/api/pb"
 	"github.com/yogenyslav/ldt-2024/admin/internal/auth"
 	ac "github.com/yogenyslav/ldt-2024/admin/internal/auth/controller"
@@ -64,6 +66,7 @@ func New(cfg *config.Config) *Server {
 	}))
 	app.Use(recovermw.New())
 	app.Use(otelfiber.Middleware())
+	app.Use("/admin/swagger/*", swagger.HandlerDefault)
 
 	exporter := tracing.MustNewExporter(context.Background(), cfg.Jaeger.URL())
 	provider := tracing.MustNewTraceProvider(exporter, "admin")

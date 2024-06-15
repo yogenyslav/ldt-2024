@@ -55,4 +55,9 @@ class UniqueCode(_message.Message):
     segment: str
     name: str
     regular: bool
-    def __init__(self, segment: _Optional[str] = ..., name: _Optional[str] = ..., regular: bool = ...) -> None: ...
+    def __init__(
+        self,
+        segment: _Optional[str] = ...,
+        name: _Optional[str] = ...,
+        regular: bool = ...,
+    ) -> None: ...

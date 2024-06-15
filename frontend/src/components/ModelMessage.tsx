@@ -5,6 +5,12 @@ import { ChatCommand, DisplayedIncomingMessage, IncomingMessageStatus } from '@/
 import { useStores } from '@/hooks/useStores';
 import { useToast } from './ui/use-toast';
 import { useState } from 'react';
+import Prediction from './Prediction';
+import Stocks from './Stocks';
+import PrompterResult from './PrompterResult';
+import MarkdownPreview from '@uiw/react-markdown-preview';
+import { LoaderButton } from './ui/loader-button';
+import FavoritesApiService from '@/api/FavoritesApiService';
 
 type ModelMessageProps = {
     incomingMessage: DisplayedIncomingMessage;
@@ -15,6 +21,7 @@ const ModelMessage = ({ incomingMessage, isLastMessage }: ModelMessageProps) => 
     const { rootStore } = useStores();
     const { toast } = useToast();
     const [showInvalidButton, setShowInvalidButton] = useState(true);
+    const [isSaving, setIsSaving] = useState(false);
 
     const getModelResonse = () => {
         switch (incomingMessage.status) {
@@ -22,17 +29,21 @@ const ModelMessage = ({ incomingMessage, isLastMessage }: ModelMessageProps) => 
                 return (
                     <>
                         <div className='prose prose-stone'>
-                            <p>{`продукт: ${incomingMessage.product}, период: ${incomingMessage.period}, тип: ${incomingMessage.type}`}</p>
+                            <PrompterResult
+                                product={incomingMessage.product}
+                                period={incomingMessage.period}
+                                type={incomingMessage.type}
+                            />
                         </div>
                         {isLastMessage && (
-                            <div className='flex items-center gap-2 flex-wrap'>
+                            <div className='flex items-center gap-2 flex-wrap mt-2'>
                                 <Button
                                     onClick={() => {
                                         rootStore.sendMessage({
                                             command: ChatCommand.Valid,
                                         });
                                     }}
-                                    variant='outline'
+                                    variant='default'
                                     className='flex-1'
                                 >
                                     Продолжить
@@ -68,14 +79,80 @@ const ModelMessage = ({ incomingMessage, isLastMessage }: ModelMessageProps) => 
             case IncomingMessageStatus.Valid:
                 return (
                     <>
-                        <div className='prose prose-stone'>
-                            <p>{incomingMessage.body}</p>
+                        <div className='flex w-full flex-col gap-5'>
+                            {' '}
+                            {incomingMessage.prediction && (
+                                <Prediction
+                                    history={incomingMessage.prediction.history}
+                                    forecast={incomingMessage.prediction.forecast}
+                                />
+                            )}
+                            {incomingMessage.stocks && (
+                                <Stocks
+                                    stocks={incomingMessage.stocks.sort(
+                                        (a, b) => a.quarter - b.quarter
+                                    )}
+                                />
+                            )}
+                            <div className='flex gap-2'>
+                                <LoaderButton
+                                    variant='outline'
+                                    onClick={() => {
+                                        console.log(incomingMessage.outputJson);
+
+                                        if (incomingMessage.outputJson) {
+                                            setIsSaving(true);
+
+                                            FavoritesApiService.createFavorite({
+                                                id: 1,
+                                                response: incomingMessage.outputJson,
+                                            })
+                                                .then(() => {
+                                                    setIsSaving(false);
+                                                    toast({
+                                                        title: 'Успех',
+                                                        description: 'Прогноз сохранен в избранное',
+                                                    });
+                                                })
+                                                .catch(() => {
+                                                    setIsSaving(false);
+                                                    toast({
+                                                        title: 'Ошибка',
+                                                        description:
+                                                            'Не удалось сохранить ответ в избранное',
+                                                        variant: 'destructive',
+                                                    });
+                                                });
+                                        }
+                                    }}
+                                    isLoading={isSaving}
+                                >
+                                    Сохранить прогноз
+                                </LoaderButton>
+
+                                <Button variant='outline' onClick={() => {}}>
+                                    Загрузить прогноз (.json)
+                                </Button>
+                            </div>
+                            <div className='prose prose-stone'>
+                                <MarkdownPreview
+                                    source={incomingMessage.body}
+                                    style={{ padding: 16 }}
+                                />
+                            </div>
                         </div>
                         <div className='flex items-center gap-2 py-2'>
                             <Button
                                 variant='ghost'
                                 size='icon'
                                 className='w-4 h-4 hover:bg-transparent text-stone-400 hover:text-stone-900'
+                                onClick={() => {
+                                    navigator.clipboard.writeText(incomingMessage.body);
+                                    toast({
+                                        title: 'Скопировано',
+                                        description: 'Текст ответа скопирован в буфер обмена',
+                                    });
+                                }}
                             >
                                 <ClipboardIcon className='w-4 h-4' />
                                 <span className='sr-only'>Копировать</span>
@@ -88,7 +165,11 @@ const ModelMessage = ({ incomingMessage, isLastMessage }: ModelMessageProps) => 
                 return (
                     <>
                         <div className='prose prose-stone'>
-                            <p>{`продукт: ${incomingMessage.product}, период: ${incomingMessage.period}, тип: ${incomingMessage.type}`}</p>
+                            <PrompterResult
+                                product={incomingMessage.product}
+                                period={incomingMessage.period}
+                                type={incomingMessage.type}
+                            />
                         </div>
                     </>
                 );
@@ -99,11 +180,11 @@ const ModelMessage = ({ incomingMessage, isLastMessage }: ModelMessageProps) => 
     };
 
     return (
-        <div className='flex items-start gap-4'>
+        <div className='flex items-start gap-4 w-full'>
             <Avatar className='border w-8 h-8'>
                 <AvatarFallback>MT</AvatarFallback>
             </Avatar>
-            <div className='grid gap-1 mt-2'>
+            <div className='grid gap-1 mt-2 w-full'>
                 <div className='font-bold'>Ответ модели</div>
 
                 {getModelResonse()}
