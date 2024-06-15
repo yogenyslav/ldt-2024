@@ -37,6 +37,7 @@ const SavedPredictions = () => {
                         <SavedOutputJson
                             key={savedPrediction.id}
                             outputJson={savedPrediction.response}
+                            id={savedPrediction.id}
                         />
                     </>
                 ))

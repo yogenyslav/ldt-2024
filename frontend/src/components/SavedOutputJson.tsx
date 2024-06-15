@@ -11,9 +11,10 @@ import { toast } from './ui/use-toast';
 
 type Props = {
     outputJson: OutputJson;
+    id: number;
 };
 
-const SavedOutputJson = ({ outputJson }: Props) => {
+const SavedOutputJson = ({ outputJson, id }: Props) => {
     const [deliverySchedules, setDeliverySchedules] = useState<DeliveryRow[]>(outputJson.rows);
     const [editMode, setEditMode] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
@@ -23,7 +24,7 @@ const SavedOutputJson = ({ outputJson }: Props) => {
         setIsSaving(true);
 
         FavoritesApiService.updateFavorite({
-            id: outputJson.id,
+            id,
             response: { ...outputJson, rows: deliverySchedules },
         })
             .then(() => {
@@ -49,7 +50,7 @@ const SavedOutputJson = ({ outputJson }: Props) => {
     const handleDelete = () => {
         setIsDeleting(true);
 
-        FavoritesApiService.deleteFavorite(outputJson.id)
+        FavoritesApiService.deleteFavorite(id)
             .then(() => {
                 toast({
                     title: 'Успех',
@@ -66,6 +67,22 @@ const SavedOutputJson = ({ outputJson }: Props) => {
             .finally(() => {
                 setIsDeleting(false);
             });
+    };
+
+    const downloadFile = () => {
+        if (outputJson) {
+            const data = JSON.stringify(outputJson);
+
+            const blob = new Blob([data], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'result.json';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+        }
     };
 
     return (
@@ -247,8 +264,8 @@ const SavedOutputJson = ({ outputJson }: Props) => {
                     </Table>
                 </div>
 
-                <Button variant='outline' onClick={() => {}}>
-                    Загрузить прогноз (.json)
+                <Button variant='outline' onClick={downloadFile}>
+                    Загрузить план закупок (.json)
                 </Button>
             </CardContent>
         </Card>
