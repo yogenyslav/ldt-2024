@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/yogenyslav/ldt-2024/admin/internal/organization/model"
-	"github.com/yogenyslav/ldt-2024/admin/internal/shared"
 	"github.com/yogenyslav/pkg/storage"
 )
 
@@ -59,22 +58,4 @@ func (r *Repo) FindOne(ctx context.Context, username string) (model.Organization
 	var org model.OrganizationDao
 	err := r.pg.Query(ctx, &org, findOne, username)
 	return org, err
-}
-
-const updateOne = `
-	update adm.organization
-	set title = $3
-	where id = $1 and username = $2;
-`
-
-// UpdateOne обновляет организацию.
-func (r *Repo) UpdateOne(ctx context.Context, params model.OrganizationDao) error {
-	tag, err := r.pg.Exec(ctx, updateOne, params.ID, params.Username, params.Title)
-	if err != nil {
-		return shared.ErrCreateOrganization
-	}
-	if tag.RowsAffected() == 0 {
-		return shared.ErrNoOrganization
-	}
-	return err
 }
