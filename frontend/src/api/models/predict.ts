@@ -41,3 +41,16 @@ export interface ExampleContract {
     ref_price: number | null;
     registry_number_in_rk: string;
 }
+
+export interface StockResponse {
+    data: Stock[];
+}
+
+export interface Stock {
+    amount: number;
+    name: string;
+    price: number;
+    quarter: number;
+    sum: number;
+    year: number;
+}

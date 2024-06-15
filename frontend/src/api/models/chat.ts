@@ -1,4 +1,10 @@
-import { ModelResponseType, PredictionResponse, PurchasePlan } from './predict';
+import {
+    ModelResponseType,
+    PredictionResponse,
+    PurchasePlan,
+    Stock,
+    StockResponse,
+} from './predict';
 
 export interface ShortSession {
     id: string;
@@ -21,7 +27,7 @@ export interface ChatResponse {
     created_at: string;
     body: string;
     status: string;
-    data: PredictionResponse;
+    data: PredictionResponse | StockResponse;
     data_type: ModelResponseType;
 }
 
@@ -85,7 +91,7 @@ export enum IncomingMessageStatus {
 }
 
 export interface WSMessage {
-    data: WSIncomingQuery | WSIncomingChunk | PredictionResponse;
+    data: WSIncomingQuery | WSIncomingChunk | PredictionResponse | StockResponse;
     finish: boolean;
     chunk: boolean;
     err?: string;
@@ -126,4 +132,5 @@ export interface DisplayedIncomingMessage {
     product?: string;
     period?: string;
     prediction?: { forecast: PurchasePlan[]; history: PurchasePlan[] };
+    stocks?: Stock[];
 }

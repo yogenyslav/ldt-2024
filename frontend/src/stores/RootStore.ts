@@ -15,6 +15,7 @@ import {
     ChatCommand,
     ModelResponseType,
     PredictionResponse,
+    StockResponse,
 } from '@/api/models';
 import { LOCAL_STORAGE_KEY } from '@/auth/AuthProvider';
 import { WS_URL } from '@/config';
@@ -81,7 +82,12 @@ export class RootStore {
             messages: session.content.map((content) => {
                 const prediction =
                     content.response.data_type === ModelResponseType.Prediction
-                        ? content.response.data
+                        ? (content.response.data as PredictionResponse)
+                        : null;
+
+                const stocks =
+                    content.response.data_type === ModelResponseType.Stock
+                        ? (content.response.data as StockResponse)
                         : null;
 
                 return {
@@ -97,6 +103,7 @@ export class RootStore {
                                   history: prediction.history,
                               }
                             : undefined,
+                        stocks: stocks?.data,
                     },
                     outcomingMessage: {
                         prompt: content.query.prompt,
@@ -176,6 +183,8 @@ export class RootStore {
                     this.processIncomingQuery(data as WSIncomingQuery);
                 } else if (wsMessage.data_type === ModelResponseType.Prediction && wsMessage.data) {
                     this.processIncomingPrediction(data as PredictionResponse);
+                } else if (wsMessage.data_type === ModelResponseType.Stock && wsMessage.data) {
+                    this.processIncomingStock(data as StockResponse);
                 }
 
                 if ((wsMessage.finish || !wsMessage.chunk) && !wsMessage.data_type) {
@@ -295,6 +304,29 @@ export class RootStore {
         };
 
         incomingMessage.prediction = { forecast, history };
+        lastMessage.incomingMessage = incomingMessage;
+
+        if (this.activeDisplayedSession) {
+            this.activeDisplayedSession.messages[lastMessageIndex] = lastMessage;
+        }
+    }
+
+    private processIncomingStock({ data }: StockResponse) {
+        console.log('processIncomingStock', data);
+
+        const session = this.activeDisplayedSession;
+        if (!this.activeSessionId || !session?.messages.length) return;
+
+        const lastMessageIndex = session.messages.length - 1;
+        const lastMessage = session.messages[lastMessageIndex];
+
+        const incomingMessage = lastMessage.incomingMessage || {
+            body: '',
+            type: IncomingMessageType.Undefined,
+            status: IncomingMessageStatus.Valid,
+        };
+
+        incomingMessage.stocks = data;
         lastMessage.incomingMessage = incomingMessage;
 
         if (this.activeDisplayedSession) {

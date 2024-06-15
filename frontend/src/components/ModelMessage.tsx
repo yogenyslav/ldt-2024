@@ -6,6 +6,7 @@ import { useStores } from '@/hooks/useStores';
 import { useToast } from './ui/use-toast';
 import { useState } from 'react';
 import Prediction from './Prediction';
+import Stocks from './Stocks';
 
 type ModelMessageProps = {
     incomingMessage: DisplayedIncomingMessage;
@@ -69,7 +70,7 @@ const ModelMessage = ({ incomingMessage, isLastMessage }: ModelMessageProps) => 
             case IncomingMessageStatus.Valid:
                 return (
                     <>
-                        <div className='flex flex-col gap-5'>
+                        <div className='flex w-full flex-col gap-5'>
                             {' '}
                             {incomingMessage.prediction && (
                                 <Prediction
@@ -77,6 +78,7 @@ const ModelMessage = ({ incomingMessage, isLastMessage }: ModelMessageProps) => 
                                     forecast={incomingMessage.prediction.forecast}
                                 />
                             )}
+                            {incomingMessage.stocks && <Stocks stocks={incomingMessage.stocks} />}
                             <div className='prose prose-stone'>
                                 <p>{incomingMessage.body}</p>
                             </div>
@@ -109,11 +111,11 @@ const ModelMessage = ({ incomingMessage, isLastMessage }: ModelMessageProps) => 
     };
 
     return (
-        <div className='flex items-start gap-4'>
+        <div className='flex items-start gap-4 w-full'>
             <Avatar className='border w-8 h-8'>
                 <AvatarFallback>MT</AvatarFallback>
             </Avatar>
-            <div className='grid gap-1 mt-2'>
+            <div className='grid gap-1 mt-2 w-full'>
                 <div className='font-bold'>Ответ модели</div>
 
                 {getModelResonse()}
