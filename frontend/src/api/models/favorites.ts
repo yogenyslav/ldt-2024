@@ -3,6 +3,10 @@ export interface SavedPrediction {
     response: OutputJson;
 }
 
+export interface SavedPredictionTemplate {
+    response: OutputJson;
+}
+
 export interface OutputJson {
     id: number;
     CustomerId: number;
