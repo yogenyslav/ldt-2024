@@ -34,6 +34,11 @@ func (ctrl *Controller) NewUser(ctx context.Context, params model.UserCreateReq)
 		return err
 	}
 
+	if err := ctrl.kc.SetPassword(ctx, token.AccessToken, userID, ctrl.cfg.Realm, params.Password, false); err != nil {
+		log.Error().Err(err).Msg("failed to set password")
+		return err
+	}
+
 	for _, role := range params.Roles {
 		path := fmt.Sprintf("/%s", strings.ToLower(role))
 		group, err := ctrl.kc.GetGroupByPath(ctx, token.AccessToken, ctrl.cfg.Realm, path)

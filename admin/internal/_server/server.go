@@ -116,7 +116,7 @@ func (s *Server) Run() {
 	auth.SetupAuthRoutes(s.app, authHandler)
 
 	userRepo := ur.New(s.pg)
-	userController := uc.New(userRepo, s.kc, s.tracer)
+	userController := uc.New(userRepo, s.cfg.KeyCloak, s.kc, s.tracer)
 	userHandler := uh.New(userController, s.tracer)
 	user.SetupUserRoutes(s.app, userHandler, s.kc, s.cfg.KeyCloak.Realm, s.cfg.Server.CipherKey, userRepo)
 
