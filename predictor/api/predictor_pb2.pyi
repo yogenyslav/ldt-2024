@@ -10,31 +10,36 @@ from typing import ClassVar as _ClassVar, Iterable as _Iterable, Mapping as _Map
 DESCRIPTOR: _descriptor.FileDescriptor
 
 class PrepareDataReq(_message.Message):
-    __slots__ = ("sources",)
+    __slots__ = ("sources", "organization")
     SOURCES_FIELD_NUMBER: _ClassVar[int]
+    ORGANIZATION_FIELD_NUMBER: _ClassVar[int]
     sources: _containers.RepeatedScalarFieldContainer[str]
-    def __init__(self, sources: _Optional[_Iterable[str]] = ...) -> None: ...
+    organization: str
+    def __init__(self, sources: _Optional[_Iterable[str]] = ..., organization: _Optional[str] = ...) -> None: ...
 
 class PredictReq(_message.Message):
-    __slots__ = ("type", "product", "period")
+    __slots__ = ("type", "product", "period", "organization")
     TYPE_FIELD_NUMBER: _ClassVar[int]
     PRODUCT_FIELD_NUMBER: _ClassVar[int]
     PERIOD_FIELD_NUMBER: _ClassVar[int]
+    ORGANIZATION_FIELD_NUMBER: _ClassVar[int]
     type: _prompter_pb2.QueryType
     product: str
     period: str
-    def __init__(
-        self,
-        type: _Optional[_Union[_prompter_pb2.QueryType, str]] = ...,
-        product: _Optional[str] = ...,
-        period: _Optional[str] = ...,
-    ) -> None: ...
+    organization: str
+    def __init__(self, type: _Optional[_Union[_prompter_pb2.QueryType, str]] = ..., product: _Optional[str] = ..., period: _Optional[str] = ..., organization: _Optional[str] = ...) -> None: ...
 
 class PredictResp(_message.Message):
     __slots__ = ("data",)
     DATA_FIELD_NUMBER: _ClassVar[int]
     data: bytes
     def __init__(self, data: _Optional[bytes] = ...) -> None: ...
+
+class UniqueCodesReq(_message.Message):
+    __slots__ = ("organization",)
+    ORGANIZATION_FIELD_NUMBER: _ClassVar[int]
+    organization: str
+    def __init__(self, organization: _Optional[str] = ...) -> None: ...
 
 class UniqueCodesResp(_message.Message):
     __slots__ = ("codes",)

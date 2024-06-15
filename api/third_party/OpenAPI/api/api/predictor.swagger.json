@@ -137,6 +137,14 @@
             }
           }
         },
+        "parameters": [
+          {
+            "name": "organization",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
         "tags": [
           "predictor"
         ],
@@ -154,7 +162,8 @@
       "example": {
         "type": "1",
         "product": "product1",
-        "period": "9"
+        "period": "9",
+        "organization": "organization1"
       },
       "properties": {
         "type": {
@@ -165,12 +174,18 @@
         },
         "period": {
           "type": "string"
+        },
+        "organization": {
+          "type": "string"
         }
       },
       "description": "Запрос на получение предикта по фильтрам: тип запроса, продукт, период",
       "title": "Запрос на получение предикта",
       "required": [
-        "sources"
+        "type",
+        "product",
+        "period",
+        "organization"
       ]
     },
     "apiPredictResp": {
@@ -184,7 +199,7 @@
       "description": "Предикт, содержащий данные в формате json в бинарном представлении",
       "title": "Предикт",
       "required": [
-        "sources"
+        "data"
       ]
     },
     "apiPrepareDataReq": {
@@ -193,7 +208,8 @@
         "source": [
           "file1.csv",
           "file2.xlsx"
-        ]
+        ],
+        "organization": "organization1"
       },
       "properties": {
         "sources": {
@@ -201,12 +217,16 @@
           "items": {
             "type": "string"
           }
+        },
+        "organization": {
+          "type": "string"
         }
       },
       "description": "Запрос на подготовку и парсинг данных по .csv/.xlsx файлам. Названия файлов должны совпадать с импортированными в систему",
       "title": "Запрос на подготовку данных",
       "required": [
-        "sources"
+        "sources",
+        "organization"
       ]
     },
     "apiQueryType": {

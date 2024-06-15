@@ -4,7 +4,6 @@ package api;
 
 import "google/api/annotations.proto";
 import "protoc-gen-openapiv2/options/annotations.proto";
-import "google/protobuf/empty.proto";
 
 option go_package="internal/api/pb";
 
@@ -30,7 +29,7 @@ option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
 };
 
 service Stock {
-  rpc ListProducts(google.protobuf.Empty) returns (ListProductsResp) {
+  rpc ListProducts(ListProductsReq) returns (ListProductsResp) {
     option (google.api.http) = {
       get: "/api/v1/stock/list_products"
     };
@@ -56,6 +55,10 @@ service Stock {
       }
     };
   }
+}
+
+message ListProductsReq {
+  string organization = 1;
 }
 
 message ListProductsResp {

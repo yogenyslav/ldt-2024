@@ -77,7 +77,7 @@ service Predictor {
       }
     };
   };
-  rpc UniqueCodes(google.protobuf.Empty) returns (UniqueCodesResp) {
+  rpc UniqueCodes(UniqueCodesReq) returns (UniqueCodesResp) {
     option (google.api.http) = {
       get: "/api/v1/predictor/unique_codes"
     };
@@ -110,11 +110,12 @@ message PrepareDataReq {
     json_schema: {
       title: "Запрос на подготовку данных"
       description: "Запрос на подготовку и парсинг данных по .csv/.xlsx файлам. Названия файлов должны совпадать с импортированными в систему"
-      required: ["sources"]
+      required: ["sources", "organization"]
     }
-    example: "{\"source\": [\"file1.csv\", \"file2.xlsx\"]}"
+    example: "{\"source\": [\"file1.csv\", \"file2.xlsx\"], \"organization\": \"organization1\"}"
   };
   repeated string sources = 1;
+  string organization = 2;
 }
 
 message PredictReq {
@@ -122,13 +123,14 @@ message PredictReq {
     json_schema: {
       title: "Запрос на получение предикта"
       description: "Запрос на получение предикта по фильтрам: тип запроса, продукт, период"
-      required: ["sources"]
+      required: ["type", "product", "period", "organization"]
     }
-    example: "{\"type\": \"1\", \"product\": \"product1\", \"period\": \"9\"}"
+    example: "{\"type\": \"1\", \"product\": \"product1\", \"period\": \"9\", \"organization\": \"organization1\"}"
   };
   QueryType type = 1;
   string product = 2;
   string period = 3;
+  string organization = 4;
 }
 
 message PredictResp {
@@ -136,10 +138,14 @@ message PredictResp {
     json_schema: {
       title: "Предикт"
       description: "Предикт, содержащий данные в формате json в бинарном представлении"
-      required: ["sources"]
+      required: ["data"]
     }
   };
   bytes data = 1;
+}
+
+message UniqueCodesReq {
+  string organization = 1;
 }
 
 message UniqueCodesResp {
