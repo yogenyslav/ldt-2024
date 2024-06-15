@@ -8,6 +8,8 @@ import (
 var (
 	// ErrParseBody ошибка парсинга тела запроса.
 	ErrParseBody = errors.New("failed to parse body")
+	// ErrParseFormFile ошибка парсинга файла.
+	ErrParseFormFile = errors.New("failed to parse form file")
 )
 
 // 401

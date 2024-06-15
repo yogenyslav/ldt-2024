@@ -13,7 +13,6 @@ type favoriteRepo interface {
 	FindOne(ctx context.Context, queryID int64) (model.FavoriteDao, error)
 	UpdateOne(ctx context.Context, queryID int64, username string, response []byte) error
 	DeleteOne(ctx context.Context, queryID int64, username string) error
-	RestoreOne(ctx context.Context, params model.FavoriteDao) error
 }
 
 // Controller контроллер избранных предиктов.

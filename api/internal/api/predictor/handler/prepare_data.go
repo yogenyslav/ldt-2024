@@ -5,6 +5,7 @@ import (
 
 	"github.com/rs/zerolog/log"
 	"github.com/yogenyslav/ldt-2024/api/internal/api/pb"
+	"github.com/yogenyslav/ldt-2024/api/internal/shared"
 	"github.com/yogenyslav/ldt-2024/api/pkg"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
@@ -31,6 +32,13 @@ func (h *Handler) PrepareData(c context.Context, in *pb.PrepareDataReq) (*emptyp
 		trace.WithAttributes(attribute.StringSlice("product", in.GetSources())),
 	)
 	defer span.End()
+
+	organization, ok := ctx.Value(shared.OrganizationKey).(string)
+	if !ok {
+		log.Error().Msg("failed to get organization")
+		return nil, status.Error(codes.Internal, "failed to get organization")
+	}
+	in.Organization = organization
 
 	resp, err := h.predictor.PrepareData(ctx, in)
 	if err != nil {

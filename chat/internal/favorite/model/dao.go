@@ -9,7 +9,7 @@ import (
 
 // FavoriteDao представление избранных предиктов в базе данных.
 type FavoriteDao struct {
-	QueryID   int64
+	ID        int64
 	Username  string
 	Response  []byte
 	IsDeleted bool
@@ -23,14 +23,14 @@ func (f *FavoriteDao) ToDto() FavoriteDto {
 	if err := json.Unmarshal(f.Response, &resp); err != nil {
 		log.Error().Err(err).Msg("failed to marshal response")
 		return FavoriteDto{
-			QueryID:   f.QueryID,
+			ID:        f.ID,
 			Response:  nil,
 			CreatedAt: f.CreatedAt,
 			UpdatedAt: f.UpdatedAt,
 		}
 	}
 	return FavoriteDto{
-		QueryID:   f.QueryID,
+		ID:        f.ID,
 		Response:  resp,
 		CreatedAt: f.CreatedAt,
 		UpdatedAt: f.UpdatedAt,

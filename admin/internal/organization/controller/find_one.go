@@ -27,7 +27,7 @@ func (ctrl *Controller) FindOne(ctx context.Context, username string) (model.Org
 			return model.OrganizationDto{}, shared.ErrNoOrganization
 		}
 		log.Error().Err(err).Msg("failed to get organization")
-		return model.OrganizationDto{}, err
+		return model.OrganizationDto{}, shared.ErrGetOrganization
 	}
 
 	return org.ToDto(), nil

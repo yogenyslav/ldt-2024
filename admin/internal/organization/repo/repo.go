@@ -24,11 +24,28 @@ const insertOne = `
 	returning id;
 `
 
+const addToOrganization = `
+	insert into adm.user_organization (username, organization)
+	values ($1, $2);
+`
+
 // InsertOne вставляет новую организацию.
 func (r *Repo) InsertOne(ctx context.Context, params model.OrganizationDao) (int64, error) {
 	var id int64
-	err := r.pg.Query(ctx, &id, insertOne, params.Username, params.Title, params.S3Bucket)
-	return id, err
+	tx, err := r.pg.BeginSerializable(ctx)
+	if err != nil {
+		return id, err
+	}
+	defer r.pg.RollbackTx(tx)
+
+	if err := r.pg.Query(tx, &id, insertOne, params.Username, params.Title, params.S3Bucket); err != nil {
+		return id, err
+	}
+
+	if _, err := r.pg.Exec(tx, addToOrganization, params.Username, params.Title); err != nil {
+		return id, err
+	}
+	return id, r.pg.CommitTx(tx)
 }
 
 const findOne = `

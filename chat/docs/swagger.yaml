@@ -2,8 +2,6 @@ basePath: /chat
 definitions:
   model.FavoriteCreateReq:
     properties:
-      id:
-        type: integer
       response:
         additionalProperties: {}
         type: object
@@ -234,9 +232,9 @@ paths:
     delete:
       consumes:
       - application/json
-      description: Удаляет избранный предикт по QueryID.
+      description: Удаляет избранный предикт по ID.
       parameters:
-      - description: QueryID предикта
+      - description: ID предикта
         in: path
         name: id
         required: true
@@ -256,15 +254,15 @@ paths:
           description: Предикт не найден
           schema:
             type: string
-      summary: Удаляет избранный предикт по QueryID.
+      summary: Удаляет избранный предикт по ID.
       tags:
       - favorite
     get:
       consumes:
       - application/json
-      description: Возвращает избранный предикт по QueryID.
+      description: Возвращает избранный предикт по ID.
       parameters:
-      - description: QueryID предикта
+      - description: ID предикта
         in: path
         name: id
         required: true
@@ -284,7 +282,7 @@ paths:
           description: Предикт не найден
           schema:
             type: string
-      summary: Возвращает избранный предикт по QueryID.
+      summary: Возвращает избранный предикт по ID.
       tags:
       - favorite
   /favorite/list:

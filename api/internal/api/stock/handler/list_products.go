@@ -8,11 +8,10 @@ import (
 	"github.com/yogenyslav/ldt-2024/api/pkg"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 // ListProducts хендлер для получения списка всех продуктов.
-func (h *Handler) ListProducts(c context.Context, _ *emptypb.Empty) (*pb.ListProductsResp, error) {
+func (h *Handler) ListProducts(c context.Context, in *pb.ListProductsReq) (*pb.ListProductsResp, error) {
 	ctx, err := pkg.GetTraceCtx(c)
 	if err != nil {
 		log.Error().Err(err).Msg("failed to get trace context")

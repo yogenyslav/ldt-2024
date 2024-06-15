@@ -177,7 +177,7 @@ const docTemplate = `{
         },
         "/favorite/{id}": {
             "get": {
-                "description": "Возвращает избранный предикт по QueryID.",
+                "description": "Возвращает избранный предикт по ID.",
                 "consumes": [
                     "application/json"
                 ],
@@ -187,11 +187,11 @@ const docTemplate = `{
                 "tags": [
                     "favorite"
                 ],
-                "summary": "Возвращает избранный предикт по QueryID.",
+                "summary": "Возвращает избранный предикт по ID.",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "QueryID предикта",
+                        "description": "ID предикта",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -219,7 +219,7 @@ const docTemplate = `{
                 }
             },
             "delete": {
-                "description": "Удаляет избранный предикт по QueryID.",
+                "description": "Удаляет избранный предикт по ID.",
                 "consumes": [
                     "application/json"
                 ],
@@ -229,11 +229,11 @@ const docTemplate = `{
                 "tags": [
                     "favorite"
                 ],
-                "summary": "Удаляет избранный предикт по QueryID.",
+                "summary": "Удаляет избранный предикт по ID.",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "QueryID предикта",
+                        "description": "ID предикта",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -483,9 +483,6 @@ const docTemplate = `{
         "model.FavoriteCreateReq": {
             "type": "object",
             "properties": {
-                "id": {
-                    "type": "integer"
-                },
                 "response": {
                     "type": "object",
                     "additionalProperties": {}

@@ -2,7 +2,6 @@ package controller
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/rs/zerolog/log"
 	"github.com/yogenyslav/ldt-2024/admin/internal/organization/model"
@@ -26,7 +25,7 @@ func (ctrl *Controller) InsertOne(ctx context.Context, params model.Organization
 
 	var resp model.OrganizationCreateResp
 
-	s3Bucket := fmt.Sprintf("organization-%s", params.Title)
+	s3Bucket := getOrganizationTitle(params.Title)
 	err := ctrl.s3.CreateBucket(ctx, &minios3.Bucket{
 		Name:   s3Bucket,
 		Region: "eu-central-1",

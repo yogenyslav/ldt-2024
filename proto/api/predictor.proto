@@ -105,6 +105,11 @@ service Predictor {
   }
 }
 
+message Source {
+  string name = 1;
+  string path = 2;
+}
+
 message PrepareDataReq {
   option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_schema) = {
     json_schema: {
@@ -112,9 +117,9 @@ message PrepareDataReq {
       description: "Запрос на подготовку и парсинг данных по .csv/.xlsx файлам. Названия файлов должны совпадать с импортированными в систему"
       required: ["sources", "organization"]
     }
-    example: "{\"source\": [\"file1.csv\", \"file2.xlsx\"], \"organization\": \"organization1\"}"
+    example: "{\"sources\": [\"file1.csv\", \"file2.xlsx\"], \"organization\": \"organization1\"}"
   };
-  repeated string sources = 1;
+  repeated Source sources = 1;
   string organization = 2;
 }
 

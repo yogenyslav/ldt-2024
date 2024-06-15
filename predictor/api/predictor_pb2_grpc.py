@@ -41,11 +41,10 @@ class PredictorStub(object):
             channel: A grpc.Channel.
         """
         self.PrepareData = channel.unary_unary(
-            "/api.Predictor/PrepareData",
-            request_serializer=api_dot_predictor__pb2.PrepareDataReq.SerializeToString,
-            response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
-            _registered_method=True,
-        )
+                '/api.Predictor/PrepareData',
+                request_serializer=api_dot_predictor__pb2.PrepareDataReq.SerializeToString,
+                response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+                _registered_method=True)
         self.Predict = channel.unary_unary(
                 '/api.Predictor/Predict',
                 request_serializer=api_dot_predictor__pb2.PredictReq.SerializeToString,

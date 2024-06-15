@@ -3,7 +3,9 @@ package controller
 import (
 	"context"
 
+	"github.com/rs/zerolog/log"
 	"github.com/yogenyslav/ldt-2024/admin/internal/organization/model"
+	"github.com/yogenyslav/ldt-2024/admin/internal/shared"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
 )
@@ -20,9 +22,13 @@ func (ctrl *Controller) UpdateOne(ctx context.Context, params model.Organization
 	)
 	defer span.End()
 
-	return ctrl.repo.UpdateOne(ctx, model.OrganizationDao{
+	if err := ctrl.repo.UpdateOne(ctx, model.OrganizationDao{
 		ID:       params.ID,
 		Username: username,
 		Title:    params.Title,
-	})
+	}); err != nil {
+		log.Error().Err(err).Msg("failed to update organization")
+		return shared.ErrUpdateOrganization
+	}
+	return nil
 }

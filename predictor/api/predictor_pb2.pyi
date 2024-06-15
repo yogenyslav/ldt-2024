@@ -9,13 +9,21 @@ from typing import ClassVar as _ClassVar, Iterable as _Iterable, Mapping as _Map
 
 DESCRIPTOR: _descriptor.FileDescriptor
 
+class Source(_message.Message):
+    __slots__ = ("name", "path")
+    NAME_FIELD_NUMBER: _ClassVar[int]
+    PATH_FIELD_NUMBER: _ClassVar[int]
+    name: str
+    path: str
+    def __init__(self, name: _Optional[str] = ..., path: _Optional[str] = ...) -> None: ...
+
 class PrepareDataReq(_message.Message):
     __slots__ = ("sources", "organization")
     SOURCES_FIELD_NUMBER: _ClassVar[int]
     ORGANIZATION_FIELD_NUMBER: _ClassVar[int]
-    sources: _containers.RepeatedScalarFieldContainer[str]
+    sources: _containers.RepeatedCompositeFieldContainer[Source]
     organization: str
-    def __init__(self, sources: _Optional[_Iterable[str]] = ..., organization: _Optional[str] = ...) -> None: ...
+    def __init__(self, sources: _Optional[_Iterable[_Union[Source, _Mapping]]] = ..., organization: _Optional[str] = ...) -> None: ...
 
 class PredictReq(_message.Message):
     __slots__ = ("type", "product", "period", "organization")
@@ -55,9 +63,4 @@ class UniqueCode(_message.Message):
     segment: str
     name: str
     regular: bool
-    def __init__(
-        self,
-        segment: _Optional[str] = ...,
-        name: _Optional[str] = ...,
-        regular: bool = ...,
-    ) -> None: ...
+    def __init__(self, segment: _Optional[str] = ..., name: _Optional[str] = ..., regular: bool = ...) -> None: ...

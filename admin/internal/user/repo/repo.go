@@ -54,3 +54,16 @@ func (r *Repo) DeleteOrganization(ctx context.Context, username string) error {
 	_, err := r.pg.Exec(ctx, deleteOne, username)
 	return err
 }
+
+const findOrganization = `
+	select organization
+	from adm.user_organization
+	where username = $1;
+`
+
+// FindOrganization находит организацию по username.
+func (r *Repo) FindOrganization(ctx context.Context, username string) (string, error) {
+	var organization string
+	err := r.pg.Query(ctx, &organization, findOrganization, username)
+	return organization, err
+}

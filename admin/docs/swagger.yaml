@@ -209,6 +209,36 @@ paths:
       summary: Обновить организацию
       tags:
       - organization
+  /organization/import:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Загрузить данные в архиве
+      parameters:
+      - description: access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Архив с данными
+        in: formData
+        name: data
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Данные успешно загружены
+          schema:
+            type: string
+        "400":
+          description: Ошибка при обработке файлов
+          schema:
+            type: string
+      summary: Загрузить данные
+      tags:
+      - organization
   /user:
     post:
       consumes:

@@ -23,19 +23,74 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type Source struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Path string `protobuf:"bytes,2,opt,name=path,proto3" json:"path,omitempty"`
+}
+
+func (x *Source) Reset() {
+	*x = Source{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_api_predictor_proto_msgTypes[0]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *Source) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Source) ProtoMessage() {}
+
+func (x *Source) ProtoReflect() protoreflect.Message {
+	mi := &file_api_predictor_proto_msgTypes[0]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Source.ProtoReflect.Descriptor instead.
+func (*Source) Descriptor() ([]byte, []int) {
+	return file_api_predictor_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *Source) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *Source) GetPath() string {
+	if x != nil {
+		return x.Path
+	}
+	return ""
+}
+
 type PrepareDataReq struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Sources      []string `protobuf:"bytes,1,rep,name=sources,proto3" json:"sources,omitempty"`
-	Organization string   `protobuf:"bytes,2,opt,name=organization,proto3" json:"organization,omitempty"`
+	Sources      []*Source `protobuf:"bytes,1,rep,name=sources,proto3" json:"sources,omitempty"`
+	Organization string    `protobuf:"bytes,2,opt,name=organization,proto3" json:"organization,omitempty"`
 }
 
 func (x *PrepareDataReq) Reset() {
 	*x = PrepareDataReq{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_api_predictor_proto_msgTypes[0]
+		mi := &file_api_predictor_proto_msgTypes[1]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -48,7 +103,7 @@ func (x *PrepareDataReq) String() string {
 func (*PrepareDataReq) ProtoMessage() {}
 
 func (x *PrepareDataReq) ProtoReflect() protoreflect.Message {
-	mi := &file_api_predictor_proto_msgTypes[0]
+	mi := &file_api_predictor_proto_msgTypes[1]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -61,10 +116,10 @@ func (x *PrepareDataReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PrepareDataReq.ProtoReflect.Descriptor instead.
 func (*PrepareDataReq) Descriptor() ([]byte, []int) {
-	return file_api_predictor_proto_rawDescGZIP(), []int{0}
+	return file_api_predictor_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *PrepareDataReq) GetSources() []string {
+func (x *PrepareDataReq) GetSources() []*Source {
 	if x != nil {
 		return x.Sources
 	}
@@ -92,7 +147,7 @@ type PredictReq struct {
 func (x *PredictReq) Reset() {
 	*x = PredictReq{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_api_predictor_proto_msgTypes[1]
+		mi := &file_api_predictor_proto_msgTypes[2]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -105,7 +160,7 @@ func (x *PredictReq) String() string {
 func (*PredictReq) ProtoMessage() {}
 
 func (x *PredictReq) ProtoReflect() protoreflect.Message {
-	mi := &file_api_predictor_proto_msgTypes[1]
+	mi := &file_api_predictor_proto_msgTypes[2]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -118,7 +173,7 @@ func (x *PredictReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PredictReq.ProtoReflect.Descriptor instead.
 func (*PredictReq) Descriptor() ([]byte, []int) {
-	return file_api_predictor_proto_rawDescGZIP(), []int{1}
+	return file_api_predictor_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *PredictReq) GetType() QueryType {
@@ -160,7 +215,7 @@ type PredictResp struct {
 func (x *PredictResp) Reset() {
 	*x = PredictResp{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_api_predictor_proto_msgTypes[2]
+		mi := &file_api_predictor_proto_msgTypes[3]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -173,7 +228,7 @@ func (x *PredictResp) String() string {
 func (*PredictResp) ProtoMessage() {}
 
 func (x *PredictResp) ProtoReflect() protoreflect.Message {
-	mi := &file_api_predictor_proto_msgTypes[2]
+	mi := &file_api_predictor_proto_msgTypes[3]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -186,7 +241,7 @@ func (x *PredictResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PredictResp.ProtoReflect.Descriptor instead.
 func (*PredictResp) Descriptor() ([]byte, []int) {
-	return file_api_predictor_proto_rawDescGZIP(), []int{2}
+	return file_api_predictor_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *PredictResp) GetData() []byte {
@@ -207,7 +262,7 @@ type UniqueCodesReq struct {
 func (x *UniqueCodesReq) Reset() {
 	*x = UniqueCodesReq{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_api_predictor_proto_msgTypes[3]
+		mi := &file_api_predictor_proto_msgTypes[4]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -220,7 +275,7 @@ func (x *UniqueCodesReq) String() string {
 func (*UniqueCodesReq) ProtoMessage() {}
 
 func (x *UniqueCodesReq) ProtoReflect() protoreflect.Message {
-	mi := &file_api_predictor_proto_msgTypes[3]
+	mi := &file_api_predictor_proto_msgTypes[4]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -233,7 +288,7 @@ func (x *UniqueCodesReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UniqueCodesReq.ProtoReflect.Descriptor instead.
 func (*UniqueCodesReq) Descriptor() ([]byte, []int) {
-	return file_api_predictor_proto_rawDescGZIP(), []int{3}
+	return file_api_predictor_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *UniqueCodesReq) GetOrganization() string {
@@ -254,7 +309,7 @@ type UniqueCodesResp struct {
 func (x *UniqueCodesResp) Reset() {
 	*x = UniqueCodesResp{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_api_predictor_proto_msgTypes[4]
+		mi := &file_api_predictor_proto_msgTypes[5]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -267,7 +322,7 @@ func (x *UniqueCodesResp) String() string {
 func (*UniqueCodesResp) ProtoMessage() {}
 
 func (x *UniqueCodesResp) ProtoReflect() protoreflect.Message {
-	mi := &file_api_predictor_proto_msgTypes[4]
+	mi := &file_api_predictor_proto_msgTypes[5]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -280,7 +335,7 @@ func (x *UniqueCodesResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UniqueCodesResp.ProtoReflect.Descriptor instead.
 func (*UniqueCodesResp) Descriptor() ([]byte, []int) {
-	return file_api_predictor_proto_rawDescGZIP(), []int{4}
+	return file_api_predictor_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *UniqueCodesResp) GetCodes() []*UniqueCode {
@@ -303,7 +358,7 @@ type UniqueCode struct {
 func (x *UniqueCode) Reset() {
 	*x = UniqueCode{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_api_predictor_proto_msgTypes[5]
+		mi := &file_api_predictor_proto_msgTypes[6]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -316,7 +371,7 @@ func (x *UniqueCode) String() string {
 func (*UniqueCode) ProtoMessage() {}
 
 func (x *UniqueCode) ProtoReflect() protoreflect.Message {
-	mi := &file_api_predictor_proto_msgTypes[5]
+	mi := &file_api_predictor_proto_msgTypes[6]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -329,7 +384,7 @@ func (x *UniqueCode) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UniqueCode.ProtoReflect.Descriptor instead.
 func (*UniqueCode) Descriptor() ([]byte, []int) {
-	return file_api_predictor_proto_rawDescGZIP(), []int{5}
+	return file_api_predictor_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *UniqueCode) GetSegment() string {
@@ -365,32 +420,36 @@ var file_api_predictor_proto_rawDesc = []byte{
 	0x6e, 0x2d, 0x6f, 0x70, 0x65, 0x6e, 0x61, 0x70, 0x69, 0x76, 0x32, 0x2f, 0x6f, 0x70, 0x74, 0x69,
 	0x6f, 0x6e, 0x73, 0x2f, 0x61, 0x6e, 0x6e, 0x6f, 0x74, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x2e,
 	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x1a, 0x12, 0x61, 0x70, 0x69, 0x2f, 0x70, 0x72, 0x6f, 0x6d, 0x70,
-	0x74, 0x65, 0x72, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x22, 0xca, 0x03, 0x0a, 0x0e, 0x50, 0x72,
-	0x65, 0x70, 0x61, 0x72, 0x65, 0x44, 0x61, 0x74, 0x61, 0x52, 0x65, 0x71, 0x12, 0x18, 0x0a, 0x07,
-	0x73, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x09, 0x52, 0x07, 0x73,
-	0x6f, 0x75, 0x72, 0x63, 0x65, 0x73, 0x12, 0x22, 0x0a, 0x0c, 0x6f, 0x72, 0x67, 0x61, 0x6e, 0x69,
-	0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0c, 0x6f, 0x72,
-	0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x3a, 0xf9, 0x02, 0x92, 0x41, 0xf5,
-	0x02, 0x0a, 0xa8, 0x02, 0x2a, 0x33, 0xd0, 0x97, 0xd0, 0xb0, 0xd0, 0xbf, 0xd1, 0x80, 0xd0, 0xbe,
-	0xd1, 0x81, 0x20, 0xd0, 0xbd, 0xd0, 0xb0, 0x20, 0xd0, 0xbf, 0xd0, 0xbe, 0xd0, 0xb4, 0xd0, 0xb3,
-	0xd0, 0xbe, 0xd1, 0x82, 0xd0, 0xbe, 0xd0, 0xb2, 0xd0, 0xba, 0xd1, 0x83, 0x20, 0xd0, 0xb4, 0xd0,
-	0xb0, 0xd0, 0xbd, 0xd0, 0xbd, 0xd1, 0x8b, 0xd1, 0x85, 0x32, 0xd7, 0x01, 0xd0, 0x97, 0xd0, 0xb0,
-	0xd0, 0xbf, 0xd1, 0x80, 0xd0, 0xbe, 0xd1, 0x81, 0x20, 0xd0, 0xbd, 0xd0, 0xb0, 0x20, 0xd0, 0xbf,
-	0xd0, 0xbe, 0xd0, 0xb4, 0xd0, 0xb3, 0xd0, 0xbe, 0xd1, 0x82, 0xd0, 0xbe, 0xd0, 0xb2, 0xd0, 0xba,
-	0xd1, 0x83, 0x20, 0xd0, 0xb8, 0x20, 0xd0, 0xbf, 0xd0, 0xb0, 0xd1, 0x80, 0xd1, 0x81, 0xd0, 0xb8,
-	0xd0, 0xbd, 0xd0, 0xb3, 0x20, 0xd0, 0xb4, 0xd0, 0xb0, 0xd0, 0xbd, 0xd0, 0xbd, 0xd1, 0x8b, 0xd1,
-	0x85, 0x20, 0xd0, 0xbf, 0xd0, 0xbe, 0x20, 0x2e, 0x63, 0x73, 0x76, 0x2f, 0x2e, 0x78, 0x6c, 0x73,
-	0x78, 0x20, 0xd1, 0x84, 0xd0, 0xb0, 0xd0, 0xb9, 0xd0, 0xbb, 0xd0, 0xb0, 0xd0, 0xbc, 0x2e, 0x20,
-	0xd0, 0x9d, 0xd0, 0xb0, 0xd0, 0xb7, 0xd0, 0xb2, 0xd0, 0xb0, 0xd0, 0xbd, 0xd0, 0xb8, 0xd1, 0x8f,
-	0x20, 0xd1, 0x84, 0xd0, 0xb0, 0xd0, 0xb9, 0xd0, 0xbb, 0xd0, 0xbe, 0xd0, 0xb2, 0x20, 0xd0, 0xb4,
-	0xd0, 0xbe, 0xd0, 0xbb, 0xd0, 0xb6, 0xd0, 0xbd, 0xd1, 0x8b, 0x20, 0xd1, 0x81, 0xd0, 0xbe, 0xd0,
-	0xb2, 0xd0, 0xbf, 0xd0, 0xb0, 0xd0, 0xb4, 0xd0, 0xb0, 0xd1, 0x82, 0xd1, 0x8c, 0x20, 0xd1, 0x81,
-	0x20, 0xd0, 0xb8, 0xd0, 0xbc, 0xd0, 0xbf, 0xd0, 0xbe, 0xd1, 0x80, 0xd1, 0x82, 0xd0, 0xb8, 0xd1,
-	0x80, 0xd0, 0xbe, 0xd0, 0xb2, 0xd0, 0xb0, 0xd0, 0xbd, 0xd0, 0xbd, 0xd1, 0x8b, 0xd0, 0xbc, 0xd0,
-	0xb8, 0x20, 0xd0, 0xb2, 0x20, 0xd1, 0x81, 0xd0, 0xb8, 0xd1, 0x81, 0xd1, 0x82, 0xd0, 0xb5, 0xd0,
-	0xbc, 0xd1, 0x83, 0xd2, 0x01, 0x07, 0x73, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x73, 0xd2, 0x01, 0x0c,
-	0x6f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x32, 0x48, 0x7b, 0x22,
-	0x73, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x22, 0x3a, 0x20, 0x5b, 0x22, 0x66, 0x69, 0x6c, 0x65, 0x31,
+	0x74, 0x65, 0x72, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x22, 0x30, 0x0a, 0x06, 0x53, 0x6f, 0x75,
+	0x72, 0x63, 0x65, 0x12, 0x12, 0x0a, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28,
+	0x09, 0x52, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x12, 0x12, 0x0a, 0x04, 0x70, 0x61, 0x74, 0x68, 0x18,
+	0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x70, 0x61, 0x74, 0x68, 0x22, 0xd8, 0x03, 0x0a, 0x0e,
+	0x50, 0x72, 0x65, 0x70, 0x61, 0x72, 0x65, 0x44, 0x61, 0x74, 0x61, 0x52, 0x65, 0x71, 0x12, 0x25,
+	0x0a, 0x07, 0x73, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32,
+	0x0b, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x53, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x52, 0x07, 0x73, 0x6f,
+	0x75, 0x72, 0x63, 0x65, 0x73, 0x12, 0x22, 0x0a, 0x0c, 0x6f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a,
+	0x61, 0x74, 0x69, 0x6f, 0x6e, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0c, 0x6f, 0x72, 0x67,
+	0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x3a, 0xfa, 0x02, 0x92, 0x41, 0xf6, 0x02,
+	0x0a, 0xa8, 0x02, 0x2a, 0x33, 0xd0, 0x97, 0xd0, 0xb0, 0xd0, 0xbf, 0xd1, 0x80, 0xd0, 0xbe, 0xd1,
+	0x81, 0x20, 0xd0, 0xbd, 0xd0, 0xb0, 0x20, 0xd0, 0xbf, 0xd0, 0xbe, 0xd0, 0xb4, 0xd0, 0xb3, 0xd0,
+	0xbe, 0xd1, 0x82, 0xd0, 0xbe, 0xd0, 0xb2, 0xd0, 0xba, 0xd1, 0x83, 0x20, 0xd0, 0xb4, 0xd0, 0xb0,
+	0xd0, 0xbd, 0xd0, 0xbd, 0xd1, 0x8b, 0xd1, 0x85, 0x32, 0xd7, 0x01, 0xd0, 0x97, 0xd0, 0xb0, 0xd0,
+	0xbf, 0xd1, 0x80, 0xd0, 0xbe, 0xd1, 0x81, 0x20, 0xd0, 0xbd, 0xd0, 0xb0, 0x20, 0xd0, 0xbf, 0xd0,
+	0xbe, 0xd0, 0xb4, 0xd0, 0xb3, 0xd0, 0xbe, 0xd1, 0x82, 0xd0, 0xbe, 0xd0, 0xb2, 0xd0, 0xba, 0xd1,
+	0x83, 0x20, 0xd0, 0xb8, 0x20, 0xd0, 0xbf, 0xd0, 0xb0, 0xd1, 0x80, 0xd1, 0x81, 0xd0, 0xb8, 0xd0,
+	0xbd, 0xd0, 0xb3, 0x20, 0xd0, 0xb4, 0xd0, 0xb0, 0xd0, 0xbd, 0xd0, 0xbd, 0xd1, 0x8b, 0xd1, 0x85,
+	0x20, 0xd0, 0xbf, 0xd0, 0xbe, 0x20, 0x2e, 0x63, 0x73, 0x76, 0x2f, 0x2e, 0x78, 0x6c, 0x73, 0x78,
+	0x20, 0xd1, 0x84, 0xd0, 0xb0, 0xd0, 0xb9, 0xd0, 0xbb, 0xd0, 0xb0, 0xd0, 0xbc, 0x2e, 0x20, 0xd0,
+	0x9d, 0xd0, 0xb0, 0xd0, 0xb7, 0xd0, 0xb2, 0xd0, 0xb0, 0xd0, 0xbd, 0xd0, 0xb8, 0xd1, 0x8f, 0x20,
+	0xd1, 0x84, 0xd0, 0xb0, 0xd0, 0xb9, 0xd0, 0xbb, 0xd0, 0xbe, 0xd0, 0xb2, 0x20, 0xd0, 0xb4, 0xd0,
+	0xbe, 0xd0, 0xbb, 0xd0, 0xb6, 0xd0, 0xbd, 0xd1, 0x8b, 0x20, 0xd1, 0x81, 0xd0, 0xbe, 0xd0, 0xb2,
+	0xd0, 0xbf, 0xd0, 0xb0, 0xd0, 0xb4, 0xd0, 0xb0, 0xd1, 0x82, 0xd1, 0x8c, 0x20, 0xd1, 0x81, 0x20,
+	0xd0, 0xb8, 0xd0, 0xbc, 0xd0, 0xbf, 0xd0, 0xbe, 0xd1, 0x80, 0xd1, 0x82, 0xd0, 0xb8, 0xd1, 0x80,
+	0xd0, 0xbe, 0xd0, 0xb2, 0xd0, 0xb0, 0xd0, 0xbd, 0xd0, 0xbd, 0xd1, 0x8b, 0xd0, 0xbc, 0xd0, 0xb8,
+	0x20, 0xd0, 0xb2, 0x20, 0xd1, 0x81, 0xd0, 0xb8, 0xd1, 0x81, 0xd1, 0x82, 0xd0, 0xb5, 0xd0, 0xbc,
+	0xd1, 0x83, 0xd2, 0x01, 0x07, 0x73, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x73, 0xd2, 0x01, 0x0c, 0x6f,
+	0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x32, 0x49, 0x7b, 0x22, 0x73,
+	0x6f, 0x75, 0x72, 0x63, 0x65, 0x73, 0x22, 0x3a, 0x20, 0x5b, 0x22, 0x66, 0x69, 0x6c, 0x65, 0x31,
 	0x2e, 0x63, 0x73, 0x76, 0x22, 0x2c, 0x20, 0x22, 0x66, 0x69, 0x6c, 0x65, 0x32, 0x2e, 0x78, 0x6c,
 	0x73, 0x78, 0x22, 0x5d, 0x2c, 0x20, 0x22, 0x6f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74,
 	0x69, 0x6f, 0x6e, 0x22, 0x3a, 0x20, 0x22, 0x6f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74,
@@ -580,31 +639,33 @@ func file_api_predictor_proto_rawDescGZIP() []byte {
 	return file_api_predictor_proto_rawDescData
 }
 
-var file_api_predictor_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
+var file_api_predictor_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_api_predictor_proto_goTypes = []interface{}{
-	(*PrepareDataReq)(nil),  // 0: api.PrepareDataReq
-	(*PredictReq)(nil),      // 1: api.PredictReq
-	(*PredictResp)(nil),     // 2: api.PredictResp
-	(*UniqueCodesReq)(nil),  // 3: api.UniqueCodesReq
-	(*UniqueCodesResp)(nil), // 4: api.UniqueCodesResp
-	(*UniqueCode)(nil),      // 5: api.UniqueCode
-	(QueryType)(0),          // 6: api.QueryType
-	(*emptypb.Empty)(nil),   // 7: google.protobuf.Empty
+	(*Source)(nil),          // 0: api.Source
+	(*PrepareDataReq)(nil),  // 1: api.PrepareDataReq
+	(*PredictReq)(nil),      // 2: api.PredictReq
+	(*PredictResp)(nil),     // 3: api.PredictResp
+	(*UniqueCodesReq)(nil),  // 4: api.UniqueCodesReq
+	(*UniqueCodesResp)(nil), // 5: api.UniqueCodesResp
+	(*UniqueCode)(nil),      // 6: api.UniqueCode
+	(QueryType)(0),          // 7: api.QueryType
+	(*emptypb.Empty)(nil),   // 8: google.protobuf.Empty
 }
 var file_api_predictor_proto_depIdxs = []int32{
-	6, // 0: api.PredictReq.type:type_name -> api.QueryType
-	5, // 1: api.UniqueCodesResp.codes:type_name -> api.UniqueCode
-	0, // 2: api.Predictor.PrepareData:input_type -> api.PrepareDataReq
-	1, // 3: api.Predictor.Predict:input_type -> api.PredictReq
-	3, // 4: api.Predictor.UniqueCodes:input_type -> api.UniqueCodesReq
-	7, // 5: api.Predictor.PrepareData:output_type -> google.protobuf.Empty
-	2, // 6: api.Predictor.Predict:output_type -> api.PredictResp
-	4, // 7: api.Predictor.UniqueCodes:output_type -> api.UniqueCodesResp
-	5, // [5:8] is the sub-list for method output_type
-	2, // [2:5] is the sub-list for method input_type
-	2, // [2:2] is the sub-list for extension type_name
-	2, // [2:2] is the sub-list for extension extendee
-	0, // [0:2] is the sub-list for field type_name
+	0, // 0: api.PrepareDataReq.sources:type_name -> api.Source
+	7, // 1: api.PredictReq.type:type_name -> api.QueryType
+	6, // 2: api.UniqueCodesResp.codes:type_name -> api.UniqueCode
+	1, // 3: api.Predictor.PrepareData:input_type -> api.PrepareDataReq
+	2, // 4: api.Predictor.Predict:input_type -> api.PredictReq
+	4, // 5: api.Predictor.UniqueCodes:input_type -> api.UniqueCodesReq
+	8, // 6: api.Predictor.PrepareData:output_type -> google.protobuf.Empty
+	3, // 7: api.Predictor.Predict:output_type -> api.PredictResp
+	5, // 8: api.Predictor.UniqueCodes:output_type -> api.UniqueCodesResp
+	6, // [6:9] is the sub-list for method output_type
+	3, // [3:6] is the sub-list for method input_type
+	3, // [3:3] is the sub-list for extension type_name
+	3, // [3:3] is the sub-list for extension extendee
+	0, // [0:3] is the sub-list for field type_name
 }
 
 func init() { file_api_predictor_proto_init() }
@@ -615,7 +676,7 @@ func file_api_predictor_proto_init() {
 	file_api_prompter_proto_init()
 	if !protoimpl.UnsafeEnabled {
 		file_api_predictor_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*PrepareDataReq); i {
+			switch v := v.(*Source); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -627,7 +688,7 @@ func file_api_predictor_proto_init() {
 			}
 		}
 		file_api_predictor_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*PredictReq); i {
+			switch v := v.(*PrepareDataReq); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -639,7 +700,7 @@ func file_api_predictor_proto_init() {
 			}
 		}
 		file_api_predictor_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*PredictResp); i {
+			switch v := v.(*PredictReq); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -651,7 +712,7 @@ func file_api_predictor_proto_init() {
 			}
 		}
 		file_api_predictor_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*UniqueCodesReq); i {
+			switch v := v.(*PredictResp); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -663,7 +724,7 @@ func file_api_predictor_proto_init() {
 			}
 		}
 		file_api_predictor_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*UniqueCodesResp); i {
+			switch v := v.(*UniqueCodesReq); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -675,6 +736,18 @@ func file_api_predictor_proto_init() {
 			}
 		}
 		file_api_predictor_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*UniqueCodesResp); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_api_predictor_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*UniqueCode); i {
 			case 0:
 				return &v.state
@@ -693,7 +766,7 @@ func file_api_predictor_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_api_predictor_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   6,
+			NumMessages:   7,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

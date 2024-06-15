@@ -8,12 +8,12 @@ import (
 )
 
 // DeleteOne godoc
-// @Summary Удаляет избранный предикт по QueryID.
-// @Description Удаляет избранный предикт по QueryID.
+// @Summary Удаляет избранный предикт по ID.
+// @Description Удаляет избранный предикт по ID.
 // @Tags favorite
 // @Accept json
 // @Produce json
-// @Param id path int true "QueryID предикта"
+// @Param id path int true "ID предикта"
 // @Success 204 {string} string "Предикт успешно удален"
 // @Failure 400 {string} string "Некорректный запрос"
 // @Failure 404 {string} string "Предикт не найден"

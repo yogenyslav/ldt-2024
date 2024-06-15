@@ -19,9 +19,5 @@ func (ctrl *Controller) UpdateOne(ctx context.Context, params model.FavoriteUpda
 		return err
 	}
 
-	if err := ctrl.repo.UpdateOne(ctx, params.QueryID, username, resp); err != nil {
-		return err
-	}
-
-	return nil
+	return ctrl.repo.UpdateOne(ctx, params.ID, username, resp)
 }

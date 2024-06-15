@@ -5,6 +5,8 @@ const (
 	UsernameKey = "username"
 	// TraceCtxKey ключ для локального хранилища контекста с trace.
 	TraceCtxKey = "trace"
+	// OrganizationKey ключ для локального хранилища организации.
+	OrganizationKey = "organization"
 )
 
 // UserRole роль пользователя.

@@ -205,7 +205,7 @@
     "apiPrepareDataReq": {
       "type": "object",
       "example": {
-        "source": [
+        "sources": [
           "file1.csv",
           "file2.xlsx"
         ],
@@ -215,7 +215,8 @@
         "sources": {
           "type": "array",
           "items": {
-            "type": "string"
+            "type": "object",
+            "$ref": "#/definitions/apiSource"
           }
         },
         "organization": {
@@ -237,6 +238,17 @@
         "STOCK"
       ],
       "default": "UNDEFINED"
+    },
+    "apiSource": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        }
+      }
     },
     "apiUniqueCode": {
       "type": "object",

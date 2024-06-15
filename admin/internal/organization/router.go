@@ -13,9 +13,9 @@ type organizationHandler interface {
 }
 
 // SetupOrganizationRoutes устанавливает маршруты для организаций.
-func SetupOrganizationRoutes(app *fiber.App, h organizationHandler, kc *gocloak.GoCloak, realm, cipher string) {
+func SetupOrganizationRoutes(app *fiber.App, h organizationHandler, kc *gocloak.GoCloak, realm, cipher string, repo authmw.UserOrganizationRepo) {
 	g := app.Group("/admin/organization")
-	g.Use(authmw.JWT(kc, realm, cipher))
+	g.Use(authmw.JWT(kc, realm, cipher, repo))
 
 	g.Post("/", h.InsertOne)
 	g.Get("/", h.FindOne)

@@ -8,12 +8,12 @@ import (
 )
 
 // FindOne godoc
-// @Summary Возвращает избранный предикт по QueryID.
-// @Description Возвращает избранный предикт по QueryID.
+// @Summary Возвращает избранный предикт по ID.
+// @Description Возвращает избранный предикт по ID.
 // @Tags favorite
 // @Accept json
 // @Produce json
-// @Param id path int true "QueryID предикта"
+// @Param id path int true "ID предикта"
 // @Success 200 {object} model.FavoriteDto "Избранный предикт"
 // @Failure 400 {string} string "Некорректный запрос"
 // @Failure 404 {string} string "Предикт не найден"

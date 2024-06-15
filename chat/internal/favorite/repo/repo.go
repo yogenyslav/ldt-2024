@@ -19,18 +19,18 @@ func New(pg storage.SQLDatabase) *Repo {
 }
 
 const insertOne = `
-	insert into chat.favorite_responses (query_id, username, response)
-	values ($1, $2, $3);
+	insert into chat.favorite_responses (username, response)
+	values ($1, $2);
 `
 
 // InsertOne добавляет новый предикт в избранное.
 func (r *Repo) InsertOne(ctx context.Context, params model.FavoriteDao) error {
-	_, err := r.pg.Exec(ctx, insertOne, params.QueryID, params.Username, params.Response)
+	_, err := r.pg.Exec(ctx, insertOne, params.Username, params.Response)
 	return err
 }
 
 const list = `
-	select query_id, response, created_at, updated_at
+	select id, response, created_at, updated_at
 	from chat.favorite_responses
 	where username = $1 and is_deleted = false;
 `
@@ -45,7 +45,7 @@ func (r *Repo) List(ctx context.Context, username string) ([]model.FavoriteDao, 
 const findOne = `
 	select response, created_at, updated_at
 	from chat.favorite_responses
-	where query_id = $1 and is_deleted = false;
+	where id = $1 and is_deleted = false;
 `
 
 // FindOne возвращает предикт из избранного.
@@ -58,7 +58,7 @@ func (r *Repo) FindOne(ctx context.Context, queryID int64) (model.FavoriteDao, e
 const updateOne = `
 	update chat.favorite_responses
 	set response = $3, updated_at = current_timestamp
-	where query_id = $1 and username = $2 and is_deleted = false;
+	where id = $1 and username = $2 and is_deleted = false;
 `
 
 // UpdateOne обновляет предикт в избранном.
@@ -76,7 +76,7 @@ func (r *Repo) UpdateOne(ctx context.Context, queryID int64, username string, re
 const deleteOne = `
 	update chat.favorite_responses
 	set is_deleted = true
-	where query_id = $1 and username = $2 and is_deleted = false;
+	where id = $1 and username = $2 and is_deleted = false;
 `
 
 // DeleteOne удаляет предикт из избранного.
@@ -84,24 +84,6 @@ func (r *Repo) DeleteOne(ctx context.Context, queryID int64, username string) er
 	tag, err := r.pg.Exec(ctx, deleteOne, queryID, username)
 	if err != nil {
 		return shared.ErrDeleteFavorite
-	}
-	if tag.RowsAffected() == 0 {
-		return shared.ErrNoFavoriteWithID
-	}
-	return nil
-}
-
-const restoreOne = `
-	update chat.favorite_responses
-	set is_deleted = false, response = $3
-	where query_id = $1 and username = $2 and is_deleted = true;
-`
-
-// RestoreOne восстанавливает предикт в избранное.
-func (r *Repo) RestoreOne(ctx context.Context, params model.FavoriteDao) error {
-	tag, err := r.pg.Exec(ctx, restoreOne, params.QueryID, params.Username, params.Response)
-	if err != nil {
-		return shared.ErrCreateSession
 	}
 	if tag.RowsAffected() == 0 {
 		return shared.ErrNoFavoriteWithID

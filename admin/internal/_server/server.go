@@ -33,6 +33,7 @@ import (
 	"github.com/yogenyslav/ldt-2024/admin/pkg/client"
 	"github.com/yogenyslav/pkg/infrastructure/prom"
 	"github.com/yogenyslav/pkg/infrastructure/tracing"
+	srvresp "github.com/yogenyslav/pkg/response"
 	"github.com/yogenyslav/pkg/storage"
 	"github.com/yogenyslav/pkg/storage/minios3"
 	"github.com/yogenyslav/pkg/storage/postgres"
@@ -55,7 +56,8 @@ type Server struct {
 // New создает новый Server.
 func New(cfg *config.Config) *Server {
 	app := fiber.New(fiber.Config{
-		BodyLimit: 1024 * 1024 * 1024,
+		BodyLimit:    1024 * 1024 * 1024,
+		ErrorHandler: srvresp.NewErrorHandler(errStatus).Handler,
 	})
 	app.Use(logger.New())
 	app.Use(cors.New(cors.Config{
@@ -113,15 +115,15 @@ func (s *Server) Run() {
 	authHandler := ah.New(authController)
 	auth.SetupAuthRoutes(s.app, authHandler)
 
-	organizationRepo := or.New(s.pg)
-	organizationController := oc.New(organizationRepo, s.s3, s.tracer)
-	organizationHandler := oh.New(organizationController, s.tracer)
-	organization.SetupOrganizationRoutes(s.app, organizationHandler, s.kc, s.cfg.KeyCloak.Realm, s.cfg.Server.CipherKey)
-
 	userRepo := ur.New(s.pg)
 	userController := uc.New(userRepo, s.kc, s.tracer)
 	userHandler := uh.New(userController, s.tracer)
 	user.SetupUserRoutes(s.app, userHandler, s.kc, s.cfg.KeyCloak.Realm, s.cfg.Server.CipherKey)
+
+	organizationRepo := or.New(s.pg)
+	organizationController := oc.New(organizationRepo, s.s3, pb.NewPredictorClient(apiClient.GetConn()), s.tracer)
+	organizationHandler := oh.New(organizationController, s.tracer)
+	organization.SetupOrganizationRoutes(s.app, organizationHandler, s.kc, s.cfg.KeyCloak.Realm, s.cfg.Server.CipherKey, userRepo)
 
 	go s.listen()
 	go prom.HandlePrometheus(s.cfg.Prom)
