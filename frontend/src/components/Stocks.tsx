@@ -70,19 +70,17 @@ const Stocks = ({ stocks }: Props) => {
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {stocks
-                        .sort((a, b) => a.quarter - b.quarter)
-                        .map((stock) => (
-                            <TableRow key={stock.quarter}>
-                                <TableCell className='font-medium'>{stock.name}</TableCell>
-                                <TableCell className='text-right'>{stock.price}</TableCell>
-                                <TableCell className='text-right'>{stock.amount}</TableCell>
-                                <TableCell className='text-right'>{stock.year}</TableCell>
-                                <TableCell className='text-right'>
-                                    {mapQuarterToLabel(stock.quarter)}
-                                </TableCell>
-                            </TableRow>
-                        ))}
+                    {stocks.map((stock) => (
+                        <TableRow key={stock.quarter}>
+                            <TableCell className='font-medium'>{stock.name}</TableCell>
+                            <TableCell className='text-right'>{stock.price}</TableCell>
+                            <TableCell className='text-right'>{stock.amount}</TableCell>
+                            <TableCell className='text-right'>{stock.year}</TableCell>
+                            <TableCell className='text-right'>
+                                {mapQuarterToLabel(stock.quarter)}
+                            </TableCell>
+                        </TableRow>
+                    ))}
                 </TableBody>
             </Table>
             <CSVLink data={csvData} filename={'data.csv'}>
