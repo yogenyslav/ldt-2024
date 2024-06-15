@@ -51,7 +51,7 @@ func (ctrl *Controller) ImportData(ctx context.Context, mpArchive *multipart.Fil
 			getOrganizationTitle(org),
 			file.FileInfo().Name(),
 			f,
-			mpArchive.Size,
+			file.FileInfo().Size(),
 			minio.PutObjectOptions{},
 		); err != nil {
 			log.Error().Err(err).Str("file", file.FileInfo().Name()).Msg("failed to put object")
