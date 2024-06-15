@@ -10,8 +10,8 @@ import (
 // @description Документация API админ-сервиса команды misis.tech
 // @license.name BSD-3-Clause
 // @license.url https://opensource.org/license/bsd-3-clause
-// @host admin.misis.larek.tech
-// @BasePath /chat
+// @host api.misis.larek.tech
+// @BasePath /admin
 func main() {
 	cfg := config.MustNew("./config.yaml")
 	srv := server.New(cfg)

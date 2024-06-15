@@ -82,7 +82,7 @@ definitions:
     - organization
     - username
     type: object
-host: admin.misis.larek.tech
+host: api.misis.larek.tech
 info:
   contact: {}
   description: Документация API админ-сервиса команды misis.tech
