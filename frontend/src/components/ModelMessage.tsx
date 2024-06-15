@@ -5,6 +5,8 @@ import { ChatCommand, DisplayedIncomingMessage, IncomingMessageStatus } from '@/
 import { useStores } from '@/hooks/useStores';
 import { useToast } from './ui/use-toast';
 import { useState } from 'react';
+import Prediction from './Prediction';
+import Stocks from './Stocks';
 
 type ModelMessageProps = {
     incomingMessage: DisplayedIncomingMessage;
@@ -68,8 +70,18 @@ const ModelMessage = ({ incomingMessage, isLastMessage }: ModelMessageProps) => 
             case IncomingMessageStatus.Valid:
                 return (
                     <>
-                        <div className='prose prose-stone'>
-                            <p>{incomingMessage.body}</p>
+                        <div className='flex w-full flex-col gap-5'>
+                            {' '}
+                            {incomingMessage.prediction && (
+                                <Prediction
+                                    history={incomingMessage.prediction.history}
+                                    forecast={incomingMessage.prediction.forecast}
+                                />
+                            )}
+                            {incomingMessage.stocks && <Stocks stocks={incomingMessage.stocks} />}
+                            <div className='prose prose-stone'>
+                                <p>{incomingMessage.body}</p>
+                            </div>
                         </div>
                         <div className='flex items-center gap-2 py-2'>
                             <Button
@@ -99,11 +111,11 @@ const ModelMessage = ({ incomingMessage, isLastMessage }: ModelMessageProps) => 
     };
 
     return (
-        <div className='flex items-start gap-4'>
+        <div className='flex items-start gap-4 w-full'>
             <Avatar className='border w-8 h-8'>
                 <AvatarFallback>MT</AvatarFallback>
             </Avatar>
-            <div className='grid gap-1 mt-2'>
+            <div className='grid gap-1 mt-2 w-full'>
                 <div className='font-bold'>Ответ модели</div>
 
                 {getModelResonse()}

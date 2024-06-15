@@ -10,7 +10,7 @@ type Props = {
 
 const Conversation = observer(({ conversation, isLastConversation }: Props) => {
     return (
-        <div>
+        <div className='w-full'>
             {conversation.outcomingMessage && (
                 <UserMessage message={conversation.outcomingMessage.prompt} />
             )}

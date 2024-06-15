@@ -50,13 +50,19 @@ export function Login() {
                     <form onSubmit={handleSubmit} className='grid gap-4'>
                         <div className='grid gap-2'>
                             <Label htmlFor='login'>Логин</Label>
-                            <Input id='login' name='login' required />
+                            <Input id='login' name='login' defaultValue={'user'} required />
                         </div>
                         <div className='grid gap-2'>
                             <div className='flex items-center'>
                                 <Label htmlFor='password'>Пароль</Label>
                             </div>
-                            <Input id='password' name='password' type='password' required />
+                            <Input
+                                id='password'
+                                name='password'
+                                type='password'
+                                defaultValue={'test123456'}
+                                required
+                            />
                         </div>
                         <LoaderButton isLoading={loading} type='submit' className='w-full'>
                             Войти
