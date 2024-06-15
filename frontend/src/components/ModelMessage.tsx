@@ -1,16 +1,21 @@
 import { ClipboardIcon } from 'lucide-react';
 import { Avatar, AvatarFallback } from './ui/avatar';
 import { Button } from './ui/button';
-import { ChatCommand, DisplayedIncomingMessage, IncomingMessageStatus } from '@/api/models';
+import {
+    ChatCommand,
+    DisplayedIncomingMessage,
+    IncomingMessageStatus,
+    IncomingMessageType,
+} from '@/api/models';
 import { useStores } from '@/hooks/useStores';
 import { useToast } from './ui/use-toast';
 import { useState } from 'react';
 import Prediction from './Prediction';
-import Stocks from './Stocks';
 import PrompterResult from './PrompterResult';
 import MarkdownPreview from '@uiw/react-markdown-preview';
 import { LoaderButton } from './ui/loader-button';
 import FavoritesApiService from '@/api/FavoritesApiService';
+import StocksGroup from './StocksGroup';
 
 type ModelMessageProps = {
     incomingMessage: DisplayedIncomingMessage;
@@ -22,6 +27,24 @@ const ModelMessage = ({ incomingMessage, isLastMessage }: ModelMessageProps) => 
     const { toast } = useToast();
     const [showInvalidButton, setShowInvalidButton] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
+
+    console.log(incomingMessage.type);
+
+    const downloadFile = () => {
+        if (incomingMessage.outputJson) {
+            const data = JSON.stringify(incomingMessage.outputJson);
+
+            const blob = new Blob([data], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'result.json';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+        }
+    };
 
     const getModelResonse = () => {
         switch (incomingMessage.status) {
@@ -88,52 +111,51 @@ const ModelMessage = ({ incomingMessage, isLastMessage }: ModelMessageProps) => 
                                 />
                             )}
                             {incomingMessage.stocks && (
-                                <Stocks
-                                    stocks={incomingMessage.stocks.sort(
-                                        (a, b) => a.quarter - b.quarter
-                                    )}
-                                />
+                                <StocksGroup stocksGroup={incomingMessage.stocks} />
                             )}
-                            <div className='flex gap-2'>
-                                <LoaderButton
-                                    variant='outline'
-                                    onClick={() => {
-                                        console.log(incomingMessage.outputJson);
+                            {incomingMessage.type === IncomingMessageType.Prediction && (
+                                <div className='flex gap-2'>
+                                    <LoaderButton
+                                        variant='outline'
+                                        onClick={() => {
+                                            console.log(incomingMessage.outputJson);
 
-                                        if (incomingMessage.outputJson) {
-                                            setIsSaving(true);
+                                            if (incomingMessage.outputJson) {
+                                                setIsSaving(true);
 
-                                            FavoritesApiService.createFavorite({
-                                                id: 1,
-                                                response: incomingMessage.outputJson,
-                                            })
-                                                .then(() => {
-                                                    setIsSaving(false);
-                                                    toast({
-                                                        title: 'Успех',
-                                                        description: 'Прогноз сохранен в избранное',
-                                                    });
+                                                FavoritesApiService.createFavorite({
+                                                    id: 1,
+                                                    response: incomingMessage.outputJson,
                                                 })
-                                                .catch(() => {
-                                                    setIsSaving(false);
-                                                    toast({
-                                                        title: 'Ошибка',
-                                                        description:
-                                                            'Не удалось сохранить ответ в избранное',
-                                                        variant: 'destructive',
+                                                    .then(() => {
+                                                        setIsSaving(false);
+                                                        toast({
+                                                            title: 'Успех',
+                                                            description:
+                                                                'Прогноз сохранен в избранное',
+                                                        });
+                                                    })
+                                                    .catch(() => {
+                                                        setIsSaving(false);
+                                                        toast({
+                                                            title: 'Ошибка',
+                                                            description:
+                                                                'Не удалось сохранить ответ в избранное',
+                                                            variant: 'destructive',
+                                                        });
                                                     });
-                                                });
-                                        }
-                                    }}
-                                    isLoading={isSaving}
-                                >
-                                    Сохранить прогноз
-                                </LoaderButton>
+                                            }
+                                        }}
+                                        isLoading={isSaving}
+                                    >
+                                        Сохранить прогноз
+                                    </LoaderButton>
 
-                                <Button variant='outline' onClick={() => {}}>
-                                    Загрузить прогноз (.json)
-                                </Button>
-                            </div>
+                                    <Button variant='outline' onClick={downloadFile}>
+                                        Загрузить прогноз (.json)
+                                    </Button>
+                                </div>
+                            )}
                             <div className='prose prose-stone'>
                                 <MarkdownPreview
                                     source={incomingMessage.body}

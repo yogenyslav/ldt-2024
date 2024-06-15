@@ -288,7 +288,7 @@ export class RootStore {
             this.activeDisplayedSession.messages[lastMessageIndex].incomingMessage = {
                 ...this.activeDisplayedSession.messages[lastMessageIndex].incomingMessage,
                 body: lastMessageBody ? lastMessageBody + info : info,
-                type: IncomingMessageType.Undefined,
+                type: IncomingMessageType.Prediction,
                 status: IncomingMessageStatus.Valid,
             };
         }
@@ -314,6 +314,7 @@ export class RootStore {
         incomingMessage.prediction = { forecast, history };
         lastMessage.incomingMessage = incomingMessage;
         lastMessage.incomingMessage.outputJson = data.output_json;
+        lastMessage.incomingMessage.type = IncomingMessageType.Prediction;
 
         if (this.activeDisplayedSession) {
             this.activeDisplayedSession.messages[lastMessageIndex] = lastMessage;

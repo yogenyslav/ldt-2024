@@ -1,11 +1,5 @@
 import { OutputJson } from './favorites';
-import {
-    ModelResponseType,
-    PredictionResponse,
-    PurchasePlan,
-    Stock,
-    StockResponse,
-} from './predict';
+import { ModelResponseType, PredictionResponse, PurchasePlan, StockResponse } from './predict';
 
 export interface ShortSession {
     id: string;
@@ -133,7 +127,7 @@ export interface DisplayedIncomingMessage {
     product?: string;
     period?: string;
     prediction?: { forecast: PurchasePlan[]; history: PurchasePlan[] };
-    stocks?: Stock[];
+    stocks?: StockResponse['data'];
     outputJson?: OutputJson;
 }
 
