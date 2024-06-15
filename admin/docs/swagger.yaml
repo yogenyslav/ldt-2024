@@ -1,0 +1,340 @@
+basePath: /chat
+definitions:
+  model.LoginReq:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  model.LoginResp:
+    properties:
+      roles:
+        items:
+          type: string
+        type: array
+      token:
+        type: string
+    type: object
+  model.OrganizationCreateReq:
+    properties:
+      title:
+        type: string
+    type: object
+  model.OrganizationCreateResp:
+    properties:
+      id:
+        type: integer
+    type: object
+  model.OrganizationDto:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      title:
+        type: string
+    type: object
+  model.OrganizationUpdateReq:
+    properties:
+      id:
+        type: integer
+      title:
+        type: string
+    type: object
+  model.UserCreateReq:
+    properties:
+      email:
+        type: string
+      first_name:
+        type: string
+      last_name:
+        type: string
+      organization:
+        type: string
+      password:
+        type: string
+      roles:
+        items:
+          type: string
+        type: array
+      username:
+        type: string
+    required:
+    - email
+    - first_name
+    - last_name
+    - organization
+    - password
+    - roles
+    - username
+    type: object
+  model.UserUpdateOrganizationReq:
+    properties:
+      organization:
+        type: string
+      username:
+        type: string
+    required:
+    - organization
+    - username
+    type: object
+host: admin.misis.larek.tech
+info:
+  contact: {}
+  description: Документация API админ-сервиса команды misis.tech
+  license:
+    name: BSD-3-Clause
+    url: https://opensource.org/license/bsd-3-clause
+  title: Admin service API
+  version: "1.0"
+paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Авторизоваться в системе, используя логин и пароль
+      parameters:
+      - description: Запрос на авторизацию
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/model.LoginReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешная авторизация
+          schema:
+            $ref: '#/definitions/model.LoginResp'
+        "400":
+          description: Неверный запрос
+          schema:
+            type: string
+        "401":
+          description: Неверный данные для входа
+          schema:
+            type: string
+        "422":
+          description: Ошибка валидации данных
+          schema:
+            type: string
+      summary: Авторизация
+      tags:
+      - auth
+  /organization:
+    get:
+      consumes:
+      - application/json
+      description: Получить организацию для пользователя
+      parameters:
+      - description: access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Информация об организации
+          schema:
+            $ref: '#/definitions/model.OrganizationDto'
+        "404":
+          description: Организация не найдена
+          schema:
+            type: string
+      summary: Получить организацию
+      tags:
+      - organization
+    post:
+      consumes:
+      - application/json
+      description: Создает новую организацию.
+      parameters:
+      - description: access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Параметры создания организации
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/model.OrganizationCreateReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: ID созданной организации
+          schema:
+            $ref: '#/definitions/model.OrganizationCreateResp'
+        "400":
+          description: Неверные параметры запроса
+          schema:
+            type: string
+      summary: Создает новую организацию.
+      tags:
+      - organization
+    put:
+      consumes:
+      - application/json
+      description: Обновить организацию
+      parameters:
+      - description: access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Параметры обновления организации
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/model.OrganizationUpdateReq'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Организация обновлена
+        "400":
+          description: Неверные параметры запроса
+          schema:
+            type: string
+      summary: Обновить организацию
+      tags:
+      - organization
+  /user:
+    post:
+      consumes:
+      - application/json
+      description: Создает нового пользователя.
+      parameters:
+      - description: access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Параметры пользователя
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/model.UserCreateReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Пользователь создан
+          schema:
+            type: string
+        "400":
+          description: Ошибка в запросе
+          schema:
+            type: string
+        "422":
+          description: Неверный формат данных
+          schema:
+            type: string
+      summary: Создает нового пользователя.
+      tags:
+      - user
+  /user/{organization}:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает список пользователей по организации.
+      parameters:
+      - description: access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Название организации
+        in: path
+        name: organization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Список пользователей
+          schema:
+            items:
+              type: string
+            type: array
+      summary: Возвращает список пользователей по организации.
+      tags:
+      - user
+  /user/{username}:
+    delete:
+      consumes:
+      - application/json
+      description: Удаляет организацию.
+      parameters:
+      - description: access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Имя пользователя
+        in: path
+        name: username
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Организация удалена
+          schema:
+            type: string
+        "400":
+          description: Ошибка в запросе
+          schema:
+            type: string
+      summary: Удаляет организацию.
+      tags:
+      - user
+  /user/organization:
+    post:
+      consumes:
+      - application/json
+      description: Добавляет пользователя в организацию.
+      parameters:
+      - description: access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Параметры пользователя
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/model.UserUpdateOrganizationReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Пользователь добавлен в организацию
+          schema:
+            type: string
+        "400":
+          description: Ошибка в запросе
+          schema:
+            type: string
+        "422":
+          description: Неверный формат данных
+          schema:
+            type: string
+      summary: Добавляет пользователя в организацию.
+      tags:
+      - user
+swagger: "2.0"
