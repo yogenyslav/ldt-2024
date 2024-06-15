@@ -8,7 +8,7 @@ type UserCreateReq struct {
 	FirstName    string   `json:"first_name" validate:"required"`
 	LastName     string   `json:"last_name" validate:"required"`
 	Email        string   `json:"email" validate:"required,email"`
-	Organization string   `json:"organization" validate:"required"`
+	Organization string   `json:"organization" validate:""`
 }
 
 // UserListReq запрос на получение списка пользователей по организации.

@@ -52,12 +52,14 @@ func (ctrl *Controller) NewUser(ctx context.Context, params model.UserCreateReq)
 		}
 	}
 
-	if err := ctrl.repo.InsertOrganization(ctx, model.UserOrganizationDao{
-		Username:     params.Username,
-		Organization: params.Organization,
-	}); err != nil {
-		log.Error().Err(err).Msg("failed to insert organization")
-		return err
+	if params.Organization != "" {
+		if err := ctrl.repo.InsertOrganization(ctx, model.UserOrganizationDao{
+			Username:     params.Username,
+			Organization: params.Organization,
+		}); err != nil {
+			log.Error().Err(err).Msg("failed to insert organization")
+			return err
+		}
 	}
 
 	return nil
