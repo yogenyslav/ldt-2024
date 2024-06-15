@@ -13,6 +13,8 @@ import {
     WSMessage,
     WSIncomingChunk,
     ChatCommand,
+    ModelResponseType,
+    PredictionResponse,
 } from '@/api/models';
 import { LOCAL_STORAGE_KEY } from '@/auth/AuthProvider';
 import { WS_URL } from '@/config';
@@ -77,6 +79,11 @@ export class RootStore {
 
         this.activeDisplayedSession = {
             messages: session.content.map((content) => {
+                const prediction =
+                    content.response.data_type === ModelResponseType.Prediction
+                        ? content.response.data
+                        : null;
+
                 return {
                     incomingMessage: {
                         body: content.response.body,
@@ -84,6 +91,12 @@ export class RootStore {
                         status: content.query.status as IncomingMessageStatus,
                         product: content.query.product,
                         period: content.query.period,
+                        prediction: prediction
+                            ? {
+                                  forecast: prediction.forecast,
+                                  history: prediction.history,
+                              }
+                            : undefined,
                     },
                     outcomingMessage: {
                         prompt: content.query.prompt,
@@ -131,6 +144,8 @@ export class RootStore {
                 this.websocket.send(
                     JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) as string)?.user?.token
                 );
+
+                this.setChatDisabled(false);
             }
 
             this.setActiveSessionId(sessionId);
@@ -156,11 +171,14 @@ export class RootStore {
                     // this.isChatDisabled = true;
 
                     this.processIncomingChunk(data as WSIncomingChunk);
-                } else if (!wsMessage.chunk && wsMessage.data) {
+                } else if (!wsMessage.chunk && wsMessage.data && !wsMessage.data_type) {
+                    //!wsMessage.data_type значит, что это ответ модели (prediction или stock)
                     this.processIncomingQuery(data as WSIncomingQuery);
+                } else if (wsMessage.data_type === ModelResponseType.Prediction && wsMessage.data) {
+                    this.processIncomingPrediction(data as PredictionResponse);
                 }
 
-                if (wsMessage.finish || !wsMessage.chunk) {
+                if ((wsMessage.finish || !wsMessage.chunk) && !wsMessage.data_type) {
                     this.isModelAnswering = false;
                 }
 
@@ -197,7 +215,7 @@ export class RootStore {
         if (this.isFirstMessageInSession()) {
             this.renameSession({
                 id: this.activeSessionId as string,
-                title: message.prompt?.slice(0, 25) || 'Без названия',
+                title: message.prompt?.slice(0, 60) || 'Без названия',
             });
         }
 
@@ -252,10 +270,35 @@ export class RootStore {
                 this.activeDisplayedSession.messages[lastMessageIndex].incomingMessage?.body;
 
             this.activeDisplayedSession.messages[lastMessageIndex].incomingMessage = {
+                ...this.activeDisplayedSession.messages[lastMessageIndex].incomingMessage,
                 body: lastMessageBody ? lastMessageBody + info : info,
                 type: IncomingMessageType.Undefined,
                 status: IncomingMessageStatus.Valid,
             };
+        }
+    }
+
+    private processIncomingPrediction({ forecast, history }: PredictionResponse) {
+        console.log('processIncomingPrediction', forecast, history);
+
+        const session = this.activeDisplayedSession;
+        if (!this.activeSessionId || !session?.messages.length) return;
+
+        const lastMessageIndex = session.messages.length - 1;
+        const lastMessage = session.messages[lastMessageIndex];
+
+        const incomingMessage = lastMessage.incomingMessage || {
+            body: '',
+            type: IncomingMessageType.Undefined,
+            status: IncomingMessageStatus.Valid,
+            prediction: { forecast, history },
+        };
+
+        incomingMessage.prediction = { forecast, history };
+        lastMessage.incomingMessage = incomingMessage;
+
+        if (this.activeDisplayedSession) {
+            this.activeDisplayedSession.messages[lastMessageIndex] = lastMessage;
         }
     }
 
