@@ -26,7 +26,7 @@ const StocksGroup = ({ stocksGroup }: Props) => {
                     <CardTitle>Нашлось несколько товаров</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <p className='text-sm'>Выберите товар, чтобы увидеть его остатков на складе</p>
+                    <p className='text-sm'>Выберите товар, чтобы увидеть его остатки на складе</p>
 
                     <div className='grid gap-6 mt-2'>
                         <div className='grid gap-3'>
