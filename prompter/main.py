@@ -16,13 +16,12 @@ load_dotenv(".env")
 class Prompter(prompter_pb2_grpc.PrompterServicer):
 
     def __init__(self):
-
+        self.prompts_path = Path(__file__).parent / "prompts.json"
         self.model_choice = os.getenv("MODEL_CHOICE")
         if self.model_choice == "saiga":
             self.model = SaigaPrompter(prompts_path=self.prompts_path)
         elif self.model_choice == "yandexgpt":
             self.model = YaGPTPrompter(prompts_path=self.prompts_path)
-        self.prompts_path = Path(__file__).parent / "prompts.json"
 
     def Extract(self, request: ExtractReq, context: ServicerContext) -> ExtractedPrompt:
         # prompter action here
