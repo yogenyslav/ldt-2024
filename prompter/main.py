@@ -7,6 +7,7 @@ from yagpt_prompter import YaGPTPrompter, PrompterOutput
 from pathlib import Path
 from dotenv import load_dotenv
 import os
+import logging
 import time
 import json
 
@@ -66,6 +67,7 @@ class Prompter(prompter_pb2_grpc.PrompterServicer):
                 if line:
                     decoded_line = line.decode("utf-8")
                     message = json.loads(decoded_line)
+                    print(message)
                     msg_text = message["result"]["alternatives"][0]["message"]["text"]
                     outp_text = msg_text[len(last_msg) :]
                     last_msg = msg_text
@@ -80,12 +82,16 @@ class Prompter(prompter_pb2_grpc.PrompterServicer):
                 if line:
                     decoded_line = line.decode("utf-8")
                     message = json.loads(decoded_line)
+                    print(message)
                     msg_text = message["result"]["alternatives"][0]["message"]["text"]
                     outp_text = msg_text[len(last_msg) :]
                     last_msg = msg_text
                     for c in outp_text:
                         time.sleep(0.01)
                         yield StreamResp(chunk=c)
+
+
+logging.basicConfig(level=logging.DEBUG)
 
 
 def serve():
