@@ -54,7 +54,7 @@ const StocksGroup = ({ stocksGroup }: Props) => {
                 </CardContent>
             </Card>
 
-            <div className='grid gap-4'>
+            <div className='gap-4'>
                 {selectedStock && stocksGroup.find((stocks) => stocks.name === selectedStock) && (
                     <Stocks
                         stocks={
