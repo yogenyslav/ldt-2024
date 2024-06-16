@@ -144,7 +144,7 @@ func (s *Server) Run() {
 	favorite.SetupFavoriteRoutes(s.app, favoriteHandler, s.kc, s.cfg.KeyCloak.Realm, s.cfg.Server.CipherKey)
 
 	go s.listen()
-	go prom.HandlePrometheus(s.cfg.ChatProm)
+	go prom.HandlePrometheus(s.cfg.Prom)
 
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM, syscall.SIGINT)
@@ -153,7 +153,7 @@ func (s *Server) Run() {
 }
 
 func (s *Server) listen() {
-	addr := fmt.Sprintf(":%d", s.cfg.Server.ChatPort)
+	addr := fmt.Sprintf(":%d", s.cfg.Server.Port)
 	if err := s.app.Listen(addr); err != nil {
 		log.Error().Err(err).Msg("failed to start server")
 	}

@@ -1,12 +1,12 @@
 server:
-  chat_port: 10000
-  bot_port: 11000
+  port: 10000
   log_level: "debug"
   cors_origins:
     - "*"
   cipher_key: "32-bit cipher hex key"
   bot_token: "BOT:TOKEN"
   debug_mode: true
+  app_url: "https://misis.larek.tech"
 
 keycloak:
   url: "http://keycloak:8080"
@@ -21,24 +21,13 @@ postgres:
   ssl: false
   retry_timeout: 20
 
-redis:
-  username: ""
-  password: "redispass"
-  host: "localhost"
-  port: 6379
-  db: 0
-
 jaeger:
   host: "jaeger"
   port: 4318
 
-chat_prom:
+prom:
   host: ""
   port: 10001
-
-bot_prom:
-  host: ""
-  port: 11001
 
 api:
   host: "api"

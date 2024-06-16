@@ -8,7 +8,6 @@ import (
 	"github.com/yogenyslav/pkg/infrastructure/prom"
 	"github.com/yogenyslav/pkg/infrastructure/tracing"
 	"github.com/yogenyslav/pkg/storage/postgres"
-	rediscache "github.com/yogenyslav/pkg/storage/redis_cache"
 )
 
 // Config конфигурация сервиса.
@@ -16,9 +15,7 @@ type Config struct {
 	Server   *srvconfig.Config        `yaml:"server"`
 	Postgres *postgres.Config         `yaml:"postgres"`
 	Jaeger   *tracing.Config          `yaml:"jaeger"`
-	Redis    *rediscache.Config       `yaml:"redis"`
-	ChatProm *prom.Config             `yaml:"chat_prom"`
-	BotProm  *prom.Config             `yaml:"bot_prom"`
+	Prom     *prom.Config             `yaml:"prom"`
 	API      *client.GrpcClientConfig `yaml:"api"`
 	KeyCloak *KeyCloakConfig          `yaml:"keycloak"`
 }

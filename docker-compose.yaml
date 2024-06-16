@@ -189,9 +189,6 @@ services:
     env_file:
       - .env
     image: bot
-    ports:
-      - "11000:11000"
-      - "11001:11001"
     depends_on:
       - pg
       - api
