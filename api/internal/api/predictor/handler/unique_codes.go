@@ -33,7 +33,7 @@ func (h *Handler) UniqueCodes(c context.Context, in *pb.UniqueCodesReq) (*pb.Uni
 	}
 	in.Organization = organization
 
-	resp, err := h.predictor.UniqueCodes(ctx, in)
+	resp, err := h.predictor.UniqueCodes(pkg.PushSpan(ctx, span), in)
 	if err != nil {
 		log.Error().Err(err).Msg("failed to get unique codes")
 		return nil, status.Error(codes.Internal, err.Error())

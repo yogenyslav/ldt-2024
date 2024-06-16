@@ -31,7 +31,7 @@ func (h *Handler) Extract(c context.Context, in *pb.ExtractReq) (*pb.ExtractedPr
 	)
 	defer span.End()
 
-	resp, err := h.prompter.Extract(ctx, in)
+	resp, err := h.prompter.Extract(pkg.PushSpan(ctx, span), in)
 	if err != nil {
 		log.Error().Err(err).Msg("failed to extract prompt metadata")
 		return nil, status.Error(codes.Internal, err.Error())
