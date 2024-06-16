@@ -11,9 +11,9 @@ import (
 // @Summary Получить организацию
 // @Description Получить организацию для пользователя
 // @Tags organization
+// @Security ApiKeyAuth
 // @Accept json
 // @Produce json
-// @Param Authorization header string true "access token"
 // @Success 200 {object} model.OrganizationDto "Информация об организации"
 // @Failure 404 {object} string "Организация не найдена"
 // @Router /organization [get]

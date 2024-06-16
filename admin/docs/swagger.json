@@ -11,7 +11,6 @@
         "version": "1.0"
     },
     "host": "api.misis.larek.tech",
-    "basePath": "/admin",
     "paths": {
         "/auth/login": {
             "post": {
@@ -67,6 +66,11 @@
         },
         "/organization": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Получить организацию для пользователя",
                 "consumes": [
                     "application/json"
@@ -78,15 +82,6 @@
                     "organization"
                 ],
                 "summary": "Получить организацию",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "access token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "Информация об организации",
@@ -103,6 +98,11 @@
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Создает новую организацию.",
                 "consumes": [
                     "application/json"
@@ -115,13 +115,6 @@
                 ],
                 "summary": "Создает новую организацию.",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "access token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
                     {
                         "description": "Параметры создания организации",
                         "name": "body",
@@ -150,6 +143,11 @@
         },
         "/organization/import": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Загрузить данные в архиве",
                 "consumes": [
                     "multipart/form-data"
@@ -162,13 +160,6 @@
                 ],
                 "summary": "Загрузить данные",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "access token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
                     {
                         "type": "file",
                         "description": "Архив с данными",
@@ -195,6 +186,11 @@
         },
         "/user": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Создает нового пользователя.",
                 "consumes": [
                     "application/json"
@@ -207,13 +203,6 @@
                 ],
                 "summary": "Создает нового пользователя.",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "access token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
                     {
                         "description": "Параметры пользователя",
                         "name": "user",
@@ -248,6 +237,11 @@
         },
         "/user/organization": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Добавляет пользователя в организацию.",
                 "consumes": [
                     "application/json"
@@ -260,13 +254,6 @@
                 ],
                 "summary": "Добавляет пользователя в организацию.",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "access token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
                     {
                         "description": "Параметры пользователя",
                         "name": "user",
@@ -301,6 +288,11 @@
         },
         "/user/{organization}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Возвращает список пользователей по организации.",
                 "consumes": [
                     "application/json"
@@ -313,13 +305,6 @@
                 ],
                 "summary": "Возвращает список пользователей по организации.",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "access token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
                     {
                         "type": "string",
                         "description": "Название организации",
@@ -343,6 +328,11 @@
         },
         "/user/{username}": {
             "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Удаляет организацию.",
                 "consumes": [
                     "application/json"
@@ -355,13 +345,6 @@
                 ],
                 "summary": "Удаляет организацию.",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "access token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
                     {
                         "type": "string",
                         "description": "Имя пользователя",
@@ -498,6 +481,13 @@
                     "type": "string"
                 }
             }
+        }
+    },
+    "securityDefinitions": {
+        "ApiKeyAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     }
 }

@@ -14,7 +14,7 @@ import (
 // @Tags session
 // @Accept json
 // @Produce json
-// @Param Authorization header string true "access token"
+// @Security ApiKeyAuth
 // @Param id path string true "UUID сессии"
 // @Success 204 {object} string "Сессия удалена"
 // @Failure 400 {object} string "Неверное значение ID"

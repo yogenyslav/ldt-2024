@@ -11,6 +11,7 @@ import (
 // @Summary Удаляет избранный предикт по ID.
 // @Description Удаляет избранный предикт по ID.
 // @Tags favorite
+// @Security ApiKeyAuth
 // @Accept json
 // @Produce json
 // @Param id path int true "ID предикта"

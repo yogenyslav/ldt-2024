@@ -12,9 +12,9 @@ import (
 // @Summary Загрузить данные
 // @Description Загрузить данные в архиве
 // @Tags organization
+// @Security ApiKeyAuth
 // @Accept mpfd
 // @Produce json
-// @Param Authorization header string true "access token"
 // @Param data formData file true "Архив с данными"
 // @Success 201 {string} string "Данные успешно загружены"
 // @Failure 400 {object} string "Ошибка при обработке файлов"

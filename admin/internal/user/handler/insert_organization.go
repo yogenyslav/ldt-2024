@@ -14,7 +14,7 @@ import (
 // @Tags user
 // @Accept json
 // @Produce json
-// @Param Authorization header string true "access token"
+// @Security ApiKeyAuth
 // @Param user body model.UserUpdateOrganizationReq true "Параметры пользователя"
 // @Success 200 {string} string "Пользователь добавлен в организацию"
 // @Failure 400 {string} string "Ошибка в запросе"

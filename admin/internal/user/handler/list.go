@@ -10,7 +10,7 @@ import (
 // @Tags user
 // @Accept json
 // @Produce json
-// @Param Authorization header string true "access token"
+// @Security ApiKeyAuth
 // @Param organization path string true "Название организации"
 // @Success 200 {array} string "Список пользователей"
 // @Router /user/{organization} [get]

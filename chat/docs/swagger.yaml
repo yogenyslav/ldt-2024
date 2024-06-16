@@ -1,4 +1,3 @@
-basePath: /chat
 definitions:
   model.FavoriteCreateReq:
     properties:
@@ -200,6 +199,8 @@ paths:
           description: Некорректный запрос
           schema:
             type: string
+      security:
+      - ApiKeyAuth: []
       summary: Добавляет новый предикт в избранное.
       tags:
       - favorite
@@ -225,6 +226,8 @@ paths:
           description: Некорректный запрос
           schema:
             type: string
+      security:
+      - ApiKeyAuth: []
       summary: Обновляет избранный предикт.
       tags:
       - favorite
@@ -254,6 +257,8 @@ paths:
           description: Предикт не найден
           schema:
             type: string
+      security:
+      - ApiKeyAuth: []
       summary: Удаляет избранный предикт по ID.
       tags:
       - favorite
@@ -282,6 +287,8 @@ paths:
           description: Предикт не найден
           schema:
             type: string
+      security:
+      - ApiKeyAuth: []
       summary: Возвращает избранный предикт по ID.
       tags:
       - favorite
@@ -299,6 +306,8 @@ paths:
             items:
               $ref: '#/definitions/model.FavoriteDto'
             type: array
+      security:
+      - ApiKeyAuth: []
       summary: Возвращает список избранных предиктов.
       tags:
       - favorite
@@ -308,11 +317,6 @@ paths:
       - application/json
       description: Удалить сессию по ID
       parameters:
-      - description: access token
-        in: header
-        name: Authorization
-        required: true
-        type: string
       - description: UUID сессии
         in: path
         name: id
@@ -333,6 +337,8 @@ paths:
           description: Сессия с таким ID не найдена
           schema:
             type: string
+      security:
+      - ApiKeyAuth: []
       summary: Удалить сессию
       tags:
       - session
@@ -341,11 +347,6 @@ paths:
       - application/json
       description: Получить все запросы и ответы для сессии по ID
       parameters:
-      - description: access token
-        in: header
-        name: Authorization
-        required: true
-        type: string
       - description: UUID сессии
         in: path
         name: id
@@ -362,6 +363,8 @@ paths:
           description: Неверное значение ID
           schema:
             type: string
+      security:
+      - ApiKeyAuth: []
       summary: Получить данные о сессии
       tags:
       - session
@@ -371,12 +374,6 @@ paths:
       - application/json
       description: Получить список сессий в порядке убывания момента создания от последней
         к первой для авторизованного пользователя
-      parameters:
-      - description: access token
-        in: header
-        name: Authorization
-        required: true
-        type: string
       produces:
       - application/json
       responses:
@@ -384,6 +381,8 @@ paths:
           description: Список сессий
           schema:
             $ref: '#/definitions/model.ListResp'
+      security:
+      - ApiKeyAuth: []
       summary: Список сессий
       tags:
       - session
@@ -392,12 +391,6 @@ paths:
       consumes:
       - application/json
       description: Создать новую сессию в чате для авторизованного пользователя
-      parameters:
-      - description: access token
-        in: header
-        name: Authorization
-        required: true
-        type: string
       produces:
       - application/json
       responses:
@@ -409,6 +402,8 @@ paths:
           description: Сессия с таким ID уже существует
           schema:
             type: string
+      security:
+      - ApiKeyAuth: []
       summary: Новая сессия
       tags:
       - session
@@ -418,11 +413,6 @@ paths:
       - application/json
       description: Обновить заголовок сессии, который отображается в интерфейсе
       parameters:
-      - description: access token
-        in: header
-        name: Authorization
-        required: true
-        type: string
       - description: ID и новое название сессии
         in: body
         name: req
@@ -444,7 +434,14 @@ paths:
           description: Сессия с таким ID не найдена
           schema:
             type: string
+      security:
+      - ApiKeyAuth: []
       summary: Обновить заголовок
       tags:
       - session
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

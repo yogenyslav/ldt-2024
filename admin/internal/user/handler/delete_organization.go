@@ -12,7 +12,7 @@ import (
 // @Tags user
 // @Accept json
 // @Produce json
-// @Param Authorization header string true "access token"
+// @Security ApiKeyAuth
 // @Param username path string true "Имя пользователя"
 // @Success 204 {string} string "Организация удалена"
 // @Failure 400 {string} string "Ошибка в запросе"

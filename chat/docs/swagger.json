@@ -11,7 +11,6 @@
         "version": "1.0"
     },
     "host": "api.misis.larek.tech",
-    "basePath": "/chat",
     "paths": {
         "/auth/login": {
             "post": {
@@ -67,6 +66,11 @@
         },
         "/favorite": {
             "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Обновляет избранный предикт.",
                 "consumes": [
                     "application/json"
@@ -105,6 +109,11 @@
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Добавляет новый предикт в избранное.",
                 "consumes": [
                     "application/json"
@@ -145,6 +154,11 @@
         },
         "/favorite/list": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Возвращает список избранных предиктов.",
                 "consumes": [
                     "application/json"
@@ -171,6 +185,11 @@
         },
         "/favorite/{id}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Возвращает избранный предикт по ID.",
                 "consumes": [
                     "application/json"
@@ -213,6 +232,11 @@
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Удаляет избранный предикт по ID.",
                 "consumes": [
                     "application/json"
@@ -257,6 +281,11 @@
         },
         "/session/list": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Получить список сессий в порядке убывания момента создания от последней к первой для авторизованного пользователя",
                 "consumes": [
                     "application/json"
@@ -268,15 +297,6 @@
                     "session"
                 ],
                 "summary": "Список сессий",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "access token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "Список сессий",
@@ -289,6 +309,11 @@
         },
         "/session/new": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Создать новую сессию в чате для авторизованного пользователя",
                 "consumes": [
                     "application/json"
@@ -300,15 +325,6 @@
                     "session"
                 ],
                 "summary": "Новая сессия",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "access token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    }
-                ],
                 "responses": {
                     "201": {
                         "description": "ID новой сессии",
@@ -327,6 +343,11 @@
         },
         "/session/rename": {
             "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Обновить заголовок сессии, который отображается в интерфейсе",
                 "consumes": [
                     "application/json"
@@ -339,13 +360,6 @@
                 ],
                 "summary": "Обновить заголовок",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "access token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
                     {
                         "description": "ID и новое название сессии",
                         "name": "req",
@@ -380,6 +394,11 @@
         },
         "/session/{id}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Получить все запросы и ответы для сессии по ID",
                 "consumes": [
                     "application/json"
@@ -392,13 +411,6 @@
                 ],
                 "summary": "Получить данные о сессии",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "access token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
                     {
                         "type": "string",
                         "description": "UUID сессии",
@@ -423,6 +435,11 @@
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Удалить сессию по ID",
                 "consumes": [
                     "application/json"
@@ -435,13 +452,6 @@
                 ],
                 "summary": "Удалить сессию",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "access token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
                     {
                         "type": "string",
                         "description": "UUID сессии",
@@ -676,6 +686,13 @@
                     "type": "string"
                 }
             }
+        }
+    },
+    "securityDefinitions": {
+        "ApiKeyAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     }
 }

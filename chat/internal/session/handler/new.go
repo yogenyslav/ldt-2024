@@ -15,7 +15,7 @@ import (
 // @Tags session
 // @Accept json
 // @Produce json
-// @Param Authorization header string true "access token"
+// @Security ApiKeyAuth
 // @Success 201 {object} model.NewSessionResp "ID новой сессии"
 // @Failure 400 {object} string "Сессия с таким ID уже существует"
 // @Router /session/new [post]

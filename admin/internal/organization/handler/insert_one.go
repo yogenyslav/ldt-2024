@@ -13,9 +13,9 @@ import (
 // @Summary Создает новую организацию.
 // @Description Создает новую организацию.
 // @Tags organization
+// @Security ApiKeyAuth
 // @Accept json
 // @Produce json
-// @Param Authorization header string true "access token"
 // @Param body body model.OrganizationCreateReq true "Параметры создания организации"
 // @Success 201 {object} model.OrganizationCreateResp "ID созданной организации"
 // @Failure 400 {object} string "Неверные параметры запроса"

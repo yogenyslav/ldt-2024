@@ -73,6 +73,11 @@ const docTemplate = `{
         },
         "/organization": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Получить организацию для пользователя",
                 "consumes": [
                     "application/json"
@@ -84,15 +89,6 @@ const docTemplate = `{
                     "organization"
                 ],
                 "summary": "Получить организацию",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "access token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "Информация об организации",
@@ -109,6 +105,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Создает новую организацию.",
                 "consumes": [
                     "application/json"
@@ -121,13 +122,6 @@ const docTemplate = `{
                 ],
                 "summary": "Создает новую организацию.",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "access token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
                     {
                         "description": "Параметры создания организации",
                         "name": "body",
@@ -156,6 +150,11 @@ const docTemplate = `{
         },
         "/organization/import": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Загрузить данные в архиве",
                 "consumes": [
                     "multipart/form-data"
@@ -168,13 +167,6 @@ const docTemplate = `{
                 ],
                 "summary": "Загрузить данные",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "access token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
                     {
                         "type": "file",
                         "description": "Архив с данными",
@@ -201,6 +193,11 @@ const docTemplate = `{
         },
         "/user": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Создает нового пользователя.",
                 "consumes": [
                     "application/json"
@@ -213,13 +210,6 @@ const docTemplate = `{
                 ],
                 "summary": "Создает нового пользователя.",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "access token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
                     {
                         "description": "Параметры пользователя",
                         "name": "user",
@@ -254,6 +244,11 @@ const docTemplate = `{
         },
         "/user/organization": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Добавляет пользователя в организацию.",
                 "consumes": [
                     "application/json"
@@ -266,13 +261,6 @@ const docTemplate = `{
                 ],
                 "summary": "Добавляет пользователя в организацию.",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "access token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
                     {
                         "description": "Параметры пользователя",
                         "name": "user",
@@ -307,6 +295,11 @@ const docTemplate = `{
         },
         "/user/{organization}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Возвращает список пользователей по организации.",
                 "consumes": [
                     "application/json"
@@ -319,13 +312,6 @@ const docTemplate = `{
                 ],
                 "summary": "Возвращает список пользователей по организации.",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "access token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
                     {
                         "type": "string",
                         "description": "Название организации",
@@ -349,6 +335,11 @@ const docTemplate = `{
         },
         "/user/{username}": {
             "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Удаляет организацию.",
                 "consumes": [
                     "application/json"
@@ -361,13 +352,6 @@ const docTemplate = `{
                 ],
                 "summary": "Удаляет организацию.",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "access token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
                     {
                         "type": "string",
                         "description": "Имя пользователя",
@@ -505,6 +489,13 @@ const docTemplate = `{
                 }
             }
         }
+    },
+    "securityDefinitions": {
+        "ApiKeyAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
     }
 }`
 
@@ -512,7 +503,7 @@ const docTemplate = `{
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
 	Host:             "api.misis.larek.tech",
-	BasePath:         "/admin",
+	BasePath:         "",
 	Schemes:          []string{},
 	Title:            "Admin service API",
 	Description:      "Документация API админ-сервиса команды misis.tech",
