@@ -44,6 +44,8 @@ const Stocks = ({ stocks }: Props) => {
                         data={dataAmount}
                         title='Остатки товара (количетство)'
                         xLabel='Кварталы'
+                        tooltipItemName='Количество товара'
+                        tooltipPostfix='шт.'
                     />
                 </div>
             </div>
@@ -52,8 +54,10 @@ const Stocks = ({ stocks }: Props) => {
                 <div>
                     <BasicBarChart
                         data={dataSum}
-                        title='Остатки товара (стоимость)'
+                        title='Остатки товара (сумма руб.)'
                         xLabel='Кварталы'
+                        tooltipItemName='Сумма'
+                        tooltipPostfix='₽'
                     />
                 </div>
             </div>
