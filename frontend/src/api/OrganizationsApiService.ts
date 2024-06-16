@@ -45,6 +45,19 @@ class FavoritesApiService {
 
         return response;
     }
+
+    public async uploadFile(file: File): Promise<string> {
+        const formData = new FormData();
+        formData.append('data', file);
+
+        const response = await post<string>(`/admin/organization/import`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+
+        return response;
+    }
 }
 
 export default new FavoritesApiService();

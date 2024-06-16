@@ -19,7 +19,7 @@ import {
     TableCell,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Info, Loader2, TrashIcon } from 'lucide-react';
+import { File, Info, Loader2, Paperclip, TrashIcon } from 'lucide-react';
 import { useStores } from '@/hooks/useStores';
 import { useEffect, useState } from 'react';
 import { toast } from '@/components/ui/use-toast';
@@ -30,7 +30,12 @@ import OrganizationsApiService from '@/api/OrganizationsApiService';
 import { observer } from 'mobx-react-lite';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Role } from '@/api/models';
-import { useAuth } from '@/auth';
+import {
+    FileInput,
+    FileUploader,
+    FileUploaderContent,
+    FileUploaderItem,
+} from '@/components/ui/file-upload';
 
 const Organizations = observer(() => {
     const { rootStore } = useStores();
@@ -40,8 +45,8 @@ const Organizations = observer(() => {
     const [isUserDialogOpen, setIsUserDialogOpen] = useState(false);
     const [organizationName, setOrganizationName] = useState('');
     const [isDeledingUser, setIsDeletingUser] = useState(false);
-
-    const auth = useAuth();
+    const [files, setFiles] = useState<File[] | null>([]);
+    const [isFileUploading, setIsFileUploading] = useState(false);
 
     useEffect(() => {
         rootStore
@@ -63,6 +68,26 @@ const Organizations = observer(() => {
                 });
             });
     }, [rootStore]);
+
+    useEffect(() => {
+        const file = files?.[0];
+
+        if (file) {
+            setIsFileUploading(true);
+
+            OrganizationsApiService.uploadFile(file)
+                .catch(() => {
+                    toast({
+                        title: 'Ошибка',
+                        description: 'Не удалось загрузить файл',
+                        variant: 'destructive',
+                    });
+                })
+                .finally(() => {
+                    setIsFileUploading(false);
+                });
+        }
+    }, [files]);
 
     function handleCreateOrganizationSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
@@ -110,7 +135,15 @@ const Organizations = observer(() => {
         const email = formData.get('email') as string;
         const username = formData.get('username') as string;
         const password = formData.get('password') as string;
-        const roleAdmin = formData.get('role-admin') as 'on' | 'off';
+        const roleAdmin = formData.get('role-admin') as 'on' | null;
+        const roleAnalyst = formData.get('analyst') as 'on' | null;
+        const roleBuyer = formData.get('buyer') as 'on' | null;
+
+        const roles = [
+            roleAdmin ? Role.Admin : null,
+            roleAnalyst ? Role.Analyst : null,
+            roleBuyer ? Role.Buyer : null,
+        ].filter((role) => role !== null) as Role[];
 
         console.log(firstName, lastName, email, username, password, roleAdmin);
 
@@ -121,7 +154,7 @@ const Organizations = observer(() => {
             password,
             username,
             organization: rootStore.organization?.title,
-            roles: [Role.Admin],
+            roles,
         })
             .then(() => {
                 toast({
@@ -176,6 +209,14 @@ const Organizations = observer(() => {
             .finally(() => {
                 setIsDeletingUser(false);
             });
+    };
+
+    const dropzone = {
+        accept: {
+            'application/zip': ['.zip'],
+        },
+        multiple: false,
+        maxFiles: 1,
     };
 
     return (
@@ -347,10 +388,12 @@ const Organizations = observer(() => {
                                                         Администратор
                                                     </Label>
                                                     <Label className='flex items-center gap-2 font-normal'>
-                                                        <Checkbox id='role-editor' /> Редактор
+                                                        <Checkbox name='analyst' id='analyst' />{' '}
+                                                        Аналитик
                                                     </Label>
                                                     <Label className='flex items-center gap-2 font-normal'>
-                                                        <Checkbox id='role-viewer' /> Просмотрщик
+                                                        <Checkbox name='buyer' id='buyer' />{' '}
+                                                        Закупщик
                                                     </Label>
                                                 </div>
                                             </div>
@@ -377,7 +420,7 @@ const Organizations = observer(() => {
                                     </TableHeader>
                                     <TableBody>
                                         {rootStore.usersInOrganization.map((user) => (
-                                            <TableRow>
+                                            <TableRow key={user}>
                                                 <TableCell>
                                                     <div className='font-medium'>{user}</div>
                                                 </TableCell>
@@ -415,6 +458,43 @@ const Organizations = observer(() => {
                             </div>
                         </div>
                     )}
+
+                    <div>
+                        <div className='flex flex-col'>
+                            <h1 className='font-semibold text-lg md:text-2xl'>Загрузка данных</h1>
+
+                            <p>Загрузите данные в формате .zip. Архив не должен папки.</p>
+                        </div>
+
+                        <FileUploader
+                            value={files}
+                            onValueChange={setFiles}
+                            dropzoneOptions={dropzone}
+                            className='relative bg-background rounded-lg p-2 max-w-md'
+                        >
+                            <FileInput className='outline-dashed outline-1'>
+                                <div className='flex items-center justify-center flex-col pt-3 pb-4 w-full '>
+                                    {isFileUploading ? (
+                                        <>
+                                            <Loader2 className='h-4 w-4 animate-spin' />
+                                        </>
+                                    ) : (
+                                        <File />
+                                    )}
+                                </div>
+                            </FileInput>
+                            <FileUploaderContent>
+                                {files &&
+                                    files.length > 0 &&
+                                    files.map((file, i) => (
+                                        <FileUploaderItem key={i} index={i}>
+                                            <Paperclip className='h-4 w-4 stroke-current' />
+                                            <span>{file.name}</span>
+                                        </FileUploaderItem>
+                                    ))}
+                            </FileUploaderContent>
+                        </FileUploader>
+                    </div>
                 </>
             )}
         </>
