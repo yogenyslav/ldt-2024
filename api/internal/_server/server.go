@@ -27,16 +27,12 @@ import (
 	"github.com/yogenyslav/ldt-2024/api/internal/api/pb"
 	"github.com/yogenyslav/ldt-2024/api/internal/api/predictor/handler"
 	ph "github.com/yogenyslav/ldt-2024/api/internal/api/prompter/handler"
-	sc "github.com/yogenyslav/ldt-2024/api/internal/api/stock/controller"
-	sh "github.com/yogenyslav/ldt-2024/api/internal/api/stock/handler"
-	sr "github.com/yogenyslav/ldt-2024/api/internal/api/stock/repo"
 	"github.com/yogenyslav/ldt-2024/api/pkg/client"
 	"github.com/yogenyslav/ldt-2024/api/pkg/metrics"
 	"github.com/yogenyslav/ldt-2024/api/third_party"
 	"github.com/yogenyslav/pkg/infrastructure/prom"
 	"github.com/yogenyslav/pkg/infrastructure/tracing"
 	"github.com/yogenyslav/pkg/storage"
-	"github.com/yogenyslav/pkg/storage/mongo"
 	"github.com/yogenyslav/pkg/storage/postgres"
 	"go.opentelemetry.io/otel"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
@@ -50,7 +46,6 @@ type Server struct {
 	cfg      *config.Config
 	srv      *grpc.Server
 	pg       storage.SQLDatabase
-	mongo    storage.MongoDatabase
 	kc       *gocloak.GoCloak
 	exporter sdktrace.SpanExporter
 	tracer   trace.Tracer
@@ -81,7 +76,6 @@ func New(cfg *config.Config) *Server {
 		cfg:      cfg,
 		srv:      srv,
 		pg:       pg,
-		mongo:    mongo.MustNew(cfg.Mongo, tracer),
 		kc:       kc,
 		exporter: exporter,
 		tracer:   tracer,
@@ -125,12 +119,6 @@ func (s *Server) Run() {
 	}()
 
 	pb.RegisterPrompterServer(s.srv, ph.New(prompterClient, s.tracer))
-
-	stockRepo := sr.New(s.mongo)
-	stockController := sc.New(stockRepo, s.tracer)
-	stockHandler := sh.New(stockController, s.tracer)
-	pb.RegisterStockServer(s.srv, stockHandler)
-
 	pb.RegisterPredictorServer(s.srv, handler.New(predictorClient, s.tracer))
 
 	log.Info().Msg("starting the server")

@@ -10,6 +10,8 @@ var (
 	ErrParseBody = errors.New("failed to parse body")
 	// ErrParseFormFile ошибка парсинга файла.
 	ErrParseFormFile = errors.New("failed to parse form file")
+	// ErrDuplicateTitle ошибка дублирования названия.
+	ErrDuplicateTitle = errors.New("duplicate title")
 )
 
 // 401

@@ -15,6 +15,9 @@ var errStatus = map[error]srvresp.ErrorResponse{
 	shared.ErrParseFormFile: {
 		Status: http.StatusBadRequest,
 	},
+	shared.ErrDuplicateTitle: {
+		Status: http.StatusBadRequest,
+	},
 	// 401
 	shared.ErrInvalidJWT: {
 		Status: http.StatusUnauthorized,

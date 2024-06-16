@@ -6,6 +6,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/yogenyslav/ldt-2024/admin/internal/organization/model"
 	"github.com/yogenyslav/ldt-2024/admin/internal/shared"
+	"github.com/yogenyslav/pkg"
 	"github.com/yogenyslav/pkg/storage/minios3"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
@@ -41,6 +42,9 @@ func (ctrl *Controller) InsertOne(ctx context.Context, params model.Organization
 		S3Bucket: s3Bucket,
 	})
 	if err != nil {
+		if pkg.CheckDuplicateKey(err) {
+			return resp, shared.ErrDuplicateTitle
+		}
 		log.Error().Err(err).Msg("failed to insert organization")
 		return resp, shared.ErrCreateOrganization
 	}

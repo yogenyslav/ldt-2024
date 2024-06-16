@@ -76,12 +76,17 @@ func New(cfg *config.Config) *Server {
 
 	tracer := otel.Tracer("admin")
 
+	s3 := minios3.MustNew(cfg.S3, tracer)
+	if err := s3.CreateBuckets(context.Background()); err != nil {
+		log.Panic().Err(err).Msg("failed to create buckets")
+	}
+
 	return &Server{
 		cfg:      cfg,
 		app:      app,
 		pg:       postgres.MustNew(cfg.Postgres, tracer),
 		kc:       gocloak.NewClient(cfg.KeyCloak.URL),
-		s3:       minios3.MustNew(cfg.S3, tracer),
+		s3:       s3,
 		exporter: exporter,
 		tracer:   tracer,
 	}
