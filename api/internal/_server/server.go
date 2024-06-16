@@ -119,7 +119,7 @@ func (s *Server) Run() {
 	}()
 
 	pb.RegisterPrompterServer(s.srv, promh.New(prompterClient, s.tracer))
-	pb.RegisterPredictorServer(s.srv, predh.New(predictorClient, s.tracer))
+	pb.RegisterPredictorServer(s.srv, predh.New(predictorClient, m, s.tracer))
 
 	log.Info().Msg("starting the server")
 	go s.listen()
