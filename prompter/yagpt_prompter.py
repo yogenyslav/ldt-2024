@@ -151,7 +151,12 @@ class YaGPTPrompter:
         if prompter_output.type != QueryType.UNDEFINED:
             inp = self._prompts["product_extractor"].format(request=request)
             outp = self._generate_responce(inp, PromptType.PRODUCT_EXTRACTOR)
-            if not ("Название продукта" in outp and "Период прогнозирования" in outp):
+            if prompter_output.type == QueryType.STOCK:
+                prompter_output.product = outp.split("Название продукта:")[1].split(
+                    "\n"
+                )[0]
+                prompter_output.period = None
+            elif not ("Название продукта" in outp and "Период прогнозирования" in outp):
                 prompter_output.type = QueryType.UNDEFINED
             else:
                 prompter_output.product = outp.split("Название продукта:")[1].split(
