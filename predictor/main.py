@@ -1,16 +1,11 @@
-import os
-import logging
-import re
 import json
-import math
-from collections import defaultdict
-from datetime import datetime
-from dateutil.relativedelta import relativedelta
+import logging
+import os
+from concurrent import futures
 from pprint import pprint
 
 import pandas as pd
 import pymongo
-import numpy as np
 from api import predictor_pb2_grpc
 from api.predictor_pb2 import (
     PredictReq,
@@ -21,56 +16,29 @@ from api.predictor_pb2 import (
     UniqueCodesResp,
 )
 from api.prompter_pb2 import QueryType
+from data_process import get_codes_data, get_merged_df, parse_sources, prepare_stocks_df
+from dateutil.relativedelta import relativedelta
+from dotenv import load_dotenv
 from google.protobuf.empty_pb2 import Empty
 from grpc import ServicerContext, server
-from concurrent import futures
-from pathlib import Path
-from dotenv import load_dotenv
+from matcher import ColbertMatcher, YaMatcher
+from utils import (
+    convert_datetime_to_str,
+    convert_to_datetime,
+    get_tracer,
+    trace_function,
+    mdb_instert_many,
+)
 
-from data import merge_contracts_with_kpgz, prepare_contracts_df, prepare_kpgz_df
 from forecast_model import Model
 from period_model import PeriodPredictor
-from process_stock import process_and_merge_stocks, StockType, Quarters, Stock
-from matcher import ColbertMatcher, YaMatcher
-from utils import trace_function, get_tracer
 
 load_dotenv(".env")
 
 mongo_url = f"mongodb://{os.getenv('MONGO_HOST')}:{os.getenv('MONGO_PORT')}"
 mongo_client = pymongo.MongoClient(mongo_url)
 
-tracer = get_tracer('jaeger:4317')
-
-def convert_to_datetime(iso_str):
-    iso_str = iso_str.replace("Z", "+00:00")
-    dt = datetime.strptime(iso_str, "%Y-%m-%dT%H:%M:%S.%f%z")
-    return dt
-
-
-def parse_filename(filename):
-    pattern = r".*на\s(\d{2}\.\d{2}\.\d{4})(?:г\.?)?\s*\(сч\.\s*(\d+)\).*\.xlsx"
-
-    match = re.match(pattern, filename)
-    if match:
-        date_str, account = match.groups()
-        date = datetime.strptime(date_str, "%d.%m.%Y")
-
-        quarter = (date.month - 1) // 3 + 1
-        year = date.year
-
-        return quarter, year, account
-    return None
-
-
-def convert_datetime_to_str(obj):
-    if isinstance(obj, dict):
-        return {k: convert_datetime_to_str(v) for k, v in obj.items()}
-    elif isinstance(obj, list):
-        return [convert_datetime_to_str(i) for i in obj]
-    elif isinstance(obj, datetime):
-        return obj.strftime("%Y-%m-%d")
-    else:
-        return obj
+tracer = get_tracer("jaeger:4317")
 
 
 class Predictor(predictor_pb2_grpc.PredictorServicer):
@@ -79,25 +47,13 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
         self._code_matcher = code_matcher
         self._name_matcher = name_matcher
 
-    @trace_function(tracer, 'merge_input_dataframes')
-    def get_merged_df(self, contracts_path, kpgz_path):
-        contracts_df = pd.read_excel(contracts_path, nrows=3699)
-        kpgz = pd.read_excel(kpgz_path).iloc[:1889]
-
-        contracts_df: pd.DataFrame = prepare_contracts_df(contracts_df)
-        kpgz: pd.DataFrame = prepare_kpgz_df(kpgz)
-        merged_df: pd.DataFrame = merge_contracts_with_kpgz(contracts_df, kpgz)
-        merged_df = merged_df.dropna(subset=["paid_rub"])
-
-        return merged_df
-
-    @trace_function(tracer, 'get_forecast_from_model')
-    def get_main_model_outputs(self, merged_df):
+    @trace_function(tracer, "get_forecast_from_model")
+    def get_main_model_outputs(self, merged_df, date="2023-01-01", months=120):
         model = Model(merged_df, self._period_model)
         forecast_dict = {}
         for segment in model.filtered_segments:
             out = model.predict(
-                pd.to_datetime("2023-01-01", dayfirst=True), 120, segment=segment
+                pd.to_datetime(date, dayfirst=True), months, segment=segment
             )
             forecast_dict[segment] = [
                 {"date": list(x.keys())[0], "value": list(x.values())[0]} for x in out
@@ -107,236 +63,7 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
 
         return forecast_dict, regular_codes
 
-    @trace_function(tracer, 'timeseries_postprocess')
-    def prepare_timeseries(self, ts, ref_price):
-        if ts is None:
-            return None
-
-        new_ts = []
-        for i, d in enumerate(ts):
-            if (
-                ref_price is not pd.NA
-                and not math.isnan(d["value"])
-                and ref_price is not np.nan
-            ):
-                new_ts.append(
-                    {
-                        "id": i,
-                        "date": d["date"],
-                        "value": d["value"],
-                        "volume": int(d["value"] // ref_price),
-                    }
-                )
-
-            else:
-                new_ts.append(
-                    {
-                        "id": i,
-                        "date": d["date"],
-                        "value": d["value"],
-                        "volume": None,
-                    }
-                )
-
-        return new_ts
-
-    @trace_function(tracer, 'get_purchase_history')
-    def get_history(self, df: pd.DataFrame):
-        hisory = df[["conclusion_date", "paid_rub"]].copy()
-        hisory = (
-            hisory.resample("ME", on="conclusion_date")["paid_rub"].sum().reset_index()
-        )
-        hisory = hisory[hisory["paid_rub"] > 0]
-        return hisory.rename({"conclusion_date": "date", "paid_rub": "value"}, axis=1)
-
-    @trace_function(tracer, 'get_output_json_purchase')
-    def get_formated_purchase(
-        self, cur_code_df, code_distrib, forecast, median_execution_duration
-    ):
-        if forecast is None:
-            return None
-        rows_by_date = defaultdict(list)
-
-        median_execution_duration = (
-            median_execution_duration if median_execution_duration is not None else 30
-        )
-
-        for code, fraction in zip(
-            code_distrib["final_code_kpgz"], code_distrib["paid_rub"]
-        ):
-            code_df = cur_code_df[
-                ["name_spgz", "id_spgz", "version_number", "final_name_kpgz"]
-            ][cur_code_df["final_code_kpgz"] == code].dropna(axis=1)
-            name_spgz = code_df["name_spgz"].iloc[0]
-            id_spgz = int(code_df["id_spgz"].iloc[0])
-            version_number = int(code_df["version_number"].iloc[0])
-            final_name_kpgz = code_df["final_name_kpgz"].iloc[0]
-
-            for forecast_point in forecast:
-                start_date = forecast_point["date"]
-                end_date = forecast_point["date"] + relativedelta(
-                    days=median_execution_duration
-                )
-                year = end_date.year
-                if forecast_point["volume"] is None:
-                    amount = None
-                else:
-                    amount = int(forecast_point["volume"] * fraction)
-
-                nmc = forecast_point["value"] * fraction
-                raw = {
-                    "DeliverySchedule": {
-                        "start_date": start_date,
-                        "end_date": end_date,
-                        "year": year,
-                        "deliveryAmount": amount,
-                    },
-                    "entityId": id_spgz,
-                    "id": version_number,
-                    "nmc": nmc,
-                    "purchaseAmount": amount,
-                    "spgzCharacteristics": {
-                        "spgzId": id_spgz,
-                        "spgzName": name_spgz,
-                        "kpgzCode": code,
-                        "kpgzName": final_name_kpgz,
-                    },
-                }
-
-                rows_by_date[convert_datetime_to_str(start_date)].append(raw)
-
-        return rows_by_date
-
-    @trace_function(tracer, 'prepare_codes_data')
-    def get_codes_data(self, merged_df, all_kpgz_codes, forecast_dict, regular_codes):
-        codes_stat = merged_df
-        codes_stat["execution_duration"] = (
-            codes_stat["execution_term_until"] - codes_stat["execution_term_from"]
-        )
-        codes_stat["start_to_execute_duration"] = (
-            codes_stat["execution_term_from"] - codes_stat["conclusion_date"]
-        )
-        codes_stat["num_nans"] = codes_stat.isna().sum(axis=1)
-
-        codes_stat = codes_stat.sort_values(by="num_nans")
-        codes_stat = codes_stat.set_index(
-            [
-                "depth3_code_kpgz",
-            ],
-            drop=True,
-        )
-
-        codes_data = []
-        for code in codes_stat.index.unique():
-            try:
-                code_name = all_kpgz_codes.loc[code, "name"]
-            except KeyError:
-                print(f"code: {code} is not found")
-                code_name = None
-
-            cur_code_df = codes_stat.loc[code]
-            if isinstance(cur_code_df, pd.Series):
-                cur_code_df = cur_code_df.to_frame().T
-
-            median_execution_duration = (
-                cur_code_df["execution_duration"].quantile().days
-            )
-
-            if (cur_code_df["start_to_execute_duration"] < pd.Timedelta(days=0)).any():
-                mean_start_to_execute_duration = None
-            elif len(cur_code_df) == 1:
-                mean_start_to_execute_duration = (
-                    cur_code_df["start_to_execute_duration"].iloc[0].days
-                )
-            else:
-                mean_start_to_execute_duration = (
-                    cur_code_df["start_to_execute_duration"].mean().days
-                )
-
-            mean_ref_price = cur_code_df["ref_price"].mean()
-            top5_providers = cur_code_df["provider"].value_counts()[:5].index.tolist()
-
-            cur_code_df = cur_code_df.drop(
-                ["num_nans", "start_to_execute_duration", "execution_duration"], axis=1
-            )
-
-            forecast = self.prepare_timeseries(
-                forecast_dict.get(code, None), mean_ref_price
-            )
-            history = self.get_history(cur_code_df).to_dict(orient="records")
-            history = self.prepare_timeseries(history, mean_ref_price)
-
-            examples = (
-                cur_code_df.drop_duplicates(subset=["final_code_kpgz"])
-                .iloc[:5]
-                .to_dict(orient="records")
-            )
-
-            code_distrib = (
-                cur_code_df.groupby("final_code_kpgz")["paid_rub"]
-                .sum()
-                .sort_values(ascending=False)[:20]
-            )
-            code_distrib = (code_distrib / code_distrib.sum()).reset_index()
-
-            rows_by_date = self.get_formated_purchase(
-                cur_code_df, code_distrib, forecast, median_execution_duration
-            )
-
-            codes_data.append(
-                {
-                    "code": code,
-                    "code_name": code_name,
-                    "is_regular": code in regular_codes,
-                    "forecast": forecast,
-                    "history": history,
-                    "rows_by_date": rows_by_date,
-                    "median_execution_days": (
-                        median_execution_duration
-                        if median_execution_duration is not pd.NA
-                        else 30
-                    ),
-                    "mean_start_to_execute_days": (
-                        mean_start_to_execute_duration
-                        if mean_start_to_execute_duration is not pd.NA
-                        else None
-                    ),
-                    "mean_ref_price": (
-                        mean_ref_price if mean_ref_price is not pd.NA else None
-                    ),
-                    "top5_providers": (
-                        top5_providers if top5_providers is not pd.NA else None
-                    ),
-                    "example_contracts_in_code": examples,
-                }
-            )
-
-        return codes_data
-
-    @trace_function(tracer, 'prepare_stocks_dataframe')
-    def prepare_stocks_df(self, paths):
-        stocks = []
-        for obj in paths:
-            result = parse_filename(obj.name)
-            if result:
-                quarter, year, stock_type = result
-                stock_type = StockType._value2member_map_.get(int(stock_type), None)
-                quarter = Quarters._value2member_map_.get(int(quarter), None)
-            else:
-                raise ValueError(f"Wrong pattern for sotcks file: {obj.name}")
-
-            if stock_type is None or quarter is None:
-                raise ValueError(
-                    f"Not valid stock info: stock_type={stock_type}, quarter={quarter}"
-                )
-
-            raw_stock = pd.read_excel(obj.path)
-            stock = Stock(raw_stock, stock_type, quarter, year)
-            stocks.append(stock)
-
-        return process_and_merge_stocks(stocks)
-
-    @trace_function(tracer, 'get_stocks_from_mdb')
+    @trace_function(tracer, "get_stocks_from_mdb")
     def get_stocks(self, query, organization):
         full_names = self._name_matcher.match_stocks(query)
 
@@ -360,7 +87,7 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
 
         return {"data": top_stocks}
 
-    @trace_function(tracer, 'get_forecast_from_mdb')
+    @trace_function(tracer, "get_forecast_from_mdb")
     def get_forecast(self, product, period, organization):
         code = self._code_matcher.match_code(product)
 
@@ -390,7 +117,7 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
                 for x in forecast_start_filtered
                 if x["date"].timestamp() <= end_dt.timestamp()
             ]
-            
+
         else:
             forecast = None
             closest_purchase = None
@@ -400,7 +127,9 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
             out_id = None
         elif len(forecast) > 0:
             rows = rows_by_date.get(convert_datetime_to_str(forecast[0]["date"]), None)
-            out_id = (hash(str(forecast[0]["id"])) + hash(code) + hash(organization))%int(1e9)
+            out_id = (
+                hash(str(forecast[0]["id"])) + hash(code) + hash(organization)
+            ) % int(1e9)
         else:
             rows = []
             out_id = None
@@ -422,60 +151,51 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
     def cur_date(self):
         return convert_to_datetime("2023-01-01T10:00:20.021Z")
 
-    @trace_function(tracer, 'parse_sources')
-    def parse_sources(self, sources):
-        contracts_path = [x.path for x in sources if x.name.startswith('Выгрузка контрактов по Заказчику')][0]
-        kpgz_path = [x.path for x in sources if x.name.startswith('КПГЗ ,СПГЗ, СТЕ')][0]
-        stocks_path = [x for x in sources if x.name.startswith('Ведомость остатков')]
-        
-        return contracts_path, kpgz_path, stocks_path
-    
-    @trace_function(tracer, 'prepare_data')
+    @trace_function(tracer, "prepare_data")
     def PrepareData(self, request: PrepareDataReq, context: ServicerContext):
         # в PrepareDataReq лежит путь до .csv/.xlsx файла
 
         logging.info(request.sources)
         assert len(request.sources) == 14
-        
-        contracts_path, kpgz_path, stocks_path = self.parse_sources(request.sources)
-        all_kpgz_codes_path = './all_kpgz_codes2name.csv'
-        
-        stocks = self.prepare_stocks_df(stocks_path)
+
+        contracts_path, kpgz_path, stocks_path = parse_sources(request.sources)
+        all_kpgz_codes_path = "./all_kpgz_codes2name.csv"
+
+        stocks = prepare_stocks_df(stocks_path)
 
         all_kpgz_codes = pd.read_csv(all_kpgz_codes_path)
         all_kpgz_codes = all_kpgz_codes.set_index("code")
 
-        merged_df = self.get_merged_df(contracts_path, kpgz_path)
+        merged_df = get_merged_df(contracts_path, kpgz_path)
 
         forecast_dict, regular_codes = self.get_main_model_outputs(merged_df)
-        codes_data = self.get_codes_data(
+        codes_data = get_codes_data(
             merged_df, all_kpgz_codes, forecast_dict, regular_codes
         )
 
-        collection_name = "codes"
-        collection = mongo_client[request.organization][collection_name]
-        collection.insert_many(codes_data)
-
-        collection_name = "stocks"
-        collection = mongo_client[request.organization][collection_name]
-        collection.insert_many(stocks.to_dict(orient="records"))
+        mdb = mongo_client[request.organization]
+        
+        mdb_instert_many(codes_data, mdb, 'codes')
+        mdb_instert_many(stocks.to_dict(orient="records"), mdb, 'stocks')
 
         return Empty()
 
-    @trace_function(tracer, 'predict')
+    @trace_function(tracer, "predict")
     def Predict(self, request: PredictReq, context: ServicerContext):
         logging.info(f"predict for {str(request)}")
 
         if request.type == QueryType.STOCK:
             resp = self.get_stocks(request.product, request.organization)
         elif request.type == QueryType.PREDICTION:
-            resp = self.get_forecast(request.product, request.period, request.organization)
+            resp = self.get_forecast(
+                request.product, request.period, request.organization
+            )
 
         pprint(resp)
 
         return PredictResp(data=json.dumps(resp).encode("utf-8"))
 
-    @trace_function(tracer, 'unique_codes')
+    @trace_function(tracer, "unique_codes")
     def UniqueCodes(self, request: UniqueCodesReq, context: ServicerContext):
         collection_name = "codes"
         collection = mongo_client[request.organization][collection_name]

@@ -1,8 +1,9 @@
 import json
+
 import colbert
 from colbert import Indexer, Searcher
-from colbert.infra import Run, RunConfig, ColBERTConfig
-from colbert.data import Queries, Collection
+from colbert.data import Collection, Queries
+from colbert.infra import ColBERTConfig, Run, RunConfig
 
 
 class ColbertMatcher:
