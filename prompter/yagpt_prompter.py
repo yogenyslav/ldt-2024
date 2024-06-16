@@ -167,6 +167,8 @@ class YaGPTPrompter:
         if data["closest_purchase"]["volume"]:
             prompt += f"Объем закупки (условные единицы): {data['closest_purchase']['volume']}\n"
 
+        return prompt
+
     def _generate_responce(
         self, prompt: str, request_type: PromptType, stream: bool = False
     ):
