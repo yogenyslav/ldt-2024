@@ -70,8 +70,8 @@ class YaGPTPrompter:
         prompt += f"Прогноз закупок:\n"
         for i, forecast in enumerate(data["forecast"], start=1):
             prompt += f"Закупка № {i}\n"
-            prompt += f"Рекомендуемая дата заключения: {forecast['date']}\n"
-            prompt += f"Рекомендуемая сумма закупки: {round(forecast['value'], 2)}\n"
+            prompt += f"Дата заключения: {forecast['date']}\n"
+            prompt += f"Сумма закупки: {round(forecast['value'], 2)}\n"
 
         prompt += f"Медианное время выполнения закупки по категории: {data['median_execution_days']}\n"
         prompt += f"Среднее время до начала выполнения закупки по категории: {data['mean_start_to_execute_days']}\n"
@@ -86,24 +86,18 @@ class YaGPTPrompter:
             prompt += f"Объем закупки (условные единицы): {data['closest_purchase']['volume']}\n"
         for i, delivery in enumerate(data["output_json"]["rows"], start=1):
             prompt += f"Позиция {i}:\n"
+            prompt += f"Начало поставки: {delivery['DeliverySchedule']['start_date']}\n"
             prompt += (
-                f"Дата начала поставки: {delivery['DeliverySchedule']['start_date']}\n"
-            )
-            prompt += (
-                f"Дата окончания поставки: {delivery['DeliverySchedule']['end_date']}\n"
+                f"Окончание поставки: {delivery['DeliverySchedule']['end_date']}\n"
             )
             if delivery["DeliverySchedule"]["deliveryAmount"]:
-                prompt += f"Объем поставки (условных единиц): {delivery['DeliverySchedule']['deliveryAmount']}\n"
+                prompt += f"Объем поставки (у.е.): {delivery['DeliverySchedule']['deliveryAmount']}\n"
             prompt += f"Номер версии: {delivery['id']}\n"
             prompt += f"Объем в рублях: {round(delivery['nmc'], 2)}\n"
             prompt += f"ID СПГЗ: {delivery['spgzCharacteristics']['spgzId']}"
-            prompt += (
-                f"Наименование СПГЗ: {delivery['spgzCharacteristics']['spgzName']}\n"
-            )
+            prompt += f"Наим. СПГЗ: {delivery['spgzCharacteristics']['spgzName']}\n"
             prompt += f"Код КПГЗ: {delivery['spgzCharacteristics']['kpgzCode']}\n"
-            prompt += (
-                f"Наименование КПГЗ: {delivery['spgzCharacteristics']['kpgzName']}\n"
-            )
+            prompt += f"Наим. КПГЗ: {delivery['spgzCharacteristics']['kpgzName']}\n"
             if i == 4:
                 break
 
@@ -135,7 +129,7 @@ class YaGPTPrompter:
         prompt += f"Дата заключения контракта: {data['closest_purchase']['date']}\n"
         prompt += f"Сумма закупки: {round(data['closest_purchase']['value'], 2)}\n"
         if data["closest_purchase"]["volume"]:
-            prompt += f"Объем закупки (условные единицы): {data['closest_purchase']['volume']}\n"
+            prompt += f"Объем закупки (у.е.): {data['closest_purchase']['volume']}\n"
 
         return prompt
 
