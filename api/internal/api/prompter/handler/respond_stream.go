@@ -6,6 +6,7 @@ import (
 
 	"github.com/rs/zerolog/log"
 	"github.com/yogenyslav/ldt-2024/api/internal/api/pb"
+	"github.com/yogenyslav/ldt-2024/api/pkg"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -15,7 +16,7 @@ func (h *Handler) RespondStream(in *pb.StreamReq, out pb.Prompter_RespondStreamS
 	ctx, span := h.tracer.Start(context.Background(), "Handler.RespondStream")
 	defer span.End()
 
-	stream, err := h.prompter.RespondStream(ctx, in)
+	stream, err := h.prompter.RespondStream(pkg.PushSpan(ctx, span), in)
 	if err != nil {
 		return status.Error(codes.Internal, err.Error())
 	}

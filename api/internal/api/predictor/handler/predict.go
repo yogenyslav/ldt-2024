@@ -43,7 +43,7 @@ func (h *Handler) Predict(c context.Context, in *pb.PredictReq) (*pb.PredictResp
 	}
 	in.Organization = organization
 
-	resp, err := h.predictor.Predict(ctx, in)
+	resp, err := h.predictor.Predict(pkg.PushSpan(ctx, span), in)
 	if err != nil {
 		log.Error().Err(err).Msg("failed to predict")
 		return nil, status.Error(codes.Internal, err.Error())

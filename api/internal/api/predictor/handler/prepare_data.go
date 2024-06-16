@@ -37,7 +37,7 @@ func (h *Handler) PrepareData(c context.Context, in *pb.PrepareDataReq) (*emptyp
 	}
 	in.Organization = organization
 
-	resp, err := h.predictor.PrepareData(ctx, in)
+	resp, err := h.predictor.PrepareData(pkg.PushSpan(ctx, span), in)
 	if err != nil {
 		log.Error().Err(err).Msg("failed to prepare data")
 		return nil, status.Error(codes.Internal, err.Error())
