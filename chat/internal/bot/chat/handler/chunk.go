@@ -29,7 +29,6 @@ func (h *Handler) processChunk(wg *sync.WaitGroup, c tele.Context, out <-chan ch
 				log.Error().Err(errors.New(chunk.Err)).Msg("failed to predict")
 				if err := c.Send("Не удалось получить данные"); err != nil {
 					log.Error().Err(err).Msg("failed to send response")
-					continue
 				}
 				return
 			}
@@ -39,55 +38,55 @@ func (h *Handler) processChunk(wg *sync.WaitGroup, c tele.Context, out <-chan ch
 				file, err := os.Create(name)
 				if err != nil {
 					log.Error().Err(err).Msg("failed to create file")
-					continue
+					return
 				}
 				mp := make(map[string]any)
 				dataBytes, err := json.Marshal(chunk.Data)
 				if err != nil {
 					_ = file.Close()
 					log.Error().Err(err).Msg("failed to marshal data")
-					continue
+					return
 				}
 				if err := json.Unmarshal(dataBytes, &mp); err != nil {
 					_ = file.Close()
 					log.Error().Err(err).Msg("failed to unmarshal data")
-					continue
+					return
 				}
 				isRegular, ok := mp["is_regular"].(bool)
 				if !ok {
 					_ = file.Close()
 					log.Error().Msg("failed to get is_regular")
-					continue
+					return
 				}
 				if !isRegular {
 					if err := c.Send("Это нерегулярная закупка. По ней не получится построить предсказание"); err != nil {
 						log.Error().Err(err).Msg("failed to send response")
 					}
-					continue
+					return
 				}
-				forecast, ok := mp["forecast"].([]any)
-				if !ok {
-					_ = file.Close()
-					log.Error().Msg("failed to get forecast")
-					continue
-				}
-				if len(forecast) == 0 {
-					if err := c.Send("Вы запросили период для предсказания, за который нет закупок"); err != nil {
-						log.Error().Err(err).Msg("failed to send response")
-					}
-					continue
-				}
+				//forecast, ok := mp["forecast"].([]any)
+				//if !ok {
+				//	_ = file.Close()
+				//	log.Error().Msg("failed to get forecast")
+				//	return
+				//}
+				//if len(forecast) == 0 {
+				//	if err := c.Send("Вы запросили период для предсказания, за который нет закупок"); err != nil {
+				//		log.Error().Err(err).Msg("failed to send response")
+				//	}
+				//	return
+				//}
 				outputJson, err := json.Marshal(mp["output_json"])
 				if err != nil {
 					_ = file.Close()
 					log.Error().Err(err).Msg("failed to marshal output_json")
-					continue
+					return
 				}
 				_, err = file.Write(outputJson)
 				if err != nil {
 					_ = file.Close()
 					log.Error().Err(err).Msg("failed to write data")
-					continue
+					return
 				}
 				_ = file.Close()
 
