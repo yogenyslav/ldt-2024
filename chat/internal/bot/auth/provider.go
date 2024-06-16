@@ -37,7 +37,7 @@ func Listen(machine *state.Machine, bot *tele.Bot, port int) *fiber.App {
 			log.Error().Err(err).Msg("failed to set state")
 			return err
 		}
-		if _, err := bot.Send(&tele.User{ID: req.TgID}, "Вы успешно авторизовались!"); err != nil {
+		if _, err := bot.Send(&tele.User{ID: req.TgID}, "Вы успешно авторизовались"); err != nil {
 			log.Error().Err(err).Msg("failed to send a message")
 			return err
 		}

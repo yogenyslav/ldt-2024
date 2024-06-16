@@ -12,7 +12,7 @@ func (h *Handler) Auth(c tele.Context) error {
 	_, span := h.tracer.Start(pkg.GetTraceCtx(c), "Handler.Auth.Send")
 	defer span.End()
 
-	url := fmt.Sprintf("Авторизация по [ссылке](http://localhost:5173?tg_id=%d)", c.Sender().ID)
+	url := fmt.Sprintf("Авторизация по ссылке http://localhost:5173?tg_id=%d", c.Sender().ID)
 
 	return c.Send(url, &tele.SendOptions{
 		DisableWebPagePreview: true,
