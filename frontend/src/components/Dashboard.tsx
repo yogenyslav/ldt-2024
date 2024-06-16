@@ -1,4 +1,4 @@
-import { Building, CircleUser, Menu, Package2, SaveAll, Search, SquarePen } from 'lucide-react';
+import { Building, CircleUser, Menu, Package2, SaveAll, SquarePen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
@@ -8,7 +8,6 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/auth';
@@ -92,18 +91,7 @@ export function Dashboard({ children }: DashboardProps) {
                                 <SessionsHistory />
                             </SheetContent>
                         </Sheet>
-                        <div className='w-full flex-1'>
-                            <form>
-                                <div className='relative'>
-                                    <Search className='absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground' />
-                                    <Input
-                                        type='search'
-                                        placeholder='Поиск...'
-                                        className='w-full appearance-none bg-background pl-8 shadow-none md:w-2/3 lg:w-1/3'
-                                    />
-                                </div>
-                            </form>
-                        </div>
+                        <div className='w-full flex-1'></div>
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Button variant='secondary' size='icon' className='rounded-full'>

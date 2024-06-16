@@ -488,6 +488,34 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/stock/unique_codes": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Получить набор уникальных записей с разделением на регулярные и нерегулярные товары",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "stock"
+                ],
+                "summary": "Регулярные товары",
+                "responses": {
+                    "200": {
+                        "description": "Список с товарами",
+                        "schema": {
+                            "$ref": "#/definitions/model.UniqueCodesResp"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -691,6 +719,31 @@ const docTemplate = `{
                 },
                 "title": {
                     "type": "string"
+                }
+            }
+        },
+        "model.UniqueCodeDto": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "regular": {
+                    "type": "boolean"
+                },
+                "segment": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.UniqueCodesResp": {
+            "type": "object",
+            "properties": {
+                "codes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.UniqueCodeDto"
+                    }
                 }
             }
         }

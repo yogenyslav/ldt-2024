@@ -1,15 +1,5 @@
 package shared
 
-import (
-	"strings"
-	"time"
-)
-
-var (
-	// UserStateExp время, через которое стейт инвалидируется в redis.
-	UserStateExp = 24 * time.Hour
-)
-
 const (
 	// UsernameKey ключ для получения имени пользователя из контекста.
 	UsernameKey = "x-username"
@@ -24,8 +14,6 @@ const (
 
 	// ErrorMessage сообщение об ошибке внутри бота.
 	ErrorMessage = "Что-то пошло не так. Попробуйте еще раз"
-	// NeedAuthMessage сообщение о необходимости авторизоваться.
-	NeedAuthMessage = "Для начала работы с ботом необходимо авторизоваться /auth"
 )
 
 // ResponseStatus статус ответа.
@@ -126,7 +114,7 @@ func (s QueryStatus) ToString() string {
 type UserRole int8
 
 const (
-	RoleUndefined UserRole = iota
+	_ UserRole = iota
 	// RoleAdmin администратор.
 	RoleAdmin
 	// RoleAnalyst аналитик.
@@ -148,32 +136,3 @@ func (r UserRole) ToString() string {
 		return enumsUndefined
 	}
 }
-
-// RoleFromString возвращает роль по ее строковому представлению.
-func RoleFromString(v string) UserRole {
-	switch strings.Split(strings.ToLower(v), "_")[1] {
-	case "admin":
-		return RoleAdmin
-	case "analyst":
-		return RoleAnalyst
-	case "buyer":
-		return RoleBuyer
-	default:
-		return RoleUndefined
-	}
-}
-
-// UserState тип для состояний пользователя.
-type UserState int8
-
-const (
-	_ UserState = iota
-	// StateWaitsAuth ожидает авторизации.
-	StateWaitsAuth
-	// StatePending пользователь авторизован, ожидание действия.
-	StatePending
-	// StateValidate ожидает подтверждения результата prompter.
-	StateValidate
-	// StateHint ожидает подсказки.
-	StateHint
-)

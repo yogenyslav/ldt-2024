@@ -101,3 +101,10 @@ main:has(.chat) {
     --color-fg-default: 0 0% 3.9% !important;
     --color-canvas-subtle: 210 12.5% 96.86% !important;
 }
+
+.wmde-markdown a {
+    display: none !important;
+    &:hover {
+        display: none !important;
+    }
+}

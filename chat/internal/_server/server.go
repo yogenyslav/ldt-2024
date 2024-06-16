@@ -35,6 +35,8 @@ import (
 	sc "github.com/yogenyslav/ldt-2024/chat/internal/session/controller"
 	sh "github.com/yogenyslav/ldt-2024/chat/internal/session/handler"
 	sr "github.com/yogenyslav/ldt-2024/chat/internal/session/repo"
+	"github.com/yogenyslav/ldt-2024/chat/internal/stock"
+	stockh "github.com/yogenyslav/ldt-2024/chat/internal/stock/handler"
 	chatresp "github.com/yogenyslav/ldt-2024/chat/pkg/chat_response"
 	"github.com/yogenyslav/ldt-2024/chat/pkg/client"
 	"github.com/yogenyslav/pkg/infrastructure/prom"
@@ -142,6 +144,9 @@ func (s *Server) Run() {
 	favoriteController := fc.New(favoriteRepo, s.tracer)
 	favoriteHandler := fh.New(favoriteController)
 	favorite.SetupFavoriteRoutes(s.app, favoriteHandler, s.kc, s.cfg.KeyCloak.Realm, s.cfg.Server.CipherKey)
+
+	stockHandler := stockh.New(pb.NewPredictorClient(apiClient.GetConn()))
+	stock.SetupStockRoutes(s.app, stockHandler, s.kc, s.cfg.KeyCloak.Realm, s.cfg.Server.CipherKey)
 
 	go s.listen()
 	go prom.HandlePrometheus(s.cfg.Prom)
