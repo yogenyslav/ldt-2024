@@ -1,5 +1,6 @@
 from datetime import datetime
 from functools import wraps
+import math
 
 from opentelemetry import trace
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
@@ -51,6 +52,17 @@ def convert_datetime_to_str(obj):
     else:
         return obj
 
+def convert_float_nan_to_none(obj):
+    if isinstance(obj, dict):
+        return {k: convert_float_nan_to_none(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [convert_float_nan_to_none(i) for i in obj]
+    elif isinstance(obj, float):
+        if math.isnan(obj):
+            return None
+        return obj
+    else:
+        return obj
 
 def mdb_instert_many(data, mdb, collection_name, drop_exists=True):
     if collection_name in mdb.list_collection_names() and drop_exists:
