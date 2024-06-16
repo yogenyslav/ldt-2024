@@ -28,7 +28,7 @@ document.getElementById('login-form').addEventListener('submit', async (event) =
 
   // Send a request to the API to validate the credentials
   try {
-    const response = await fetch('https://hawk-handy-wolf.ngrok-free.app/api/v1/auth/login', {
+    const response = await fetch('https://api.misis.larek.tech/api/v1/auth/login', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -43,7 +43,7 @@ document.getElementById('login-form').addEventListener('submit', async (event) =
       console.log('Data:', data);
 
       try {
-      const resp = await fetch('http://localhost:11000/bot/auth', {
+      const resp = await fetch('https://api.misis.larek.tech/bot/auth', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

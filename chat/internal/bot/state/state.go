@@ -87,3 +87,13 @@ func (m *Machine) SetValidateQuery(ctx context.Context, userID, queryID int64) e
 func (m *Machine) GetValidateQuery(ctx context.Context, userID int64) (int64, error) {
 	return m.client.GetInt64(ctx, getKey("validate_query", userID))
 }
+
+// SetHintQuery задать id Query, который надо подсказать.
+func (m *Machine) SetHintQuery(ctx context.Context, userID, queryID int64) error {
+	return m.client.SetPrimitive(ctx, getKey("hint_query", userID), queryID, shared.UserStateExp)
+}
+
+// GetHintQuery получить id Query, который надо подсказать.
+func (m *Machine) GetHintQuery(ctx context.Context, userID int64) (int64, error) {
+	return m.client.GetInt64(ctx, getKey("hint_query", userID))
+}

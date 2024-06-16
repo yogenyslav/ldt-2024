@@ -174,4 +174,6 @@ const (
 	StatePending
 	// StateValidate ожидает подтверждения результата prompter.
 	StateValidate
+	// StateHint ожидает подсказки.
+	StateHint
 )
