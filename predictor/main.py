@@ -1,16 +1,11 @@
-import os
-import logging
-import re
 import json
-import math
-from collections import defaultdict
-from datetime import datetime
-from dateutil.relativedelta import relativedelta
+import logging
+import os
+from concurrent import futures
 from pprint import pprint
 
 import pandas as pd
 import pymongo
-import numpy as np
 from api import predictor_pb2_grpc
 from api.predictor_pb2 import (
     PredictReq,
@@ -21,25 +16,28 @@ from api.predictor_pb2 import (
     UniqueCodesResp,
 )
 from api.prompter_pb2 import QueryType
+from data_process import get_codes_data, get_merged_df, parse_sources, prepare_stocks_df
+from dateutil.relativedelta import relativedelta
+from dotenv import load_dotenv
 from google.protobuf.empty_pb2 import Empty
 from grpc import ServicerContext, server
-from concurrent import futures
-from pathlib import Path
-from dotenv import load_dotenv
+from matcher import ColbertMatcher, YaMatcher
+from utils import (
+    convert_datetime_to_str,
+    convert_to_datetime,
+    get_tracer,
+    trace_function,
+)
 
-from data_process import get_merged_df, prepare_stocks_df, parse_sources, get_codes_data
 from forecast_model import Model
 from period_model import PeriodPredictor
-from process_stock import process_and_merge_stocks, StockType, Quarters, Stock
-from matcher import ColbertMatcher, YaMatcher
-from utils import trace_function, get_tracer, convert_to_datetime, convert_datetime_to_str
 
 load_dotenv(".env")
 
 mongo_url = f"mongodb://{os.getenv('MONGO_HOST')}:{os.getenv('MONGO_PORT')}"
 mongo_client = pymongo.MongoClient(mongo_url)
 
-tracer = get_tracer('jaeger:4317')
+tracer = get_tracer("jaeger:4317")
 
 
 class Predictor(predictor_pb2_grpc.PredictorServicer):
@@ -48,7 +46,7 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
         self._code_matcher = code_matcher
         self._name_matcher = name_matcher
 
-    @trace_function(tracer, 'get_forecast_from_model')
+    @trace_function(tracer, "get_forecast_from_model")
     def get_main_model_outputs(self, merged_df, date="2023-01-01", months=120):
         model = Model(merged_df, self._period_model)
         forecast_dict = {}
@@ -64,7 +62,7 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
 
         return forecast_dict, regular_codes
 
-    @trace_function(tracer, 'get_stocks_from_mdb')
+    @trace_function(tracer, "get_stocks_from_mdb")
     def get_stocks(self, query, organization):
         full_names = self._name_matcher.match_stocks(query)
 
@@ -88,7 +86,7 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
 
         return {"data": top_stocks}
 
-    @trace_function(tracer, 'get_forecast_from_mdb')
+    @trace_function(tracer, "get_forecast_from_mdb")
     def get_forecast(self, product, period, organization):
         code = self._code_matcher.match_code(product)
 
@@ -118,7 +116,7 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
                 for x in forecast_start_filtered
                 if x["date"].timestamp() <= end_dt.timestamp()
             ]
-            
+
         else:
             forecast = None
             closest_purchase = None
@@ -128,7 +126,9 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
             out_id = None
         elif len(forecast) > 0:
             rows = rows_by_date.get(convert_datetime_to_str(forecast[0]["date"]), None)
-            out_id = (hash(str(forecast[0]["id"])) + hash(code) + hash(organization))%int(1e9)
+            out_id = (
+                hash(str(forecast[0]["id"])) + hash(code) + hash(organization)
+            ) % int(1e9)
         else:
             rows = []
             out_id = None
@@ -149,17 +149,17 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
     @property
     def cur_date(self):
         return convert_to_datetime("2023-01-01T10:00:20.021Z")
-    
-    @trace_function(tracer, 'prepare_data')
+
+    @trace_function(tracer, "prepare_data")
     def PrepareData(self, request: PrepareDataReq, context: ServicerContext):
         # в PrepareDataReq лежит путь до .csv/.xlsx файла
 
         logging.info(request.sources)
         assert len(request.sources) == 14
-        
+
         contracts_path, kpgz_path, stocks_path = parse_sources(request.sources)
-        all_kpgz_codes_path = './all_kpgz_codes2name.csv'
-        
+        all_kpgz_codes_path = "./all_kpgz_codes2name.csv"
+
         stocks = prepare_stocks_df(stocks_path)
 
         all_kpgz_codes = pd.read_csv(all_kpgz_codes_path)
@@ -182,20 +182,22 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
 
         return Empty()
 
-    @trace_function(tracer, 'predict')
+    @trace_function(tracer, "predict")
     def Predict(self, request: PredictReq, context: ServicerContext):
         logging.info(f"predict for {str(request)}")
 
         if request.type == QueryType.STOCK:
             resp = self.get_stocks(request.product, request.organization)
         elif request.type == QueryType.PREDICTION:
-            resp = self.get_forecast(request.product, request.period, request.organization)
+            resp = self.get_forecast(
+                request.product, request.period, request.organization
+            )
 
         pprint(resp)
 
         return PredictResp(data=json.dumps(resp).encode("utf-8"))
 
-    @trace_function(tracer, 'unique_codes')
+    @trace_function(tracer, "unique_codes")
     def UniqueCodes(self, request: UniqueCodesReq, context: ServicerContext):
         collection_name = "codes"
         collection = mongo_client[request.organization][collection_name]
