@@ -50,26 +50,20 @@ export function Login() {
                     <form onSubmit={handleSubmit} className='grid gap-4'>
                         <div className='grid gap-2'>
                             <Label htmlFor='login'>Логин</Label>
-                            <Input id='login' name='login' defaultValue={'user'} required />
+                            <Input id='login' name='login' required />
                         </div>
                         <div className='grid gap-2'>
                             <div className='flex items-center'>
                                 <Label htmlFor='password'>Пароль</Label>
                             </div>
-                            <Input
-                                id='password'
-                                name='password'
-                                type='password'
-                                defaultValue={'test123456'}
-                                required
-                            />
+                            <Input id='password' name='password' type='password' required />
                         </div>
                         <LoaderButton isLoading={loading} type='submit' className='w-full'>
                             Войти
                         </LoaderButton>
                     </form>
                     <div className='mt-4 text-center text-sm'>
-                        Обратитесь к администратору для получения доступа.
+                        Учетные данные для доступа в приложение можно найти в инструкции.
                     </div>
                 </CardContent>
             </Card>
