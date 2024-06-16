@@ -59,7 +59,9 @@ class Prompter(prompter_pb2_grpc.PrompterServicer):
                 print(chunk)
                 yield StreamResp(chunk=chunk)
         elif self.model_choice == "yandexgpt":
-            generator_1 = self.model.process_final_request(request.prompt)
+            generator_1 = self.model.process_final_request(
+                request.prompt, PromptType.FINAL_PREDICTION_PART1
+            )
             last_msg = ""
             for line in generator_1.iter_lines():
                 if line:

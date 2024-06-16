@@ -1,10 +1,10 @@
-import os
-from dataclasses import dataclass
-from enum import Enum
 import json
+import os
 import requests
-from dotenv import load_dotenv
 import time
+from dataclasses import dataclass
+from dotenv import load_dotenv
+from enum import Enum
 
 from api.prompter_pb2 import QueryType
 
@@ -45,7 +45,9 @@ class YaGPTPrompter:
         model_choice = os.getenv("MODEL_CHOICE")
         self._model_uri = f"gpt://{self._yandex_folder_id}/{model_choice}/latest"
 
-    def _prepare_prompt(self, prompt: str, request_type: PromptType, stream: True) -> dict:
+    def _prepare_prompt(
+        self, prompt: str, request_type: PromptType, stream: True
+    ) -> dict:
         return {
             "modelUri": self._model_uri,
             "completionOptions": {
@@ -66,7 +68,7 @@ class YaGPTPrompter:
         prompt += f"Наименование категории: {data['code_name']}\n"
         prompt += f"Регулярная/нерегулярная: {'регулярная' if data['is_regular'] else 'нерегулярная'}\n"
         prompt += f"Прогноз закупок:\n"
-        for i, forecast in enumerate(data['forecast'], start=1):
+        for i, forecast in enumerate(data["forecast"], start=1):
             prompt += f"Закупка № {i}\n"
             prompt += f"Рекомендуемая дата заключения: {forecast['date']}\n"
             prompt += f"Рекомендуемая сумма закупки: {forecast['value']}\n"
@@ -76,27 +78,35 @@ class YaGPTPrompter:
         prompt += f"Средняя референсная цена: {data['mean_ref_price']}\n"
 
         prompt += "Топ 5 поставщиков этой категории по объему закупок:\n"
-        for i, seller in enumerate(data['top5_providers'], start=1):
+        for i, seller in enumerate(data["top5_providers"], start=1):
             prompt += f"Поставщик {i}, код исполнителя: {seller}\n"
 
         prompt += f"\n Выгрзука из файла для оформления закупок: \n"
-        if data['closest_purchase']['volume']:
+        if data["closest_purchase"]["volume"]:
             prompt += f"Объем закупки (условные единицы): {data['closest_purchase']['volume']}\n"
-        for i, delivery in enumerate(data['output_json']['rows'], start=1):
+        for i, delivery in enumerate(data["output_json"]["rows"], start=1):
             prompt += f"Позиция {i}:\n"
-            prompt += f"Дата начала поставки: {delivery['DeliverySchedule']['start_date']}\n"
-            prompt += f"Дата окончания поставки: {delivery['DeliverySchedule']['end_date']}\n"
-            if delivery['DeliverySchedule']['deliveryAmount']:
+            prompt += (
+                f"Дата начала поставки: {delivery['DeliverySchedule']['start_date']}\n"
+            )
+            prompt += (
+                f"Дата окончания поставки: {delivery['DeliverySchedule']['end_date']}\n"
+            )
+            if delivery["DeliverySchedule"]["deliveryAmount"]:
                 prompt += f"Объем поставки (условных единиц): {delivery['DeliverySchedule']['deliveryAmount']}\n"
             prompt += f"Номер версии: {delivery['id']}\n"
             prompt += f"Объем в рублях: {delivery['nmc']}\n"
             prompt += f"ID СПГЗ: {delivery['spgzCharacteristics']['spgzId']}"
-            prompt += f"Наименование СПГЗ: {delivery['spgzCharacteristics']['spgzName']}\n"
+            prompt += (
+                f"Наименование СПГЗ: {delivery['spgzCharacteristics']['spgzName']}\n"
+            )
             prompt += f"Код КПГЗ: {delivery['spgzCharacteristics']['kpgzCode']}\n"
-            prompt += f"Наименование КПГЗ: {delivery['spgzCharacteristics']['kpgzName']}\n"
+            prompt += (
+                f"Наименование КПГЗ: {delivery['spgzCharacteristics']['kpgzName']}\n"
+            )
             if i == 4:
                 break
-            
+
         return prompt
 
     def prepare_prompt2(self, data: dict) -> str:
@@ -125,13 +135,13 @@ class YaGPTPrompter:
                 break
 
         return prompt
-    
+
     def prepare_prompt_with_nan(self, data: dict) -> str:
         prompt = ""
         prompt += f"Код категории: {data['code']}\n"
         prompt += f"Наименование категории: {data['code_name']}\n"
         return prompt
-    
+
     def prepare_prompt_with_empty_forecast(self, data: dict) -> str:
         prompt = ""
         prompt += f"Код категории: {data['code']}\n"
@@ -147,20 +157,20 @@ class YaGPTPrompter:
         prompt += f"Средняя референсная цена: {data['mean_ref_price'] if data['mean_ref_price'] else 'Информация отсутствует'}\n"
 
         prompt += "Топ 5 поставщиков этой категории по объему закупок:\n"
-        for i, seller in enumerate(data['top5_providers'], start=1):
+        for i, seller in enumerate(data["top5_providers"], start=1):
             prompt += f"Поставщик {i}, код исполнителя: {seller}\n"
 
         prompt += f"Подробная информация о ближайшей закупке:\n"
         prompt += f"ID запроса на закупку: {data['closest_purchase']['id']}\n"
         prompt += f"Дата заключения контракта: {data['closest_purchase']['date']}\n"
         prompt += f"Сумма закупки: {data['closest_purchase']['value']}\n"
-        if data['closest_purchase']['volume']:
+        if data["closest_purchase"]["volume"]:
             prompt += f"Объем закупки (условные единицы): {data['closest_purchase']['volume']}\n"
 
     def _generate_responce(
         self, prompt: str, request_type: PromptType, stream: bool = False
     ):
-        time.sleep(1) # TODO: sorry for this abomination, I'll fix this later 
+        time.sleep(1)  # TODO: sorry for this abomination, I'll fix this later
         prepared_prompt = self._prepare_prompt(prompt, request_type, stream=stream)
         if not stream:
             retry_attempts = 10
@@ -210,7 +220,7 @@ class YaGPTPrompter:
                         time.sleep(5)
                     else:
                         raise e
-                
+
                 except requests.exceptions.HTTPError as e:
                     print("HTTP Error, retrying...")
                     retry_attempts -= 1
@@ -258,9 +268,9 @@ class YaGPTPrompter:
             if "Период (в месяцах)" not in outp:
                 prompter_output.period = outp
             else:
-                prompter_output.period = outp.split("Период (в месяцах):")[1].split(
-                    "\n"
-                )[0].replace(" ", "")
+                prompter_output.period = (
+                    outp.split("Период (в месяцах):")[1].split("\n")[0].replace(" ", "")
+                )
                 if not prompter_output.period.isdigit():
                     prompter_output.type = QueryType.UNDEFINED
 
