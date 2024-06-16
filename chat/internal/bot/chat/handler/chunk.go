@@ -40,7 +40,7 @@ func (h *Handler) processChunk(wg *sync.WaitGroup, c tele.Context, out <-chan ch
 					log.Error().Err(err).Msg("failed to create file")
 					return
 				}
-				mp := make(map[string]any)
+				mp := make(map[string]map[string]interface{})
 				dataBytes, err := json.Marshal(chunk.Data)
 				if err != nil {
 					_ = file.Close()
@@ -52,7 +52,7 @@ func (h *Handler) processChunk(wg *sync.WaitGroup, c tele.Context, out <-chan ch
 					log.Error().Err(err).Msg("failed to unmarshal data")
 					return
 				}
-				isRegular, ok := mp["is_regular"].(bool)
+				isRegular, ok := mp["data"]["is_regular"].(bool)
 				if !ok {
 					_ = file.Close()
 					log.Error().Msg("failed to get is_regular")
@@ -64,19 +64,19 @@ func (h *Handler) processChunk(wg *sync.WaitGroup, c tele.Context, out <-chan ch
 					}
 					return
 				}
-				//forecast, ok := mp["forecast"].([]any)
-				//if !ok {
-				//	_ = file.Close()
-				//	log.Error().Msg("failed to get forecast")
-				//	return
-				//}
-				//if len(forecast) == 0 {
-				//	if err := c.Send("Вы запросили период для предсказания, за который нет закупок"); err != nil {
-				//		log.Error().Err(err).Msg("failed to send response")
-				//	}
-				//	return
-				//}
-				outputJson, err := json.Marshal(mp["output_json"])
+				forecast, ok := mp["data"]["forecast"].([]any)
+				if !ok {
+					_ = file.Close()
+					log.Error().Msg("failed to get forecast")
+					return
+				}
+				if len(forecast) == 0 {
+					if err := c.Send("Вы запросили период для предсказания, за который нет закупок"); err != nil {
+						log.Error().Err(err).Msg("failed to send response")
+					}
+					return
+				}
+				outputJson, err := json.Marshal(mp["data"]["output_json"])
 				if err != nil {
 					_ = file.Close()
 					log.Error().Err(err).Msg("failed to marshal output_json")
