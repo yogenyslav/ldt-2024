@@ -1,4 +1,4 @@
-import { Building, CircleUser, Menu, Package2, SaveAll, Search, SquarePen } from 'lucide-react';
+import { Building, CircleUser, Menu, Package2, SaveAll, SquarePen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
@@ -8,7 +8,6 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/auth';
