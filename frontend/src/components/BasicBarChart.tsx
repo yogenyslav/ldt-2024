@@ -8,7 +8,6 @@ import {
     CartesianGrid,
     Tooltip,
     ResponsiveContainer,
-    Label,
     TooltipProps,
 } from 'recharts';
 import { useCurrentPng } from 'recharts-to-png';
@@ -29,7 +28,7 @@ type Props = {
     tooltipPostfix?: string;
 };
 
-const BasicBarChart = ({ data, title, xLabel, tooltipItemName, tooltipPostfix }: Props) => {
+const BasicBarChart = ({ data, title, tooltipItemName, tooltipPostfix }: Props) => {
     const [getPng, { ref }] = useCurrentPng();
 
     const handleDownload = useCallback(async () => {
@@ -71,17 +70,17 @@ const BasicBarChart = ({ data, title, xLabel, tooltipItemName, tooltipPostfix }:
                     </Button>
                 </div>
 
-                <div className='mt-2 rounded-lg border w-full h-[300px]'>
-                    <ResponsiveContainer width='100%' height={300}>
+                <div className='mt-2 rounded-lg border w-full h-[320px]'>
+                    <ResponsiveContainer width='100%' height={320}>
                         <BarChart
                             ref={ref}
-                            height={300}
+                            height={320}
                             data={data}
                             margin={{
                                 top: 5,
                                 right: 30,
                                 left: 20,
-                                bottom: 30,
+                                bottom: 45,
                             }}
                         >
                             <CartesianGrid strokeDasharray='3 3' />
