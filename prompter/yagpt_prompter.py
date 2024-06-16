@@ -52,7 +52,7 @@ class YaGPTPrompter:
             "modelUri": self._model_uri,
             "completionOptions": {
                 "stream": stream,
-                "temperature": 0.2,
+                "temperature": 0.6,
                 "maxTokens": "5000",
             },
             "messages": [
