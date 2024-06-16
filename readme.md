@@ -182,3 +182,8 @@ ColBert (local) / Yandex Embeddings (cloud)
 ### Преимущества
 
 TypeScript, React, MobX и Shadcn используются вместе для создания модульных, безопасных и легко поддерживаемых веб-приложений.
+
+## ArchiMate
+
+#### Структура сервиса
+![alt text](ArchiMate/ServiceStructure.png "ArchiMate")
