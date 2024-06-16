@@ -165,9 +165,6 @@ func (s *Server) listenGateway() {
 	if err = pb.RegisterPrompterHandler(ctx, mux, conn); err != nil {
 		log.Panic().Err(err).Msg("failed to register the prompter gateway")
 	}
-	if err = pb.RegisterStockHandler(ctx, mux, conn); err != nil {
-		log.Panic().Err(err).Msg("failed to register the stock gateway")
-	}
 	if err = pb.RegisterPredictorHandler(ctx, mux, conn); err != nil {
 		log.Panic().Err(err).Msg("failed to register the predictor gateway")
 	}
