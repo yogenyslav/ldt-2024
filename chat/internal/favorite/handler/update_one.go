@@ -12,6 +12,7 @@ import (
 // @Summary Обновляет избранный предикт.
 // @Description Обновляет избранный предикт.
 // @Tags favorite
+// @Security ApiKeyAuth
 // @Accept json
 // @Produce json
 // @Param body body model.FavoriteUpdateReq true "Параметры запроса"

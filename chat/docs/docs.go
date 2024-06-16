@@ -73,6 +73,11 @@ const docTemplate = `{
         },
         "/favorite": {
             "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Обновляет избранный предикт.",
                 "consumes": [
                     "application/json"
@@ -111,6 +116,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Добавляет новый предикт в избранное.",
                 "consumes": [
                     "application/json"
@@ -151,6 +161,11 @@ const docTemplate = `{
         },
         "/favorite/list": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Возвращает список избранных предиктов.",
                 "consumes": [
                     "application/json"
@@ -177,6 +192,11 @@ const docTemplate = `{
         },
         "/favorite/{id}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Возвращает избранный предикт по ID.",
                 "consumes": [
                     "application/json"
@@ -219,6 +239,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Удаляет избранный предикт по ID.",
                 "consumes": [
                     "application/json"
@@ -263,6 +288,11 @@ const docTemplate = `{
         },
         "/session/list": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Получить список сессий в порядке убывания момента создания от последней к первой для авторизованного пользователя",
                 "consumes": [
                     "application/json"
@@ -274,15 +304,6 @@ const docTemplate = `{
                     "session"
                 ],
                 "summary": "Список сессий",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "access token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "Список сессий",
@@ -295,6 +316,11 @@ const docTemplate = `{
         },
         "/session/new": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Создать новую сессию в чате для авторизованного пользователя",
                 "consumes": [
                     "application/json"
@@ -306,15 +332,6 @@ const docTemplate = `{
                     "session"
                 ],
                 "summary": "Новая сессия",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "access token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    }
-                ],
                 "responses": {
                     "201": {
                         "description": "ID новой сессии",
@@ -333,6 +350,11 @@ const docTemplate = `{
         },
         "/session/rename": {
             "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Обновить заголовок сессии, который отображается в интерфейсе",
                 "consumes": [
                     "application/json"
@@ -345,13 +367,6 @@ const docTemplate = `{
                 ],
                 "summary": "Обновить заголовок",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "access token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
                     {
                         "description": "ID и новое название сессии",
                         "name": "req",
@@ -386,6 +401,11 @@ const docTemplate = `{
         },
         "/session/{id}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Получить все запросы и ответы для сессии по ID",
                 "consumes": [
                     "application/json"
@@ -398,13 +418,6 @@ const docTemplate = `{
                 ],
                 "summary": "Получить данные о сессии",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "access token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
                     {
                         "type": "string",
                         "description": "UUID сессии",
@@ -429,6 +442,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Удалить сессию по ID",
                 "consumes": [
                     "application/json"
@@ -441,13 +459,6 @@ const docTemplate = `{
                 ],
                 "summary": "Удалить сессию",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "access token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
                     {
                         "type": "string",
                         "description": "UUID сессии",
@@ -682,6 +693,13 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
+        }
+    },
+    "securityDefinitions": {
+        "ApiKeyAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     }
 }`

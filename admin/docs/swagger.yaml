@@ -123,12 +123,6 @@ paths:
       consumes:
       - application/json
       description: Получить организацию для пользователя
-      parameters:
-      - description: access token
-        in: header
-        name: Authorization
-        required: true
-        type: string
       produces:
       - application/json
       responses:
@@ -140,6 +134,8 @@ paths:
           description: Организация не найдена
           schema:
             type: string
+      security:
+      - ApiKeyAuth: []
       summary: Получить организацию
       tags:
       - organization
@@ -148,11 +144,6 @@ paths:
       - application/json
       description: Создает новую организацию.
       parameters:
-      - description: access token
-        in: header
-        name: Authorization
-        required: true
-        type: string
       - description: Параметры создания организации
         in: body
         name: body
@@ -170,6 +161,8 @@ paths:
           description: Неверные параметры запроса
           schema:
             type: string
+      security:
+      - ApiKeyAuth: []
       summary: Создает новую организацию.
       tags:
       - organization
@@ -179,11 +172,6 @@ paths:
       - multipart/form-data
       description: Загрузить данные в архиве
       parameters:
-      - description: access token
-        in: header
-        name: Authorization
-        required: true
-        type: string
       - description: Архив с данными
         in: formData
         name: data
@@ -200,6 +188,8 @@ paths:
           description: Ошибка при обработке файлов
           schema:
             type: string
+      security:
+      - ApiKeyAuth: []
       summary: Загрузить данные
       tags:
       - organization
@@ -209,11 +199,6 @@ paths:
       - application/json
       description: Создает нового пользователя.
       parameters:
-      - description: access token
-        in: header
-        name: Authorization
-        required: true
-        type: string
       - description: Параметры пользователя
         in: body
         name: user
@@ -235,6 +220,8 @@ paths:
           description: Неверный формат данных
           schema:
             type: string
+      security:
+      - ApiKeyAuth: []
       summary: Создает нового пользователя.
       tags:
       - user
@@ -244,11 +231,6 @@ paths:
       - application/json
       description: Возвращает список пользователей по организации.
       parameters:
-      - description: access token
-        in: header
-        name: Authorization
-        required: true
-        type: string
       - description: Название организации
         in: path
         name: organization
@@ -263,6 +245,8 @@ paths:
             items:
               type: string
             type: array
+      security:
+      - ApiKeyAuth: []
       summary: Возвращает список пользователей по организации.
       tags:
       - user
@@ -272,11 +256,6 @@ paths:
       - application/json
       description: Удаляет организацию.
       parameters:
-      - description: access token
-        in: header
-        name: Authorization
-        required: true
-        type: string
       - description: Имя пользователя
         in: path
         name: username
@@ -293,6 +272,8 @@ paths:
           description: Ошибка в запросе
           schema:
             type: string
+      security:
+      - ApiKeyAuth: []
       summary: Удаляет организацию.
       tags:
       - user
@@ -302,11 +283,6 @@ paths:
       - application/json
       description: Добавляет пользователя в организацию.
       parameters:
-      - description: access token
-        in: header
-        name: Authorization
-        required: true
-        type: string
       - description: Параметры пользователя
         in: body
         name: user
@@ -328,7 +304,14 @@ paths:
           description: Неверный формат данных
           schema:
             type: string
+      security:
+      - ApiKeyAuth: []
       summary: Добавляет пользователя в организацию.
       tags:
       - user
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

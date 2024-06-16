@@ -15,7 +15,7 @@ import (
 // @Tags user
 // @Accept json
 // @Produce json
-// @Param Authorization header string true "access token"
+// @Security ApiKeyAuth
 // @Param user body model.UserCreateReq true "Параметры пользователя"
 // @Success 201 {string} string "Пользователь создан"
 // @Failure 400 {string} string "Ошибка в запросе"

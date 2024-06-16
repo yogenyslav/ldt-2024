@@ -14,6 +14,9 @@ import (
 // @license.url https://opensource.org/license/bsd-3-clause
 // @host api.misis.larek.tech
 // @BasePath /chat
+// @securitydefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
 func main() {
 	cfg := config.MustNew("./config/config.yaml")
 	level, err := zerolog.ParseLevel(cfg.Server.LogLevel)

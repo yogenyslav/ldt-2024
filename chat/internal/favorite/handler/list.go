@@ -11,6 +11,7 @@ import (
 // @Summary Возвращает список избранных предиктов.
 // @Description Возвращает список избранных предиктов.
 // @Tags favorite
+// @Security ApiKeyAuth
 // @Accept json
 // @Produce json
 // @Success 200 {array} model.FavoriteDto "Список избранных предиктов"

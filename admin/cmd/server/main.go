@@ -12,6 +12,9 @@ import (
 // @license.url https://opensource.org/license/bsd-3-clause
 // @host api.misis.larek.tech
 // @BasePath /admin
+// @securitydefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
 func main() {
 	cfg := config.MustNew("./config/config.yaml")
 	srv := server.New(cfg)
