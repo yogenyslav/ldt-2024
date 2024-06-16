@@ -50,3 +50,11 @@ def convert_datetime_to_str(obj):
         return obj.strftime("%Y-%m-%d")
     else:
         return obj
+
+
+def mdb_instert_many(data, mdb, collection_name, drop_exists=True):
+    if collection_name in mdb.list_collection_names() and drop_exists:
+        mdb[collection_name].drop()
+        
+    collection = mdb[collection_name]
+    collection.insert_many(data)

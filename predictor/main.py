@@ -27,6 +27,7 @@ from utils import (
     convert_to_datetime,
     get_tracer,
     trace_function,
+    mdb_instert_many,
 )
 
 from forecast_model import Model
@@ -172,13 +173,10 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
             merged_df, all_kpgz_codes, forecast_dict, regular_codes
         )
 
-        collection_name = "codes"
-        collection = mongo_client[request.organization][collection_name]
-        collection.insert_many(codes_data)
-
-        collection_name = "stocks"
-        collection = mongo_client[request.organization][collection_name]
-        collection.insert_many(stocks.to_dict(orient="records"))
+        mdb = mongo_client[request.organization]
+        
+        mdb_instert_many(codes_data, mdb, 'codes')
+        mdb_instert_many(stocks.to_dict(orient="records"), mdb, 'stocks')
 
         return Empty()
 
