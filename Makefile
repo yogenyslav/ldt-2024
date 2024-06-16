@@ -27,8 +27,6 @@ docker_remove: docker_down
 	docker volume rm ${BASE_IMAGE}_pg_data
 	docker volume rm ${BASE_IMAGE}_prom_data
 	docker volume rm ${BASE_IMAGE}_jaeger_data
-	docker volume rm ${BASE_IMAGE}_redis_data
-	docker volume rm ${BASE_IMAGE}_redis_conf
 	docker volume rm ${BASE_IMAGE}_mongo_data
 	docker volume rm ${BASE_IMAGE}_predictor_data
 	docker volume rm ${BASE_IMAGE}_s3_data
