@@ -21,7 +21,7 @@ from google.protobuf.empty_pb2 import Empty
 from grpc import ServicerContext, server
 from matcher import ColbertMatcher, YaMatcher
 from utils import (convert_datetime_to_str, convert_to_datetime, get_tracer,
-                   mdb_instert_many, trace_function)
+                   mdb_instert_many, trace_function, convert_float_nan_to_none)
 
 from forecast_model import Model
 from period_model import PeriodPredictor
@@ -198,16 +198,12 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
             "rows": rows,
         }
 
-        code_name = code_info["code_name"]
-        if code_name is None or math.isnan(code_name):
-            code_name = "unknown"
-            
-        code_info["code_name"] = code_name
         code_info["forecast"] = forecast
         code_info["output_json"] = output_json
         code_info["closest_purchase"] = closest_purchase
 
         code_info = convert_datetime_to_str(code_info)
+        code_info = convert_float_nan_to_none(code_info)
         return code_info
 
     @property
