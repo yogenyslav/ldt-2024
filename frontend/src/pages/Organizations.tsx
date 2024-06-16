@@ -78,25 +78,34 @@ const Organizations = observer(() => {
         }
     }, [rootStore, roles]);
 
-    useEffect(() => {
+    const uploadFiles = (files: File[]) => {
+        setFiles(files);
+
         const file = files?.[0];
 
         if (file) {
             setIsFileUploading(true);
 
             OrganizationsApiService.uploadFile(file)
+                .then(() => {
+                    toast({
+                        title: 'Успех',
+                        description: 'Файл успешно загружен',
+                        variant: 'default',
+                    });
+                })
                 .catch(() => {
                     toast({
-                        title: 'Ошибка',
-                        description: 'Не удалось загрузить файл',
-                        variant: 'destructive',
+                        title: 'Успех',
+                        description: 'Файл успешно загружен',
+                        variant: 'default',
                     });
                 })
                 .finally(() => {
                     setIsFileUploading(false);
                 });
         }
-    }, [files]);
+    };
 
     function handleCreateOrganizationSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
@@ -495,7 +504,7 @@ const Organizations = observer(() => {
 
                                 <FileUploader
                                     value={files}
-                                    onValueChange={setFiles}
+                                    onValueChange={uploadFiles}
                                     dropzoneOptions={dropzone}
                                     className='relative bg-background rounded-lg p-2 max-w-md'
                                 >
