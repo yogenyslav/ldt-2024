@@ -54,6 +54,7 @@ class FavoritesApiService {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
+            timeout: 510000,
         });
 
         return response;
