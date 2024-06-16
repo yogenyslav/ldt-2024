@@ -133,6 +133,22 @@ definitions:
       title:
         type: string
     type: object
+  model.UniqueCodeDto:
+    properties:
+      name:
+        type: string
+      regular:
+        type: boolean
+      segment:
+        type: string
+    type: object
+  model.UniqueCodesResp:
+    properties:
+      codes:
+        items:
+          $ref: '#/definitions/model.UniqueCodeDto'
+        type: array
+    type: object
 host: api.misis.larek.tech
 info:
   contact: {}
@@ -440,6 +456,24 @@ paths:
       summary: Обновить заголовок
       tags:
       - session
+  /stock/unique_codes:
+    get:
+      consumes:
+      - application/json
+      description: Получить набор уникальных записей с разделением на регулярные и
+        нерегулярные товары
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Список с товарами
+          schema:
+            $ref: '#/definitions/model.UniqueCodesResp'
+      security:
+      - ApiKeyAuth: []
+      summary: Регулярные товары
+      tags:
+      - stock
 securityDefinitions:
   ApiKeyAuth:
     in: header
