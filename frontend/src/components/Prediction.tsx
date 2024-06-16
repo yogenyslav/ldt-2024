@@ -42,6 +42,8 @@ const Prediction = ({ history, forecast }: Props) => {
                             }))}
                         title='Прогноз закупок'
                         xLabel='Сумма закупки'
+                        tooltipItemName='Сумма закупки'
+                        tooltipPostfix=' ₽'
                     />
                 )}
             </div>

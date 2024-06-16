@@ -7,13 +7,15 @@ import {
     XAxis,
     CartesianGrid,
     Tooltip,
-    Legend,
     ResponsiveContainer,
     Label,
+    TooltipProps,
 } from 'recharts';
 import { useCurrentPng } from 'recharts-to-png';
 import FileSaver from 'file-saver';
 import { Button } from './ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
+import { NameType, ValueType } from 'recharts/types/component/DefaultTooltipContent';
 
 type Props = {
     data: {
@@ -23,9 +25,11 @@ type Props = {
     }[];
     title: string;
     xLabel: string;
+    tooltipItemName?: string;
+    tooltipPostfix?: string;
 };
 
-const BasicBarChart = ({ data, title, xLabel }: Props) => {
+const BasicBarChart = ({ data, title, xLabel, tooltipItemName, tooltipPostfix }: Props) => {
     const [getPng, { ref }] = useCurrentPng();
 
     const handleDownload = useCallback(async () => {
@@ -77,7 +81,7 @@ const BasicBarChart = ({ data, title, xLabel }: Props) => {
                                 top: 5,
                                 right: 30,
                                 left: 20,
-                                bottom: 5,
+                                bottom: 30,
                             }}
                         >
                             <CartesianGrid strokeDasharray='3 3' />
@@ -88,12 +92,17 @@ const BasicBarChart = ({ data, title, xLabel }: Props) => {
                                 angle={45}
                                 dx={window.innerWidth < 600 ? 0 : 20}
                                 dy={20}
-                            >
-                                <Label value={xLabel} offset={0} position='insideBottom' />
-                            </XAxis>
-                            {/* <YAxis /> */}
-                            <Tooltip />
-                            <Legend />
+                            ></XAxis>
+
+                            <Tooltip
+                                content={
+                                    <CustomTooltip
+                                        itemName={tooltipItemName}
+                                        postfix={tooltipPostfix}
+                                    />
+                                }
+                            />
+
                             <Bar
                                 dataKey='y'
                                 fill={hslStringToHex(
@@ -111,3 +120,30 @@ const BasicBarChart = ({ data, title, xLabel }: Props) => {
 };
 
 export default BasicBarChart;
+
+interface CustomTooltipProps extends TooltipProps<ValueType, NameType> {
+    itemName?: string;
+    postfix?: string;
+}
+
+const CustomTooltip = ({ active, payload, label, postfix, itemName }: CustomTooltipProps) => {
+    if (active && payload && payload.length) {
+        return (
+            <Card>
+                <CardHeader>
+                    <CardTitle className='text-sm'>{label}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    {payload.map((item, index) => (
+                        <div key={index}>
+                            <span>{itemName ? itemName : item.name}</span>
+                            <span>
+                                : {item.value} {postfix}
+                            </span>
+                        </div>
+                    ))}
+                </CardContent>
+            </Card>
+        );
+    }
+};

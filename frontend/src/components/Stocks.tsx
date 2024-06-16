@@ -44,6 +44,8 @@ const Stocks = ({ stocks }: Props) => {
                         data={dataAmount}
                         title='Остатки товара (количетство)'
                         xLabel='Кварталы'
+                        tooltipItemName='Количество товара'
+                        tooltipPostfix='шт.'
                     />
                 </div>
             </div>
@@ -54,6 +56,8 @@ const Stocks = ({ stocks }: Props) => {
                         data={dataSum}
                         title='Остатки товара (стоимость)'
                         xLabel='Кварталы'
+                        tooltipItemName='Стоимость товара'
+                        tooltipPostfix='₽'
                     />
                 </div>
             </div>
