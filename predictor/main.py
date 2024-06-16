@@ -197,6 +197,8 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
             "rows": rows,
         }
 
+        code_name = code_info["code_name"]
+        code_info["code_name"] = code_name if code_name is not None else ""
         code_info["forecast"] = forecast
         code_info["output_json"] = output_json
         code_info["closest_purchase"] = closest_purchase
