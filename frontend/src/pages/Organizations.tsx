@@ -459,42 +459,46 @@ const Organizations = observer(() => {
                         </div>
                     )}
 
-                    <div>
-                        <div className='flex flex-col'>
-                            <h1 className='font-semibold text-lg md:text-2xl'>Загрузка данных</h1>
+                    {rootStore.organization && (
+                        <div>
+                            <div className='flex flex-col'>
+                                <h1 className='font-semibold text-lg md:text-2xl'>
+                                    Загрузка данных
+                                </h1>
 
-                            <p>Загрузите данные в формате .zip. Архив не должен папки.</p>
+                                <p>Загрузите данные в формате .zip. Архив не должен папки.</p>
+                            </div>
+
+                            <FileUploader
+                                value={files}
+                                onValueChange={setFiles}
+                                dropzoneOptions={dropzone}
+                                className='relative bg-background rounded-lg p-2 max-w-md'
+                            >
+                                <FileInput className='outline-dashed outline-1'>
+                                    <div className='flex items-center justify-center flex-col pt-3 pb-4 w-full '>
+                                        {isFileUploading ? (
+                                            <>
+                                                <Loader2 className='h-4 w-4 animate-spin' />
+                                            </>
+                                        ) : (
+                                            <File />
+                                        )}
+                                    </div>
+                                </FileInput>
+                                <FileUploaderContent>
+                                    {files &&
+                                        files.length > 0 &&
+                                        files.map((file, i) => (
+                                            <FileUploaderItem key={i} index={i}>
+                                                <Paperclip className='h-4 w-4 stroke-current' />
+                                                <span>{file.name}</span>
+                                            </FileUploaderItem>
+                                        ))}
+                                </FileUploaderContent>
+                            </FileUploader>
                         </div>
-
-                        <FileUploader
-                            value={files}
-                            onValueChange={setFiles}
-                            dropzoneOptions={dropzone}
-                            className='relative bg-background rounded-lg p-2 max-w-md'
-                        >
-                            <FileInput className='outline-dashed outline-1'>
-                                <div className='flex items-center justify-center flex-col pt-3 pb-4 w-full '>
-                                    {isFileUploading ? (
-                                        <>
-                                            <Loader2 className='h-4 w-4 animate-spin' />
-                                        </>
-                                    ) : (
-                                        <File />
-                                    )}
-                                </div>
-                            </FileInput>
-                            <FileUploaderContent>
-                                {files &&
-                                    files.length > 0 &&
-                                    files.map((file, i) => (
-                                        <FileUploaderItem key={i} index={i}>
-                                            <Paperclip className='h-4 w-4 stroke-current' />
-                                            <span>{file.name}</span>
-                                        </FileUploaderItem>
-                                    ))}
-                            </FileUploaderContent>
-                        </FileUploader>
-                    </div>
+                    )}
                 </>
             )}
         </>
