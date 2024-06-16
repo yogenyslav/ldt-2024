@@ -2,6 +2,7 @@ import math
 import re
 from collections import defaultdict
 from datetime import datetime
+from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -41,7 +42,20 @@ kpgz_map_columns = {
 
 
 @trace_function(tracer, "get_depth34_code_kpgz_column")
-def get_depth34_code_kpgz(df, min_month_count=3, filter_service=True):
+def get_depth34_code_kpgz(df: pd.DataFrame,
+                          min_month_count: int = 3,
+                          filter_service: bool = True) -> pd.Series:
+    """
+    Get the depth34 code kpgz column.
+
+    Args:
+        df (pd.DataFrame): The input dataframe.
+        min_month_count (int): The minimum count of months.
+        filter_service (bool): Whether to filter by service.
+
+    Returns:
+        pd.Series: The depth34 code kpgz column.
+    """
     init_df = df[["final_code_kpgz", "conclusion_date"]]
     df = df[["final_code_kpgz", "conclusion_date"]].copy()
     if filter_service:
@@ -67,7 +81,18 @@ def get_depth34_code_kpgz(df, min_month_count=3, filter_service=True):
 
 
 @trace_function(tracer, "prepare_contracts_df")
-def prepare_contracts_df(df: pd.DataFrame) -> pd.DataFrame:
+def prepare_contracts_df(
+    df: pd.DataFrame  # type: ignore
+) -> pd.DataFrame:
+    """
+    Prepare the contracts dataframe.
+
+    Args:
+        df (pd.DataFrame): The input dataframe.
+
+    Returns:
+        pd.DataFrame: The prepared dataframe.
+    """
     df = df[contracts_map_columns.keys()]
     df = df.rename(contracts_map_columns, axis=1)
     df = df.dropna(axis=0, subset=["final_code_kpgz", "conclusion_date"])
@@ -95,6 +120,15 @@ def prepare_contracts_df(df: pd.DataFrame) -> pd.DataFrame:
 
 @trace_function(tracer, "prepare_kpgz_df")
 def prepare_kpgz_df(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Prepare the kpgz dataframe.
+
+    Args:
+        df (pd.DataFrame): The input dataframe.
+
+    Returns:
+        pd.DataFrame: The prepared dataframe.
+    """
     df = df[kpgz_map_columns.keys()]
     df = df.rename(kpgz_map_columns, axis=1)
     df = df.dropna(axis=0, subset=["name_ste"])
@@ -109,7 +143,19 @@ def prepare_kpgz_df(df: pd.DataFrame) -> pd.DataFrame:
 
 
 @trace_function(tracer, "merge_contracts_with_kpgz")
-def merge_contracts_with_kpgz(contracts_df, kpgz_df):
+def merge_contracts_with_kpgz(
+    contracts_df: pd.DataFrame, kpgz_df: pd.DataFrame
+) -> pd.DataFrame:
+    """
+    Merge the contracts dataframe with the kpgz dataframe using the sentence transformers library.
+
+    Args:
+        contracts_df (pd.DataFrame): The contracts dataframe.
+        kpgz_df (pd.DataFrame): The kpgz dataframe.
+
+    Returns:
+        pd.DataFrame: The merged dataframe.
+    """
     model_name = "sentence-transformers/distilbert-multilingual-nli-stsb-quora-ranking"
     encoder = SentenceTransformer(model_name)
 
@@ -179,7 +225,19 @@ def merge_contracts_with_kpgz(contracts_df, kpgz_df):
 
 
 @trace_function(tracer, "get_merged_df")
-def get_merged_df(contracts_path, kpgz_path):
+def get_merged_df(
+    contracts_path: str, kpgz_path: str
+) -> pd.DataFrame:
+    """
+    Get the merged dataframe using contracts and kpgz dataframes.
+
+    Args:
+        contracts_path: The path to the contracts dataframe.
+        kpgz_path: The path to the kpgz dataframe.
+
+    Returns:
+        pd.DataFrame: The merged dataframe.
+    """
     contracts_df = pd.read_excel(contracts_path, nrows=3699)
     kpgz = pd.read_excel(kpgz_path).iloc[:1889]
 
@@ -192,7 +250,18 @@ def get_merged_df(contracts_path, kpgz_path):
 
 
 @trace_function(tracer, "get_code_history")
-def get_code_history(df: pd.DataFrame):
+def get_code_history(
+    df: pd.DataFrame
+) -> pd.DataFrame:
+    """
+    Get the code history from the given dataframe.
+
+    Args:
+        df (pd.DataFrame): The input dataframe containing "conclusion_date" and "paid_rub" columns.
+
+    Returns:
+        pd.DataFrame: The code history dataframe with "date" and "value" columns.
+    """
     hisory = df[["conclusion_date", "paid_rub"]].copy()
     hisory = hisory.resample("ME", on="conclusion_date")["paid_rub"].sum().reset_index()
     hisory = hisory[hisory["paid_rub"] > 0]
@@ -200,7 +269,20 @@ def get_code_history(df: pd.DataFrame):
 
 
 @trace_function(tracer, "prepare_timeseries")
-def prepare_timeseries(ts, ref_price):
+def prepare_timeseries(
+    ts: Optional[List[Dict[str, Union[str, float]]]],
+    ref_price: float,
+) -> Optional[List[Dict[str, Union[int, str, float, None]]]]:
+    """
+    Prepare the timeseries data.
+
+    Args:
+        ts (Optional[List[Dict[str, Union[str, float]]]]): The timeseries data.
+        ref_price (Union[float, pd.NA, np.nan]): The reference price.
+
+    Returns:
+        Optional[List[Dict[str, Union[int, str, float, None]]]]: The prepared timeseries data.
+    """
     if ts is None:
         return None
 
@@ -235,8 +317,23 @@ def prepare_timeseries(ts, ref_price):
 
 @trace_function(tracer, "get_formated_purchase")
 def get_formated_purchase(
-    cur_code_df, code_distrib, forecast, median_execution_duration
-):
+    cur_code_df: pd.DataFrame,
+    code_distrib: pd.DataFrame,
+    forecast: Optional[List[Dict[str, Union[str, float]]]],
+    median_execution_duration: Optional[int] = 30,
+) -> Optional[Dict[str, List[Dict[str, Union[str, int, float]]]]]:
+    """
+    Get the formatted purchase data.
+
+    Args:
+        cur_code_df (pd.DataFrame): The current code dataframe.
+        code_distrib (pd.DataFrame): The code distribution dataframe.
+        forecast (Optional[List[Dict[str, Union[str, float]]]]): The forecast data.
+        median_execution_duration (Optional[int], optional): The median execution duration. Defaults to 30.
+
+    Returns:
+        Optional[Dict[str, List[Dict[str, Union[str, int, float]]]]]: The formatted purchase data.
+    """
     if forecast is None:
         return None
     rows_by_date = defaultdict(list)
@@ -293,7 +390,24 @@ def get_formated_purchase(
 
 
 @trace_function(tracer, "get_codes_data")
-def get_codes_data(merged_df, all_kpgz_codes, forecast_dict, regular_codes):
+def get_codes_data(
+    merged_df: pd.DataFrame,
+    all_kpgz_codes: pd.DataFrame,
+    forecast_dict: Dict[str, List[Dict[str, Any]]],
+    regular_codes: Set[str],
+) -> List[Dict[str, Union[str, int, float, bool, List[Dict[str, Any]], Dict[str, Any], None]]]:
+    """
+    Process the merged dataframe and return the codes data.
+
+    Args:
+        merged_df (pd.DataFrame): The merged dataframe.
+        all_kpgz_codes (pd.DataFrame): The dataframe containing all kpgz codes.
+        forecast_dict (Dict[str, List[Dict[str, Any]]]): The forecast dictionary.
+        regular_codes (Set[str]): The set of regular codes.
+
+    Returns:
+        List[Dict[str, Union[str, int, float, bool, List[Dict[str, Any]], Dict[str, Any], None]]]: The codes data.
+    """
     codes_stat = merged_df
     codes_stat["execution_duration"] = (
         codes_stat["execution_term_until"] - codes_stat["execution_term_from"]
@@ -396,7 +510,18 @@ def get_codes_data(merged_df, all_kpgz_codes, forecast_dict, regular_codes):
 
 
 @trace_function(tracer, "prepare_stocks_df")
-def prepare_stocks_df(paths):
+def prepare_stocks_df(
+    paths: List
+) -> pd.DataFrame:
+    """
+    Prepare stocks data from list of PathInfo objects.
+
+    Args:
+        paths (List): List of Path objects.
+
+    Returns:
+        pd.DataFrame: Processed and merged stocks data.
+    """
     stocks = []
     for obj in paths:
         result = parse_filename(obj.name)
@@ -420,7 +545,18 @@ def prepare_stocks_df(paths):
 
 
 @trace_function(tracer, "parse_sources")
-def parse_sources(sources):
+def parse_sources(
+    sources: List
+) -> Tuple[str, str, List]:
+    """
+    Parse sources and return paths to contracts, kpgz and stocks.
+
+    Args:
+        sources (List[PathInfo]): List of PathInfo objects.
+
+    Returns:
+        Tuple[str, str, List[PathInfo]]: Tuple with paths to contracts, kpgz and stocks.
+    """
     contracts_path = [
         x.path for x in sources if x.name.startswith("Выгрузка контрактов по Заказчику")
     ][0]
@@ -431,7 +567,17 @@ def parse_sources(sources):
 
 
 @trace_function(tracer, "parse_filename")
-def parse_filename(filename):
+def parse_filename(filename: str) -> Optional[Tuple[int, int, str]]:
+    """
+    Parses the filename and returns the quarter, year, and account number.
+
+    Args:
+        filename (str): The name of the file to parse.
+
+    Returns:
+        Optional[Tuple[int, int, str]]: A tuple containing the quarter, year, and account number,
+        or None if the filename does not match the expected pattern.
+    """
     pattern = r".*на\s(\d{2}\.\d{2}\.\d{4})(?:г\.?)?\s*\(сч\.\s*(\d+)\).*\.xlsx"
 
     match = re.match(pattern, filename)

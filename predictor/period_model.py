@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+from typing import Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -37,8 +38,19 @@ class ConvNet(nn.Module):
 
 class PeriodPredictor:
     def __init__(
-        self, model: nn.Module, dates_range: tuple[str, str], dates_freq: str = "ME"
+        self,
+        model: nn.Module,
+        dates_range: Tuple[str, str],
+        dates_freq: str = "ME",
     ) -> None:
+        """
+        Initialize the PeriodPredictor.
+
+        Args:
+            model (nn.Module): The trained model for predicting periods.
+            dates_range (Tuple[str, str]): The start and end dates for the prediction.
+            dates_freq (str, optional): The frequency of the dates. Defaults to "ME".
+        """
         self._model = model
         self._dates_freq = dates_freq
 
@@ -50,7 +62,16 @@ class PeriodPredictor:
         self._normalized_dates = (dates - dates.min()) / (dates.max() - dates.min())
 
     @classmethod
-    def load_from_checkpoint(cls, path):
+    def load_from_checkpoint(cls, path: Union[str, Path]) -> "PeriodPredictor":
+        """
+        Load the PeriodPredictor from a checkpoint.
+
+        Args:
+            path (Union[str, Path]): The path to the checkpoint directory.
+
+        Returns:
+            PeriodPredictor: The loaded PeriodPredictor.
+        """
         path = Path(path)
         model_weights = torch.load(path / "model.pt", map_location="cpu")
 
@@ -77,7 +98,19 @@ class PeriodPredictor:
         dates_column: str,
         values_column: str,
         device: str = "cpu",
-    ):
+    ) -> Tuple[float, pd.Timestamp]:
+        """
+        Predict the period and last purchase date from the given DataFrame.
+
+        Args:
+            df (pd.DataFrame): The input DataFrame containing the dates and values.
+            dates_column (str): The name of the column containing the dates.
+            values_column (str): The name of the column containing the values.
+            device (str, optional): The device to perform the prediction on. Defaults to "cpu".
+
+        Returns:
+            Tuple[float, pd.Timestamp]: A tuple containing the predicted period and the last purchase date.
+        """
         self._model.to(device)
         df = df[[dates_column, values_column]].copy()
         df[dates_column] = pd.to_datetime(df[dates_column], dayfirst=True)

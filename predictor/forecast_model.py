@@ -1,4 +1,4 @@
-from typing import Any, Iterable, Optional
+from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple
 
 import numpy as np
 import pandas as pd
@@ -24,10 +24,22 @@ class Model:
         self,
         df: pd.DataFrame,
         period_model: Any,
-        regular_codes: Optional[tuple] = None,
+        regular_codes: Optional[Tuple[str]] = None,
         value_column: str = "paid_rub",
         date_column: str = "conclusion_date",
-    ):
+    ) -> None:
+        """
+        Initialize the Model object.
+
+        Args:
+            df (pd.DataFrame): The input data containing the data to be used for prediction.
+                The DataFrame should have columns "depth3_code_kpgz", "paid_rub", and "conclusion_date".
+            period_model (Any): The period model object used for prediction.
+            regular_codes (Optional[Tuple[str]], optional): The regular codes to be used for filtering.
+                Defaults to None.
+            value_column (str, optional): The column name for the value column. Defaults to "paid_rub".
+            date_column (str, optional): The column name for the date column. Defaults to "conclusion_date".
+        """
         self._value_column = value_column
         self._date_column = date_column
         self._df = df[["depth3_code_kpgz", value_column, date_column]].copy()
@@ -40,17 +52,35 @@ class Model:
         self._trend_models_by_segment, self._periods_df = self.fit()
 
     @property
-    def filtered_segments(self):
+    def filtered_segments(self) -> Tuple[str]:
+        """
+        Get the filtered segments.
+
+        Returns:
+            Tuple[str]: The filtered segments.
+        """
         return tuple(self._trend_models_by_segment.keys())
 
     def filter_regular_codes(
         self,
         segments: pd.Series,
-        regular_codes: tuple,
+        regular_codes: Optional[Tuple[str]] = None,
         count_threshold: int = 3,
         starts_with: Optional[str] = "01.",
-    ):
+    ) -> Tuple[str]:
+        """
+        Filter the segments based on given criteria.
 
+        Args:
+            segments (pd.Series): The segments to be filtered.
+            regular_codes (Optional[Tuple[str]], optional): The regular codes to be used for filtering.
+                Defaults to None.
+            count_threshold (int, optional): The count threshold for filtering. Defaults to 3.
+            starts_with (Optional[str], optional): The prefix for filtering. Defaults to "01.".
+
+        Returns:
+            Tuple[str]: The filtered segments.
+        """
         segments = segments[segments > count_threshold]
         segments_np = segments.index.to_numpy()
 
@@ -64,8 +94,19 @@ class Model:
 
         return segments
 
-    def fit_trend(self, x_data, y_data):
-        def app_func(x, *params):
+    def fit_trend(self, x_data: np.ndarray, y_data: np.ndarray) -> Callable[[float], float]:
+        """
+        Fit a trend model to the given data.
+
+        Args:
+            x_data (np.ndarray): The input data.
+            y_data (np.ndarray): The target data.
+
+        Returns:
+            Callable[[float], float]: A function that takes a float as input and returns the predicted value.
+        """
+
+        def app_func(x: float, *params: float) -> float:
             log_func = params[0] * np.log(params[1] * x + params[2])
             poly_func = params[3] * x + params[4]
             sin_func = params[5] * (np.sin(params[6] * (x + params[7])) + params[6] * x)
@@ -113,9 +154,26 @@ class Model:
         return output_func
 
     def train_trend_models(
-        self, segments: Iterable[str], min_dates_records: int = 3, min_r2: float = 0.7
-    ) -> dict[str, Any]:
-        trend_models_by_segment = {}
+        self,
+        segments: Iterable[str],
+        min_dates_records: int = 3,
+        min_r2: float = 0.7,
+    ) -> dict[str, FittedTrendModel]:
+        """
+        Train trend models for each segment.
+
+        Args:
+            segments (Iterable[str]): The segments to train models for.
+            min_dates_records (int, optional): Minimum number of non-zero records
+                required for a segment. Defaults to 3.
+            min_r2 (float, optional): Minimum r-squared value for a model.
+                Defaults to 0.7.
+
+        Returns:
+            dict[str, FittedTrendModel]: A dictionary mapping segment names to fitted
+                trend models.
+        """
+        trend_models_by_segment: dict[str, FittedTrendModel] = {}
 
         for segment in segments:
             filtered_df = self._df[self._df["depth3_code_kpgz"] == segment]
@@ -162,7 +220,16 @@ class Model:
 
         return trend_models_by_segment
 
-    def get_periods(self, segments: Iterable[str]):
+    def get_periods(self, segments: Iterable[str]) -> pd.DataFrame:
+        """
+        Get periods for each segment.
+
+        Args:
+            segments (Iterable[str]): The segments to get periods for.
+
+        Returns:
+            pd.DataFrame: A DataFrame containing the last date, period, and segment.
+        """
         all_periods = []
         all_timestamps = []
         all_segments = []
@@ -189,13 +256,38 @@ class Model:
 
         return periods_df
 
-    def fit(self):
+    def fit(self) -> Tuple[Dict[str, FittedTrendModel], pd.DataFrame]:
+        """
+        Train the trend models and get the periods for each segment.
+
+        Returns:
+            Tuple[Dict[str, FittedTrendModel], pd.DataFrame]: A tuple containing the trained trend models
+            and the periods DataFrame.
+        """
         trend_models_by_segment = self.train_trend_models(self._uniq_segments)
         periods_df = self.get_periods(self._uniq_segments)
 
         return trend_models_by_segment, periods_df
 
-    def predict(self, start_date: np.datetime64, num_months: int, segment: str):
+    def predict(
+        self,
+        start_date: np.datetime64,
+        num_months: int,
+        segment: str,
+    ) -> List[Dict[np.datetime64, float]]:
+        """
+        Predict the future values for a given segment.
+
+        Args:
+            start_date (np.datetime64): The start date for the prediction.
+            num_months (int): The number of months to predict.
+            segment (str): The segment to predict for.
+
+        Returns:
+            List[Dict[np.datetime64, float]]: A list of dictionaries containing the predicted values for each
+            future date. Each dictionary contains a single key-value pair, where the key is the predicted date
+            and the value is the predicted value.
+        """
         segment_period_info = self._periods_df[
             self._periods_df["depth3_code_kpgz"] == segment
         ]
