@@ -1,4 +1,5 @@
 import ChatApiService from '@/api/ChatApiService';
+import OrganizationsApiService from '@/api/OrganizationsApiService';
 import {
     ChatSession,
     DeleteSessionParams,
@@ -18,6 +19,7 @@ import {
     StockResponse,
     UNAUTHORIZED_ERR,
 } from '@/api/models';
+import { GetUsersInOrganizationParams, Organization } from '@/api/models/organizations';
 import { LOCAL_STORAGE_KEY } from '@/auth/AuthProvider';
 import { WS_URL } from '@/config';
 import { makeAutoObservable, runInAction } from 'mobx';
@@ -36,6 +38,11 @@ export class RootStore {
     closedWebSocket: WebSocket | null = null;
 
     websocket: WebSocket | null = null;
+
+    organization: Organization | null = null;
+    isOrganizationLoading: boolean = false;
+    usersInOrganization: string[] = [];
+    isUsersInOrganizationLoading: boolean = false;
 
     constructor() {
         makeAutoObservable(this);
@@ -369,5 +376,35 @@ export class RootStore {
         if (this.activeSessionId) {
             this.connectWebSocket(this.activeSessionId);
         }
+    }
+
+    async getOrganization() {
+        this.isOrganizationLoading = true;
+
+        return OrganizationsApiService.getOrganization()
+            .then((organization) => {
+                this.organization = organization;
+
+                return organization;
+            })
+            .finally(() => {
+                this.isOrganizationLoading = false;
+            });
+    }
+
+    async getUsersInOrganization({ organization }: GetUsersInOrganizationParams) {
+        this.isUsersInOrganizationLoading = true;
+
+        return OrganizationsApiService.getUsersInOrganization({ organization })
+            .then((users) => {
+                this.usersInOrganization = users;
+            })
+            .finally(() => {
+                this.isUsersInOrganizationLoading = false;
+            });
+    }
+
+    setIsUsersInOrganizationLoading(isLoading: boolean) {
+        this.isUsersInOrganizationLoading = isLoading;
     }
 }

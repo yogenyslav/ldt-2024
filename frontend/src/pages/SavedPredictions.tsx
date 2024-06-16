@@ -28,7 +28,7 @@ const SavedPredictions = () => {
     }, []);
 
     return (
-        <div className='saved flex gap-4 flex-col'>
+        <div className='saved flex gap-4 flex-col pb-10'>
             {isLoading ? (
                 <div>Loading...</div>
             ) : savedPredictions.length ? (
