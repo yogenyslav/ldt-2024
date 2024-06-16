@@ -9,8 +9,23 @@ import { Toaster } from './components/ui/toaster';
 import SavedPredictions from './pages/SavedPredictions';
 import Organizations from './pages/Organizations';
 import { Pages } from './router/constants';
+import { useEffect } from 'react';
 
 function App() {
+    useEffect(() => {
+        // eslint-disable-next-line
+        // @ts-ignore
+        if (window.Telegram && window.Telegram.WebApp) {
+            // eslint-disable-next-line
+            // @ts-ignore
+            const telegramWebApp = window.Telegram.WebApp;
+
+            telegramWebApp.expand();
+        } else {
+            console.error('Telegram WebApp is not available');
+        }
+    }, []);
+
     return (
         <>
             <Toaster />
