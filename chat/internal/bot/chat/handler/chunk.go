@@ -41,13 +41,49 @@ func (h *Handler) processChunk(wg *sync.WaitGroup, c tele.Context, out <-chan ch
 					log.Error().Err(err).Msg("failed to create file")
 					continue
 				}
+				mp := make(map[string]any)
 				dataBytes, err := json.Marshal(chunk.Data)
 				if err != nil {
 					_ = file.Close()
 					log.Error().Err(err).Msg("failed to marshal data")
 					continue
 				}
-				_, err = file.Write(dataBytes)
+				if err := json.Unmarshal(dataBytes, &mp); err != nil {
+					_ = file.Close()
+					log.Error().Err(err).Msg("failed to unmarshal data")
+					continue
+				}
+				isRegular, ok := mp["is_regular"].(bool)
+				if !ok {
+					_ = file.Close()
+					log.Error().Msg("failed to get is_regular")
+					continue
+				}
+				if !isRegular {
+					if err := c.Send("Это нерегулярная закупка. По ней не получится построить предсказание"); err != nil {
+						log.Error().Err(err).Msg("failed to send response")
+					}
+					continue
+				}
+				forecast, ok := mp["forecast"].([]any)
+				if !ok {
+					_ = file.Close()
+					log.Error().Msg("failed to get forecast")
+					continue
+				}
+				if len(forecast) == 0 {
+					if err := c.Send("Вы запросили период для предсказания, за который нет закупок"); err != nil {
+						log.Error().Err(err).Msg("failed to send response")
+					}
+					continue
+				}
+				outputJson, err := json.Marshal(mp["output_json"])
+				if err != nil {
+					_ = file.Close()
+					log.Error().Err(err).Msg("failed to marshal output_json")
+					continue
+				}
+				_, err = file.Write(outputJson)
 				if err != nil {
 					_ = file.Close()
 					log.Error().Err(err).Msg("failed to write data")
