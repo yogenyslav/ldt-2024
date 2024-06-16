@@ -1,5 +1,6 @@
 import json
 import logging
+import math
 import os
 from concurrent import futures
 from datetime import datetime
@@ -198,7 +199,10 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
         }
 
         code_name = code_info["code_name"]
-        code_info["code_name"] = code_name if code_name is not None else ""
+        if code_name is None or math.isnan(code_name):
+            code_name = "unknown"
+            
+        code_info["code_name"] = code_name
         code_info["forecast"] = forecast
         code_info["output_json"] = output_json
         code_info["closest_purchase"] = closest_purchase
