@@ -1,7 +1,7 @@
 include .env
 
-.PHONY: .deps
-.deps:
+.PHONY: deps
+deps:
 	curl -fsSL \
         https://raw.githubusercontent.com/pressly/goose/master/install.sh |\
         GOOSE_INSTALL=. sh
@@ -109,8 +109,5 @@ ollama_down:
 	docker stop ollama
 	docker rm ollama
 
-.PHONY: deps
-deps: .deps migrate_up
-
 .PHONY: run_all
-run_all: deps ollama_up docker_up
+run_all: migrate_up ollama_up docker_up
