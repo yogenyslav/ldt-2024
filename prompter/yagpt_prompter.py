@@ -45,11 +45,11 @@ class YaGPTPrompter:
         model_choice = os.getenv("MODEL_CHOICE")
         self._model_uri = f"gpt://{self._yandex_folder_id}/{model_choice}/latest"
 
-    def _prepare_prompt(self, prompt: str, request_type: PromptType) -> dict:
+    def _prepare_prompt(self, prompt: str, request_type: PromptType, stream: True) -> dict:
         return {
             "modelUri": self._model_uri,
             "completionOptions": {
-                "stream": False,
+                "stream": stream,
                 "temperature": 0.3,
                 "maxTokens": "5000",
             },
@@ -82,7 +82,7 @@ class YaGPTPrompter:
 
     def prepare_prompt2(self, data: dict) -> str:
         prompt = ""
-        for i, deal in enumerate(data["example_contracts_in_code"], start=1):
+        for i, deal in enumerate(data["contracts_in_code"], start=1):
             prompt += f"Контракт № {i}:\n"
             prompt += f"Код СПГЗ: {deal['id_spgz']}\n"
             prompt += f"Конечное наименование КПГЗ: {deal['name_spgz']}\n"
@@ -111,7 +111,7 @@ class YaGPTPrompter:
         self, prompt: str, request_type: PromptType, stream: bool = False
     ):
         time.sleep(1) # TODO: sorry for this abomination, I'll fix this later 
-        prepared_prompt = self._prepare_prompt(prompt, request_type)
+        prepared_prompt = self._prepare_prompt(prompt, request_type, stream=stream)
         response = requests.post(
             self._url,
             headers=self._headers,
