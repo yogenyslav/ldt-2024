@@ -156,11 +156,13 @@ const ModelMessage = ({ incomingMessage, isLastMessage }: ModelMessageProps) => 
                                     </Button>
                                 </div>
                             )}
-                            <div className='prose prose-stone'>
-                                <MarkdownPreview
-                                    source={incomingMessage.body}
-                                    style={{ padding: 16 }}
-                                />
+                            <div className='prose prose-stone overflow-x-scroll markdown'>
+                                <div>
+                                    <MarkdownPreview
+                                        source={incomingMessage.body}
+                                        style={{ padding: 16 }}
+                                    />
+                                </div>
                             </div>
                         </div>
                         <div className='flex items-center gap-2 py-2'>
@@ -206,7 +208,7 @@ const ModelMessage = ({ incomingMessage, isLastMessage }: ModelMessageProps) => 
             <Avatar className='border w-8 h-8'>
                 <AvatarFallback>MT</AvatarFallback>
             </Avatar>
-            <div className='grid gap-1 mt-2 w-full'>
+            <div className='gap-1 mt-2 w-full'>
                 <div className='font-bold'>Ответ модели</div>
 
                 {getModelResonse()}
