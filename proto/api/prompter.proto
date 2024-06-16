@@ -60,10 +60,26 @@ service Prompter {
 }
 
 message StreamReq {
+  option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_schema) = {
+    json_schema: {
+      title: "Получить ответ на запрос"
+      description: "Получение ответа на запрос от предиктора"
+      required: ["prompt"]
+    }
+    example: "{\"prompt\": \"я хочу купить бумагу A4 на 18 месяцев вперед\"}"
+  };
   bytes prompt = 1;
 }
 
 message StreamResp {
+  option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_schema) = {
+    json_schema: {
+      title: "Ответ на запрос"
+      description: "Ответ на запрос от предиктора по чанкам"
+      required: ["chunk"]
+    }
+    example: "{\"chunk\": \"Предсказание: цена бумаги A4 на 18 месяцев вперед составит 1000 рублей\"}"
+  };
   string chunk = 1;
 }
 

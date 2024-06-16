@@ -123,11 +123,19 @@
     },
     "apiStreamResp": {
       "type": "object",
+      "example": {
+        "chunk": "Предсказание: цена бумаги A4 на 18 месяцев вперед составит 1000 рублей"
+      },
       "properties": {
         "chunk": {
           "type": "string"
         }
-      }
+      },
+      "description": "Ответ на запрос от предиктора по чанкам",
+      "title": "Ответ на запрос",
+      "required": [
+        "chunk"
+      ]
     },
     "protobufAny": {
       "type": "object",
