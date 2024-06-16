@@ -71,11 +71,11 @@ class YaGPTPrompter:
         for i, forecast in enumerate(data["forecast"], start=1):
             prompt += f"Закупка № {i}\n"
             prompt += f"Рекомендуемая дата заключения: {forecast['date']}\n"
-            prompt += f"Рекомендуемая сумма закупки: {forecast['value']}\n"
+            prompt += f"Рекомендуемая сумма закупки: {round(forecast['value'], 2)}\n"
 
         prompt += f"Медианное время выполнения закупки по категории: {data['median_execution_days']}\n"
         prompt += f"Среднее время до начала выполнения закупки по категории: {data['mean_start_to_execute_days']}\n"
-        prompt += f"Средняя референсная цена: {data['mean_ref_price']}\n"
+        prompt += f"Средняя референсная цена: {round(data['mean_ref_price'], 2)}\n"
 
         prompt += "Топ 5 поставщиков этой категории по объему закупок:\n"
         for i, seller in enumerate(data["top5_providers"], start=1):
@@ -95,7 +95,7 @@ class YaGPTPrompter:
             if delivery["DeliverySchedule"]["deliveryAmount"]:
                 prompt += f"Объем поставки (условных единиц): {delivery['DeliverySchedule']['deliveryAmount']}\n"
             prompt += f"Номер версии: {delivery['id']}\n"
-            prompt += f"Объем в рублях: {delivery['nmc']}\n"
+            prompt += f"Объем в рублях: {round(delivery['nmc'], 2)}\n"
             prompt += f"ID СПГЗ: {delivery['spgzCharacteristics']['spgzId']}"
             prompt += (
                 f"Наименование СПГЗ: {delivery['spgzCharacteristics']['spgzName']}\n"
@@ -104,33 +104,6 @@ class YaGPTPrompter:
             prompt += (
                 f"Наименование КПГЗ: {delivery['spgzCharacteristics']['kpgzName']}\n"
             )
-            if i == 4:
-                break
-
-        return prompt
-
-    def prepare_prompt2(self, data: dict) -> str:
-        prompt = ""
-        for i, deal in enumerate(data["example_contracts_in_code"], start=1):
-            prompt += f"Контракт № {i}:\n"
-            prompt += f"Код СПГЗ: {deal['id_spgz']}\n"
-            prompt += f"Конечное наименование КПГЗ: {deal['name_spgz']}\n"
-            prompt += f"Наименование ГК: {deal['item_name_gk']}\n"
-            prompt += f"Дата регистрации контракта: {deal['conclusion_date']}\n"
-            prompt += (
-                f"Дата начала выполнения контракта: {deal['execution_term_from']}\n"
-            )
-            prompt += (
-                f"Дата окончания выполнения контракта: {deal['execution_term_until']}\n"
-            )
-            prompt += f"Дата окончания срока действия: {deal['end_date_of_validity']}\n"
-            prompt += f"Оплачено, руб.: {deal['paid_rub']}\n"
-            prompt += f"Цена ГК при заключении, руб.: {deal['gk_price_rub']}\n"
-            prompt += f"Конечный код КПГЗ: {deal['final_code_kpgz']}\n"
-            prompt += f"Конечное наименование КПГЗ: {deal['final_name_kpgz']}\n"
-            prompt += f"Реестровый номер в РК: {deal['registry_number_in_rk']}\n"
-            prompt += f"Код поставщика: {deal['provider']}\n"
-            prompt += f"Референсная цена: {deal['ref_price']}\n"
             if i == 4:
                 break
 
@@ -147,13 +120,12 @@ class YaGPTPrompter:
         prompt += f"Код категории: {data['code']}\n"
         prompt += f"Наименование категории: {data['code_name']}\n"
         prompt += f"Регулярная/нерегулярная: {'регулярная' if data['is_regular'] else 'нерегулярная'}\n"
-        prompt += f"Напиши о том, что период прогнозирования выбран слишком мал, поэтому ниже представлена информация о ближайшей закупке\n"
         prompt += f"Дата заключения контракта: {data['closest_purchase']['date']}\n"
         prompt += f"Сумма закупки: {round(data['closest_purchase']['value'], 2)}\n"
         prompt += f"Объем закупки (условные единицы): {data['closest_purchase']['volume'] if data['closest_purchase']['volume'] else 'Информация отсутствует'}\n"
         prompt += f"Медианное время выполнения закупки по категории: {data['median_execution_days']}\n"
         prompt += f"Среднее время до начала выполнения закупки по категории: {data['mean_start_to_execute_days']}\n"
-        prompt += f"Средняя референсная цена: {data['mean_ref_price'] if data['mean_ref_price'] else 'Информация отсутствует'}\n"
+        prompt += f"Средняя референсная цена: {round(data['mean_ref_price'], 2) if data['mean_ref_price'] else 'Информация отсутствует'}\n"
 
         prompt += "Топ 5 поставщиков этой категории по объему закупок:\n"
         for i, seller in enumerate(data["top5_providers"], start=1):
@@ -161,7 +133,7 @@ class YaGPTPrompter:
 
         prompt += f"Подробная информация о ближайшей закупке:\n"
         prompt += f"Дата заключения контракта: {data['closest_purchase']['date']}\n"
-        prompt += f"Сумма закупки: {data['closest_purchase']['value']}\n"
+        prompt += f"Сумма закупки: {round(data['closest_purchase']['value'], 2)}\n"
         if data["closest_purchase"]["volume"]:
             prompt += f"Объем закупки (условные единицы): {data['closest_purchase']['volume']}\n"
 
@@ -287,12 +259,12 @@ class YaGPTPrompter:
             Не давай лишней информации, посоветуй пользователю ввести другой товар. Не советуй пользователю ничего"""
         elif inp["forecast"] == []:
             request = self.prepare_prompt_with_empty_forecast(inp)
-            request += """ЗАПРОС 1: Оформи отчет в MARKDOWN, добавь таблицы, где нужно, если они слишком широкие (столбцов больше, чем строк), поменяй строки с столбцы местами. Убери None, где нет информации. 
+            request += """ЗАПРОС 1: Оформи отчет в MARKDOWN, добавь таблицы, названия колонок/переменных указывай вертикально, записи - горизонтально. Убери None, где нет информации. 
             В своем отчете укажи всю предоставленную информацию. Не добавляй информацию, которой нет в исходных данных. 
             Добавь суммаризацию, в которой скажи то, что информацию о закупках можно поменять в соответствии с потребностями заказчика."""
         else:
             request = self.prepare_prompt1(inp)
-            request += """ЗАПРОС 1: Оформи отчет в MARKDOWN, добавь таблицы, где нужно, если они слишком широкие (столбцов больше, чем строк), поменяй строки с столбцы местами. Убери None, где нет информации. 
+            request += """ЗАПРОС 1: Оформи отчет в MARKDOWN, добавь таблицы, названия колонок/переменных указывай вертикально, записи - горизонтально. Убери None, где нет информации. 
             В своем отчете укажи всю предоставленную информацию. Не добавляй информацию, которой нет в исходных данных. 
             Добавь суммаризацию, в которой скажи то, что информацию о закупках можно поменять в соответствии с потребностями заказчика."""
         return self._generate_responce(request, prompt_type, stream=True)
