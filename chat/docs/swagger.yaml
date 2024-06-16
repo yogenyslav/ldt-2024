@@ -1,3 +1,4 @@
+basePath: /chat
 definitions:
   model.FavoriteCreateReq:
     properties:
