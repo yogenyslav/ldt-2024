@@ -4,6 +4,9 @@ server:
   cors_origins:
     - "*"
   cipher_key: "32-bit cipher hex key"
+  bot_token: "BOT:TOKEN"
+  debug_mode: true
+  app_url: "https://misis.larek.tech"
 
 keycloak:
   url: "http://keycloak:8080"
@@ -22,7 +25,7 @@ jaeger:
   host: "jaeger"
   port: 4318
 
-prometheus:
+prom:
   host: ""
   port: 10001
 

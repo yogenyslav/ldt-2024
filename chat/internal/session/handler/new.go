@@ -15,7 +15,7 @@ import (
 // @Tags session
 // @Accept json
 // @Produce json
-// @Param Authorization header string true "access token"
+// @Security ApiKeyAuth
 // @Success 201 {object} model.NewSessionResp "ID новой сессии"
 // @Failure 400 {object} string "Сессия с таким ID уже существует"
 // @Router /session/new [post]
@@ -26,7 +26,7 @@ func (h *Handler) NewSession(c *fiber.Ctx) error {
 	}
 
 	id := uuid.New()
-	if err := h.ctrl.NewSession(c.UserContext(), id, username); err != nil {
+	if err := h.ctrl.NewSession(c.UserContext(), id, username, false, 0); err != nil {
 		return err
 	}
 

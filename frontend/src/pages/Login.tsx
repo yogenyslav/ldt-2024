@@ -63,7 +63,7 @@ export function Login() {
                         </LoaderButton>
                     </form>
                     <div className='mt-4 text-center text-sm'>
-                        Обратитесь к администратору для получения доступа.
+                        Учетные данные для доступа в приложение можно найти в инструкции.
                     </div>
                 </CardContent>
             </Card>

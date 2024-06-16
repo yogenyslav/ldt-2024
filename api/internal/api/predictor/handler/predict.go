@@ -5,6 +5,7 @@ import (
 
 	"github.com/rs/zerolog/log"
 	"github.com/yogenyslav/ldt-2024/api/internal/api/pb"
+	"github.com/yogenyslav/ldt-2024/api/internal/shared"
 	"github.com/yogenyslav/ldt-2024/api/pkg"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
@@ -35,10 +36,26 @@ func (h *Handler) Predict(c context.Context, in *pb.PredictReq) (*pb.PredictResp
 	)
 	defer span.End()
 
-	resp, err := h.predictor.Predict(ctx, in)
+	organization, ok := ctx.Value(shared.OrganizationKey).(string)
+	if !ok {
+		log.Error().Msg("failed to get organization")
+		return nil, status.Error(codes.Internal, "failed to get organization")
+	}
+	in.Organization = organization
+
+	switch in.GetType() {
+	case pb.QueryType_PREDICTION:
+		h.m.NumberOfPredictRequests.Inc()
+	case pb.QueryType_STOCK:
+		h.m.NumberOfStockRequests.Inc()
+	}
+
+	resp, err := h.predictor.Predict(pkg.PushSpan(ctx, span), in)
 	if err != nil {
 		log.Error().Err(err).Msg("failed to predict")
+		h.m.PredictionErrors.Inc()
 		return nil, status.Error(codes.Internal, err.Error())
 	}
+	h.m.NumberOfReports.Inc()
 	return resp, status.Error(codes.OK, "predicted")
 }

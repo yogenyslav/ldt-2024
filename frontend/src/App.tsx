@@ -6,8 +6,26 @@ import { AuthProvider } from './auth/AuthProvider';
 import { RequireUnauth } from './auth/RequireUnauth';
 import { Dashboard } from './components/Dashboard';
 import { Toaster } from './components/ui/toaster';
+import SavedPredictions from './pages/SavedPredictions';
+import Organizations from './pages/Organizations';
+import { Pages } from './router/constants';
+import { useEffect } from 'react';
 
 function App() {
+    useEffect(() => {
+        // eslint-disable-next-line
+        // @ts-ignore
+        if (window.Telegram && window.Telegram.WebApp) {
+            // eslint-disable-next-line
+            // @ts-ignore
+            const telegramWebApp = window.Telegram.WebApp;
+
+            telegramWebApp.expand();
+        } else {
+            console.error('Telegram WebApp is not available');
+        }
+    }, []);
+
     return (
         <>
             <Toaster />
@@ -15,7 +33,7 @@ function App() {
             <AuthProvider>
                 <Routes>
                     <Route
-                        path='/login'
+                        path={`/${Pages.Login}`}
                         element={
                             <RequireUnauth>
                                 <Login />
@@ -23,11 +41,31 @@ function App() {
                         }
                     />
                     <Route
-                        path='/chat/:sessionId'
+                        path={`/${Pages.Chat}/:sessionId`}
                         element={
                             <RequireAuth>
                                 <Dashboard>
                                     <Chat />
+                                </Dashboard>
+                            </RequireAuth>
+                        }
+                    />
+                    <Route
+                        path={`/${Pages.SavedPredictions}`}
+                        element={
+                            <RequireAuth>
+                                <Dashboard>
+                                    <SavedPredictions />
+                                </Dashboard>
+                            </RequireAuth>
+                        }
+                    />
+                    <Route
+                        path={`/${Pages.Organizatinos}`}
+                        element={
+                            <RequireAuth>
+                                <Dashboard>
+                                    <Organizations />
                                 </Dashboard>
                             </RequireAuth>
                         }

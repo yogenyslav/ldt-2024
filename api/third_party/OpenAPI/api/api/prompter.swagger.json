@@ -121,6 +121,14 @@
       ],
       "default": "UNDEFINED"
     },
+    "apiStreamResp": {
+      "type": "object",
+      "properties": {
+        "chunk": {
+          "type": "string"
+        }
+      }
+    },
     "protobufAny": {
       "type": "object",
       "properties": {

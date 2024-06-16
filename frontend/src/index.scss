@@ -69,6 +69,10 @@ body:has(.dashboard) {
     overflow: hidden;
 }
 
+main:has(.chat) {
+    max-width: 100vw;
+}
+
 .chat {
     max-height: calc(100vh - 3.5rem);
     overflow-y: scroll;
@@ -78,10 +82,29 @@ body:has(.dashboard) {
     }
 }
 
+.saved {
+    max-height: calc(100vh - 3.5rem);
+    overflow-y: scroll;
+}
+
 @media screen and (max-width: 768px) {
     .session-history-item {
         &__delete-button {
             display: block;
         }
+    }
+}
+
+.wmde-markdown {
+    --color-canvas-default: 210 12.5% 96.86% !important;
+    --color-fg-default: 0 0% 3.9% !important;
+    --color-fg-default: 0 0% 3.9% !important;
+    --color-canvas-subtle: 210 12.5% 96.86% !important;
+}
+
+.wmde-markdown a {
+    display: none !important;
+    &:hover {
+        display: none !important;
     }
 }

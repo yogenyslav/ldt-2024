@@ -20,13 +20,13 @@ func New(pg storage.SQLDatabase) *Repo {
 }
 
 const insertOne = `
-	insert into chat.session(id, username, title)
-	values ($1, $2, $3);
+	insert into chat.session(id, username, title, tg, tg_id)
+	values ($1, $2, $3, $4, $5);
 `
 
 // InsertOne создает новую сессию.
 func (r *Repo) InsertOne(ctx context.Context, params model.SessionDao) error {
-	_, err := r.pg.Exec(ctx, insertOne, params.ID, params.Username, params.Title)
+	_, err := r.pg.Exec(ctx, insertOne, params.ID, params.Username, params.Title, params.Tg, params.TgID)
 	return err
 }
 
@@ -95,7 +95,7 @@ func (r *Repo) FindMeta(ctx context.Context, id uuid.UUID) (model.SessionMeta, e
 
 const findContent = `
 	select 
-		(r.created_at, r.body, r.status) as response,
+		(r.created_at, r.body, r.data, r.data_type, r.status) as response,
 		(q.created_at, q.prompt, q.product, q.period, q.status, q.type, q.id) as query
 	from chat.query q
 	join
@@ -116,7 +116,7 @@ func (r *Repo) FindContent(ctx context.Context, id uuid.UUID) ([]model.SessionCo
 	return content, err
 }
 
-const sessionClenaup = `
+const sessionContentEmpty = `
 	select count(id)
 	from chat.query
 	where session_id = $1;
@@ -125,6 +125,6 @@ const sessionClenaup = `
 // SessionContentEmpty проверяет, что контент сессии пуст.
 func (r *Repo) SessionContentEmpty(ctx context.Context, sessionID uuid.UUID) (bool, error) {
 	var count int64
-	err := r.pg.Query(ctx, &count, sessionClenaup, sessionID)
+	err := r.pg.Query(ctx, &count, sessionContentEmpty, sessionID)
 	return count == 0, err
 }

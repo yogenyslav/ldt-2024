@@ -1,4 +1,5 @@
 import ChatApiService from '@/api/ChatApiService';
+import OrganizationsApiService from '@/api/OrganizationsApiService';
 import {
     ChatSession,
     DeleteSessionParams,
@@ -13,7 +14,12 @@ import {
     WSMessage,
     WSIncomingChunk,
     ChatCommand,
+    ModelResponseType,
+    PredictionResponse,
+    StockResponse,
+    UNAUTHORIZED_ERR,
 } from '@/api/models';
+import { GetUsersInOrganizationParams, Organization } from '@/api/models/organizations';
 import { LOCAL_STORAGE_KEY } from '@/auth/AuthProvider';
 import { WS_URL } from '@/config';
 import { makeAutoObservable, runInAction } from 'mobx';
@@ -28,8 +34,15 @@ export class RootStore {
     activeSessionLoading: boolean = false;
     isChatDisabled: boolean = false;
     isModelAnswering: boolean = false;
+    chatError: string | null = null;
+    closedWebSocket: WebSocket | null = null;
 
     websocket: WebSocket | null = null;
+
+    organization: Organization | null = null;
+    isOrganizationLoading: boolean = false;
+    usersInOrganization: string[] = [];
+    isUsersInOrganizationLoading: boolean = false;
 
     constructor() {
         makeAutoObservable(this);
@@ -52,7 +65,7 @@ export class RootStore {
     async deleteSession({ id }: DeleteSessionParams) {
         return ChatApiService.deleteSession({ id }).then(() => {
             if (this.activeSessionId === id) {
-                this.activeSessionId = null;
+                this.setActiveSessionId(null);
                 this.activeSession = null;
             }
         });
@@ -75,6 +88,16 @@ export class RootStore {
 
         this.activeDisplayedSession = {
             messages: session.content.map((content) => {
+                const prediction =
+                    content.response.data_type === ModelResponseType.Prediction
+                        ? (content.response.data as PredictionResponse)
+                        : null;
+
+                const stocks =
+                    content.response.data_type === ModelResponseType.Stock
+                        ? (content.response.data as StockResponse)
+                        : null;
+
                 return {
                     incomingMessage: {
                         body: content.response.body,
@@ -82,6 +105,14 @@ export class RootStore {
                         status: content.query.status as IncomingMessageStatus,
                         product: content.query.product,
                         period: content.query.period,
+                        prediction: prediction
+                            ? {
+                                  forecast: prediction.forecast,
+                                  history: prediction.history,
+                              }
+                            : undefined,
+                        stocks: stocks?.data,
+                        outputJson: prediction?.output_json,
                     },
                     outcomingMessage: {
                         prompt: content.query.prompt,
@@ -93,10 +124,8 @@ export class RootStore {
         this.connectWebSocket(session.id);
     }
 
-    setActiveSessionId(id: string) {
-        if (id !== this.activeSession?.id) {
-            // this.disconnectWebSocket();
-
+    setActiveSessionId(id: string | null) {
+        if (id !== this.activeSessionId) {
             this.activeSessionId = id;
         }
     }
@@ -108,8 +137,6 @@ export class RootStore {
     async createSession() {
         return ChatApiService.createSession().then(async ({ id }) => {
             this.activeDisplayedSession = null;
-
-            this.setActiveSessionId(id);
 
             this.getSessions();
 
@@ -129,6 +156,8 @@ export class RootStore {
                 this.websocket.send(
                     JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) as string)?.user?.token
                 );
+
+                this.setChatDisabled(false);
             }
 
             this.setActiveSessionId(sessionId);
@@ -142,20 +171,41 @@ export class RootStore {
 
                 console.log(wsMessage);
 
+                if (wsMessage.err) {
+                    this.chatError = wsMessage.err;
+
+                    if (wsMessage.err === UNAUTHORIZED_ERR) {
+                        localStorage.removeItem(LOCAL_STORAGE_KEY);
+
+                        window.location.href = '/login';
+                    }
+
+                    this.isModelAnswering = false;
+                    this.isChatDisabled = false;
+                }
+
                 if (wsMessage.chunk && !wsMessage.finish) {
                     // this.isModelAnswering = true;
                     // this.isChatDisabled = true;
 
                     this.processIncomingChunk(data as WSIncomingChunk);
-                } else if (!wsMessage.chunk && wsMessage.data) {
+                } else if (!wsMessage.chunk && wsMessage.data && !wsMessage.data_type) {
+                    //!wsMessage.data_type значит, что это ответ модели (prediction или stock)
                     this.processIncomingQuery(data as WSIncomingQuery);
+                } else if (wsMessage.data_type === ModelResponseType.Prediction && wsMessage.data) {
+                    this.processIncomingPrediction(data as PredictionResponse);
+                } else if (wsMessage.data_type === ModelResponseType.Stock && wsMessage.data) {
+                    this.processIncomingStock(data as StockResponse);
                 }
 
-                if (wsMessage.finish || !wsMessage.chunk) {
+                if (
+                    (wsMessage.finish || !wsMessage.chunk) &&
+                    !(wsMessage.data_type === ModelResponseType.Prediction)
+                ) {
                     this.isModelAnswering = false;
                 }
 
-                if (wsMessage.finish) {
+                if (wsMessage.finish || wsMessage.data_type === ModelResponseType.Stock) {
                     this.isChatDisabled = false;
                 }
             });
@@ -163,6 +213,11 @@ export class RootStore {
 
         this.websocket.onclose = () => {
             console.log('WebSocket connection closed');
+
+            this.isChatDisabled = true;
+            this.closedWebSocket = this.websocket;
+
+            this.reconnectWebSocket();
         };
 
         this.websocket.onerror = (error) => {
@@ -183,7 +238,7 @@ export class RootStore {
         if (this.isFirstMessageInSession()) {
             this.renameSession({
                 id: this.activeSessionId as string,
-                title: message.prompt?.slice(0, 25) || 'Без названия',
+                title: message.prompt?.slice(0, 60) || 'Без названия',
             });
         }
 
@@ -192,6 +247,7 @@ export class RootStore {
 
     disconnectWebSocket() {
         if (this.websocket) {
+            this.setActiveSessionId(null);
             this.websocket.close();
         }
     }
@@ -237,10 +293,61 @@ export class RootStore {
                 this.activeDisplayedSession.messages[lastMessageIndex].incomingMessage?.body;
 
             this.activeDisplayedSession.messages[lastMessageIndex].incomingMessage = {
+                ...this.activeDisplayedSession.messages[lastMessageIndex].incomingMessage,
                 body: lastMessageBody ? lastMessageBody + info : info,
-                type: IncomingMessageType.Undefined,
+                type: IncomingMessageType.Prediction,
                 status: IncomingMessageStatus.Valid,
             };
+        }
+    }
+
+    private processIncomingPrediction(data: PredictionResponse) {
+        const { forecast, history } = data;
+        console.log('processIncomingPrediction', forecast, history);
+
+        const session = this.activeDisplayedSession;
+        if (!this.activeSessionId || !session?.messages.length) return;
+
+        const lastMessageIndex = session.messages.length - 1;
+        const lastMessage = session.messages[lastMessageIndex];
+
+        const incomingMessage = lastMessage.incomingMessage || {
+            body: '',
+            type: IncomingMessageType.Undefined,
+            status: IncomingMessageStatus.Valid,
+            prediction: { forecast, history },
+        };
+
+        incomingMessage.prediction = { forecast, history };
+        lastMessage.incomingMessage = incomingMessage;
+        lastMessage.incomingMessage.outputJson = data.output_json;
+        lastMessage.incomingMessage.type = IncomingMessageType.Prediction;
+
+        if (this.activeDisplayedSession) {
+            this.activeDisplayedSession.messages[lastMessageIndex] = lastMessage;
+        }
+    }
+
+    private processIncomingStock({ data }: StockResponse) {
+        console.log('processIncomingStock', data);
+
+        const session = this.activeDisplayedSession;
+        if (!this.activeSessionId || !session?.messages.length) return;
+
+        const lastMessageIndex = session.messages.length - 1;
+        const lastMessage = session.messages[lastMessageIndex];
+
+        const incomingMessage = lastMessage.incomingMessage || {
+            body: '',
+            type: IncomingMessageType.Undefined,
+            status: IncomingMessageStatus.Valid,
+        };
+
+        incomingMessage.stocks = data;
+        lastMessage.incomingMessage = incomingMessage;
+
+        if (this.activeDisplayedSession) {
+            this.activeDisplayedSession.messages[lastMessageIndex] = lastMessage;
         }
     }
 
@@ -263,5 +370,41 @@ export class RootStore {
 
     private isFirstMessageInSession() {
         return !this.activeDisplayedSession?.messages.length;
+    }
+
+    private reconnectWebSocket() {
+        if (this.activeSessionId) {
+            this.connectWebSocket(this.activeSessionId);
+        }
+    }
+
+    async getOrganization() {
+        this.isOrganizationLoading = true;
+
+        return OrganizationsApiService.getOrganization()
+            .then((organization) => {
+                this.organization = organization;
+
+                return organization;
+            })
+            .finally(() => {
+                this.isOrganizationLoading = false;
+            });
+    }
+
+    async getUsersInOrganization({ organization }: GetUsersInOrganizationParams) {
+        this.isUsersInOrganizationLoading = true;
+
+        return OrganizationsApiService.getUsersInOrganization({ organization })
+            .then((users) => {
+                this.usersInOrganization = users;
+            })
+            .finally(() => {
+                this.isUsersInOrganizationLoading = false;
+            });
+    }
+
+    setIsUsersInOrganizationLoading(isLoading: boolean) {
+        this.isUsersInOrganizationLoading = isLoading;
     }
 }

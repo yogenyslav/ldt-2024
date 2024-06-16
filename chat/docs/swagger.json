@@ -10,7 +10,7 @@
         },
         "version": "1.0"
     },
-    "host": "hawk-handy-wolf.ngrok-free.app",
+    "host": "api.misis.larek.tech",
     "basePath": "/chat",
     "paths": {
         "/auth/login": {
@@ -65,8 +65,228 @@
                 }
             }
         },
+        "/favorite": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Обновляет избранный предикт.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "favorite"
+                ],
+                "summary": "Обновляет избранный предикт.",
+                "parameters": [
+                    {
+                        "description": "Параметры запроса",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.FavoriteUpdateReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Предикт успешно обновлен",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Некорректный запрос",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Добавляет новый предикт в избранное.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "favorite"
+                ],
+                "summary": "Добавляет новый предикт в избранное.",
+                "parameters": [
+                    {
+                        "description": "Параметры запроса",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.FavoriteCreateReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Предикт успешно добавлен в избранное",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Некорректный запрос",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/favorite/list": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Возвращает список избранных предиктов.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "favorite"
+                ],
+                "summary": "Возвращает список избранных предиктов.",
+                "responses": {
+                    "200": {
+                        "description": "Список избранных предиктов",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.FavoriteDto"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/favorite/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Возвращает избранный предикт по ID.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "favorite"
+                ],
+                "summary": "Возвращает избранный предикт по ID.",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID предикта",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Избранный предикт",
+                        "schema": {
+                            "$ref": "#/definitions/model.FavoriteDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Некорректный запрос",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Предикт не найден",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Удаляет избранный предикт по ID.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "favorite"
+                ],
+                "summary": "Удаляет избранный предикт по ID.",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID предикта",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Предикт успешно удален",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Некорректный запрос",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Предикт не найден",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/session/list": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Получить список сессий в порядке убывания момента создания от последней к первой для авторизованного пользователя",
                 "consumes": [
                     "application/json"
@@ -78,15 +298,6 @@
                     "session"
                 ],
                 "summary": "Список сессий",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "access token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "Список сессий",
@@ -99,6 +310,11 @@
         },
         "/session/new": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Создать новую сессию в чате для авторизованного пользователя",
                 "consumes": [
                     "application/json"
@@ -110,15 +326,6 @@
                     "session"
                 ],
                 "summary": "Новая сессия",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "access token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    }
-                ],
                 "responses": {
                     "201": {
                         "description": "ID новой сессии",
@@ -137,6 +344,11 @@
         },
         "/session/rename": {
             "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Обновить заголовок сессии, который отображается в интерфейсе",
                 "consumes": [
                     "application/json"
@@ -149,13 +361,6 @@
                 ],
                 "summary": "Обновить заголовок",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "access token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
                     {
                         "description": "ID и новое название сессии",
                         "name": "req",
@@ -190,6 +395,11 @@
         },
         "/session/{id}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Получить все запросы и ответы для сессии по ID",
                 "consumes": [
                     "application/json"
@@ -202,13 +412,6 @@
                 ],
                 "summary": "Получить данные о сессии",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "access token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
                     {
                         "type": "string",
                         "description": "UUID сессии",
@@ -233,6 +436,11 @@
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Удалить сессию по ID",
                 "consumes": [
                     "application/json"
@@ -245,13 +453,6 @@
                 ],
                 "summary": "Удалить сессию",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "access token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
                     {
                         "type": "string",
                         "description": "UUID сессии",
@@ -281,9 +482,76 @@
                     }
                 }
             }
+        },
+        "/stock/unique_codes": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Получить набор уникальных записей с разделением на регулярные и нерегулярные товары",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "stock"
+                ],
+                "summary": "Регулярные товары",
+                "responses": {
+                    "200": {
+                        "description": "Список с товарами",
+                        "schema": {
+                            "$ref": "#/definitions/model.UniqueCodesResp"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
+        "model.FavoriteCreateReq": {
+            "type": "object",
+            "properties": {
+                "response": {
+                    "type": "object",
+                    "additionalProperties": {}
+                }
+            }
+        },
+        "model.FavoriteDto": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "response": {
+                    "type": "object",
+                    "additionalProperties": {}
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.FavoriteUpdateReq": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "response": {
+                    "type": "object",
+                    "additionalProperties": {}
+                }
+            }
+        },
         "model.FindOneResp": {
             "type": "object",
             "properties": {
@@ -405,6 +673,13 @@
                 "created_at": {
                     "type": "string"
                 },
+                "data": {
+                    "type": "object",
+                    "additionalProperties": {}
+                },
+                "data_type": {
+                    "type": "string"
+                },
                 "status": {
                     "type": "string"
                 }
@@ -433,10 +708,45 @@
                 "tg": {
                     "type": "boolean"
                 },
+                "tg_id": {
+                    "type": "integer"
+                },
                 "title": {
                     "type": "string"
                 }
             }
+        },
+        "model.UniqueCodeDto": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "regular": {
+                    "type": "boolean"
+                },
+                "segment": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.UniqueCodesResp": {
+            "type": "object",
+            "properties": {
+                "codes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.UniqueCodeDto"
+                    }
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "ApiKeyAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     }
 }

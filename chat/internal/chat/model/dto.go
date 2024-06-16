@@ -19,9 +19,11 @@ type QueryDto struct {
 
 // ResponseDto модель ответа.
 type ResponseDto struct {
-	CreatedAt time.Time `json:"created_at"`
-	Body      string    `json:"body"`
-	Status    string    `json:"status"`
+	CreatedAt time.Time      `json:"created_at"`
+	Body      string         `json:"body"`
+	Data      map[string]any `json:"data"`
+	DataType  string         `json:"data_type"`
+	Status    string         `json:"status"`
 }
 
 // QueryCreateReq модель запроса для создания.

@@ -22,21 +22,17 @@ import (
 	ac "github.com/yogenyslav/ldt-2024/api/internal/api/auth/controller"
 	ah "github.com/yogenyslav/ldt-2024/api/internal/api/auth/handler"
 	authmw "github.com/yogenyslav/ldt-2024/api/internal/api/auth/middleware"
+	"github.com/yogenyslav/ldt-2024/api/internal/api/auth/repo"
 	"github.com/yogenyslav/ldt-2024/api/internal/api/middleware"
 	"github.com/yogenyslav/ldt-2024/api/internal/api/pb"
-	"github.com/yogenyslav/ldt-2024/api/internal/api/predictor/handler"
-	pc "github.com/yogenyslav/ldt-2024/api/internal/api/prompter/controller"
-	ph "github.com/yogenyslav/ldt-2024/api/internal/api/prompter/handler"
-	sc "github.com/yogenyslav/ldt-2024/api/internal/api/stock/controller"
-	sh "github.com/yogenyslav/ldt-2024/api/internal/api/stock/handler"
-	sr "github.com/yogenyslav/ldt-2024/api/internal/api/stock/repo"
+	predh "github.com/yogenyslav/ldt-2024/api/internal/api/predictor/handler"
+	promh "github.com/yogenyslav/ldt-2024/api/internal/api/prompter/handler"
 	"github.com/yogenyslav/ldt-2024/api/pkg/client"
 	"github.com/yogenyslav/ldt-2024/api/pkg/metrics"
 	"github.com/yogenyslav/ldt-2024/api/third_party"
 	"github.com/yogenyslav/pkg/infrastructure/prom"
 	"github.com/yogenyslav/pkg/infrastructure/tracing"
 	"github.com/yogenyslav/pkg/storage"
-	"github.com/yogenyslav/pkg/storage/mongo"
 	"github.com/yogenyslav/pkg/storage/postgres"
 	"go.opentelemetry.io/otel"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
@@ -50,7 +46,6 @@ type Server struct {
 	cfg      *config.Config
 	srv      *grpc.Server
 	pg       storage.SQLDatabase
-	mongo    storage.MongoDatabase
 	kc       *gocloak.GoCloak
 	exporter sdktrace.SpanExporter
 	tracer   trace.Tracer
@@ -60,27 +55,27 @@ type Server struct {
 func New(cfg *config.Config) *Server {
 	kc := gocloak.NewClient(cfg.KeyCloak.URL)
 
-	logOpts := []logging.Option{
-		logging.WithLogOnEvents(logging.StartCall, logging.FinishCall),
-	}
-
-	var grpcOpts []grpc.ServerOption
-	grpcOpts = append(grpcOpts, grpc.ChainUnaryInterceptor(
-		logging.UnaryServerInterceptor(middleware.InterceptorLogger(), logOpts...),
-		auth.UnaryServerInterceptor(authmw.JWT(kc, cfg.KeyCloak.Realm)),
-	))
-	srv := grpc.NewServer(grpcOpts...)
-
 	exporter := tracing.MustNewExporter(context.Background(), cfg.Jaeger.URL())
 	provider := tracing.MustNewTraceProvider(exporter, "api")
 	otel.SetTracerProvider(provider)
 	tracer := otel.Tracer("api")
 
+	pg := postgres.MustNew(cfg.Postgres, tracer)
+
+	logOpts := []logging.Option{
+		logging.WithLogOnEvents(logging.StartCall, logging.FinishCall),
+	}
+	var grpcOpts []grpc.ServerOption
+	grpcOpts = append(grpcOpts, grpc.ChainUnaryInterceptor(
+		logging.UnaryServerInterceptor(middleware.InterceptorLogger(), logOpts...),
+		auth.UnaryServerInterceptor(authmw.JWT(kc, cfg.KeyCloak.Realm, repo.New(pg))),
+	))
+	srv := grpc.NewServer(grpcOpts...)
+
 	return &Server{
 		cfg:      cfg,
 		srv:      srv,
-		pg:       postgres.MustNew(cfg.Postgres, tracer),
-		mongo:    mongo.MustNew(cfg.Mongo, tracer),
+		pg:       pg,
 		kc:       kc,
 		exporter: exporter,
 		tracer:   tracer,
@@ -123,16 +118,8 @@ func (s *Server) Run() {
 		}
 	}()
 
-	prompterController := pc.New(prompterClient, s.tracer)
-	prompterHandler := ph.New(prompterController, s.tracer)
-	pb.RegisterPrompterServer(s.srv, prompterHandler)
-
-	stockRepo := sr.New(s.mongo)
-	stockController := sc.New(stockRepo, s.tracer)
-	stockHandler := sh.New(stockController, s.tracer)
-	pb.RegisterStockServer(s.srv, stockHandler)
-
-	pb.RegisterPredictorServer(s.srv, handler.New(predictorClient, s.tracer))
+	pb.RegisterPrompterServer(s.srv, promh.New(prompterClient, s.tracer))
+	pb.RegisterPredictorServer(s.srv, predh.New(predictorClient, m, s.tracer))
 
 	log.Info().Msg("starting the server")
 	go s.listen()
@@ -177,9 +164,6 @@ func (s *Server) listenGateway() {
 	}
 	if err = pb.RegisterPrompterHandler(ctx, mux, conn); err != nil {
 		log.Panic().Err(err).Msg("failed to register the prompter gateway")
-	}
-	if err = pb.RegisterStockHandler(ctx, mux, conn); err != nil {
-		log.Panic().Err(err).Msg("failed to register the stock gateway")
 	}
 	if err = pb.RegisterPredictorHandler(ctx, mux, conn); err != nil {
 		log.Panic().Err(err).Msg("failed to register the predictor gateway")

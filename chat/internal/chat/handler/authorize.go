@@ -6,6 +6,7 @@ import (
 
 	"github.com/gofiber/contrib/websocket"
 	"github.com/rs/zerolog/log"
+	chatresp "github.com/yogenyslav/ldt-2024/chat/pkg/chat_response"
 )
 
 // Authorize проверяет авторизацию пользователя.
@@ -16,13 +17,13 @@ func (h *Handler) Authorize(c *websocket.Conn) (context.Context, string, error) 
 		return nil, "", tokenErr
 	}
 	if mt != websocket.TextMessage {
-		respondError(c, "need authorization first", errors.New("unexpected message type"))
+		chatresp.RespondError(c, "need authorization first", errors.New("unexpected message type"))
 		return nil, "", errors.New("unexpected message type")
 	}
 
 	ctx, username, authErr := h.ctrl.Authorize(context.Background(), string(msg))
 	if authErr != nil {
-		respondError(c, "unauthorized", authErr)
+		chatresp.RespondError(c, "unauthorized", authErr)
 		return nil, "", authErr
 	}
 	return ctx, username, nil

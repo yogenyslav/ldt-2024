@@ -12,8 +12,11 @@ import (
 // @description Документация API чат-сервиса команды misis.tech
 // @license.name BSD-3-Clause
 // @license.url https://opensource.org/license/bsd-3-clause
-// @host hawk-handy-wolf.ngrok-free.app
+// @host api.misis.larek.tech
 // @BasePath /chat
+// @securitydefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
 func main() {
 	cfg := config.MustNew("./config/config.yaml")
 	level, err := zerolog.ParseLevel(cfg.Server.LogLevel)
@@ -22,6 +25,6 @@ func main() {
 	}
 	zerolog.SetGlobalLevel(level)
 	loctime.SetLocation(loctime.MoscowLocation)
-	srv := server.New(cfg)
+	srv := server.NewServer(cfg)
 	srv.Run()
 }

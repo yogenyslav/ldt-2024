@@ -1,8 +1,9 @@
 package shared
 
 import (
-	"github.com/yogenyslav/ldt-2024/api/internal/api/pb"
 	"strings"
+
+	"github.com/yogenyslav/ldt-2024/api/internal/api/pb"
 )
 
 const (
@@ -10,6 +11,8 @@ const (
 	UsernameKey = "x-username"
 	// LoginEndpoint эндпоинт для авторизации.
 	LoginEndpoint = "/api.AuthService/Login"
+	// OrganizationKey ключ для получения организации из контекста.
+	OrganizationKey = "organization"
 )
 
 // RoleFromString конвертирует строку роли в число.

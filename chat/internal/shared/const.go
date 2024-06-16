@@ -1,12 +1,19 @@
 package shared
 
-var (
+const (
 	// UsernameKey ключ для получения имени пользователя из контекста.
 	UsernameKey = "x-username"
-)
-
-const (
+	// TraceCtxKey ключ для trace внутри контекста.
+	TraceCtxKey = "traceCtx"
+	// UserIDKey ключ для получения userID.
+	UserIDKey = "userID"
+	// TokenKey ключ для получения токена.
+	TokenKey = "token"
+	// UsernameKey ключ для получения username.
 	enumsUndefined = "UNDEFINED"
+
+	// ErrorMessage сообщение об ошибке внутри бота.
+	ErrorMessage = "Что-то пошло не так. Попробуйте еще раз"
 )
 
 // ResponseStatus статус ответа.
@@ -125,6 +132,7 @@ func (r UserRole) ToString() string {
 		return "ANALYST"
 	case RoleBuyer:
 		return "BUYER"
+	default:
+		return enumsUndefined
 	}
-	return enumsUndefined
 }

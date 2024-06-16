@@ -80,7 +80,7 @@ func TestController_NewSession(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := ctrl.NewSession(ctx, tt.sessionID, tt.username)
+			err := ctrl.NewSession(ctx, tt.sessionID, tt.username, false, 0)
 			if tt.wantErr == nil {
 				assert.NoError(t, err)
 			} else {

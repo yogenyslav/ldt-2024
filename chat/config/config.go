@@ -12,12 +12,12 @@ import (
 
 // Config конфигурация сервиса.
 type Config struct {
-	Server     *srvconfig.Config        `yaml:"server"`
-	Postgres   *postgres.Config         `yaml:"postgres"`
-	Jaeger     *tracing.Config          `yaml:"jaeger"`
-	Prometheus *prom.Config             `yaml:"prometheus"`
-	API        *client.GrpcClientConfig `yaml:"api"`
-	KeyCloak   *KeyCloakConfig          `yaml:"keycloak"`
+	Server   *srvconfig.Config        `yaml:"server"`
+	Postgres *postgres.Config         `yaml:"postgres"`
+	Jaeger   *tracing.Config          `yaml:"jaeger"`
+	Prom     *prom.Config             `yaml:"prom"`
+	API      *client.GrpcClientConfig `yaml:"api"`
+	KeyCloak *KeyCloakConfig          `yaml:"keycloak"`
 }
 
 // KeyCloakConfig конфигурация KeyCloak.

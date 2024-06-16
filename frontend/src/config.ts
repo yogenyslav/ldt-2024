@@ -1,2 +1,2 @@
-export const API_URL = 'https://hawk-handy-wolf.ngrok-free.app';
-export const WS_URL = 'ws://hawk-handy-wolf.ngrok-free.app/ws';
+export const API_URL = import.meta.env.VITE_API_URL as string;
+export const WS_URL = import.meta.env.VITE_WS_URL as string;

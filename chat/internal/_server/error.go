@@ -19,6 +19,12 @@ var errStatus = map[error]srvresp.ErrorResponse{
 	shared.ErrInvalidUUID: {
 		Status: http.StatusBadRequest,
 	},
+	shared.ErrEmptyQueryHint: {
+		Status: http.StatusBadRequest,
+	},
+	shared.ErrWsProtocolRequired: {
+		Status: http.StatusBadRequest,
+	},
 	// 401
 	shared.ErrLoginFailed: {
 		Msg:    "invalid username or password",
@@ -32,6 +38,15 @@ var errStatus = map[error]srvresp.ErrorResponse{
 	},
 	// 404
 	shared.ErrNoSessionWithID: {
+		Status: http.StatusNotFound,
+	},
+	shared.ErrNoQueryWithID: {
+		Status: http.StatusNotFound,
+	},
+	shared.ErrNoResponseWithID: {
+		Status: http.StatusNotFound,
+	},
+	shared.ErrNoFavoriteWithID: {
 		Status: http.StatusNotFound,
 	},
 	// 500
@@ -60,6 +75,33 @@ var errStatus = map[error]srvresp.ErrorResponse{
 		Status: http.StatusInternalServerError,
 	},
 	shared.ErrCommitTx: {
+		Status: http.StatusInternalServerError,
+	},
+	shared.ErrCreateQuery: {
+		Status: http.StatusInternalServerError,
+	},
+	shared.ErrCreateResponse: {
+		Status: http.StatusInternalServerError,
+	},
+	shared.ErrUpdateResponse: {
+		Status: http.StatusInternalServerError,
+	},
+	shared.ErrUpdateQuery: {
+		Status: http.StatusInternalServerError,
+	},
+	shared.ErrGetQuery: {
+		Status: http.StatusInternalServerError,
+	},
+	shared.ErrUpdateFavorite: {
+		Status: http.StatusInternalServerError,
+	},
+	shared.ErrDeleteFavorite: {
+		Status: http.StatusInternalServerError,
+	},
+	shared.ErrCreateFavorite: {
+		Status: http.StatusInternalServerError,
+	},
+	shared.ErrGetFavorite: {
 		Status: http.StatusInternalServerError,
 	},
 }

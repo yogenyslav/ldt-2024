@@ -37,9 +37,3 @@ predictor:
   host: "predictor"
   port: 9980
 
-mongo:
-  host: "mongo"
-  port: 27017
-  db: "product"
-  auth_type: "no"
-  retry_timeout: 20

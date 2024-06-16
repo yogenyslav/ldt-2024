@@ -1,5 +1,31 @@
 basePath: /chat
 definitions:
+  model.FavoriteCreateReq:
+    properties:
+      response:
+        additionalProperties: {}
+        type: object
+    type: object
+  model.FavoriteDto:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      response:
+        additionalProperties: {}
+        type: object
+      updated_at:
+        type: string
+    type: object
+  model.FavoriteUpdateReq:
+    properties:
+      id:
+        type: integer
+      response:
+        additionalProperties: {}
+        type: object
+    type: object
   model.FindOneResp:
     properties:
       content:
@@ -79,6 +105,11 @@ definitions:
         type: string
       created_at:
         type: string
+      data:
+        additionalProperties: {}
+        type: object
+      data_type:
+        type: string
       status:
         type: string
     type: object
@@ -97,10 +128,28 @@ definitions:
         type: string
       tg:
         type: boolean
+      tg_id:
+        type: integer
       title:
         type: string
     type: object
-host: hawk-handy-wolf.ngrok-free.app
+  model.UniqueCodeDto:
+    properties:
+      name:
+        type: string
+      regular:
+        type: boolean
+      segment:
+        type: string
+    type: object
+  model.UniqueCodesResp:
+    properties:
+      codes:
+        items:
+          $ref: '#/definitions/model.UniqueCodeDto'
+        type: array
+    type: object
+host: api.misis.larek.tech
 info:
   contact: {}
   description: Документация API чат-сервиса команды misis.tech
@@ -144,17 +193,147 @@ paths:
       summary: Авторизация
       tags:
       - auth
+  /favorite:
+    post:
+      consumes:
+      - application/json
+      description: Добавляет новый предикт в избранное.
+      parameters:
+      - description: Параметры запроса
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/model.FavoriteCreateReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Предикт успешно добавлен в избранное
+          schema:
+            type: string
+        "400":
+          description: Некорректный запрос
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Добавляет новый предикт в избранное.
+      tags:
+      - favorite
+    put:
+      consumes:
+      - application/json
+      description: Обновляет избранный предикт.
+      parameters:
+      - description: Параметры запроса
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/model.FavoriteUpdateReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Предикт успешно обновлен
+          schema:
+            type: string
+        "400":
+          description: Некорректный запрос
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Обновляет избранный предикт.
+      tags:
+      - favorite
+  /favorite/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Удаляет избранный предикт по ID.
+      parameters:
+      - description: ID предикта
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Предикт успешно удален
+          schema:
+            type: string
+        "400":
+          description: Некорректный запрос
+          schema:
+            type: string
+        "404":
+          description: Предикт не найден
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Удаляет избранный предикт по ID.
+      tags:
+      - favorite
+    get:
+      consumes:
+      - application/json
+      description: Возвращает избранный предикт по ID.
+      parameters:
+      - description: ID предикта
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Избранный предикт
+          schema:
+            $ref: '#/definitions/model.FavoriteDto'
+        "400":
+          description: Некорректный запрос
+          schema:
+            type: string
+        "404":
+          description: Предикт не найден
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Возвращает избранный предикт по ID.
+      tags:
+      - favorite
+  /favorite/list:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает список избранных предиктов.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Список избранных предиктов
+          schema:
+            items:
+              $ref: '#/definitions/model.FavoriteDto'
+            type: array
+      security:
+      - ApiKeyAuth: []
+      summary: Возвращает список избранных предиктов.
+      tags:
+      - favorite
   /session/{id}:
     delete:
       consumes:
       - application/json
       description: Удалить сессию по ID
       parameters:
-      - description: access token
-        in: header
-        name: Authorization
-        required: true
-        type: string
       - description: UUID сессии
         in: path
         name: id
@@ -175,6 +354,8 @@ paths:
           description: Сессия с таким ID не найдена
           schema:
             type: string
+      security:
+      - ApiKeyAuth: []
       summary: Удалить сессию
       tags:
       - session
@@ -183,11 +364,6 @@ paths:
       - application/json
       description: Получить все запросы и ответы для сессии по ID
       parameters:
-      - description: access token
-        in: header
-        name: Authorization
-        required: true
-        type: string
       - description: UUID сессии
         in: path
         name: id
@@ -204,6 +380,8 @@ paths:
           description: Неверное значение ID
           schema:
             type: string
+      security:
+      - ApiKeyAuth: []
       summary: Получить данные о сессии
       tags:
       - session
@@ -213,12 +391,6 @@ paths:
       - application/json
       description: Получить список сессий в порядке убывания момента создания от последней
         к первой для авторизованного пользователя
-      parameters:
-      - description: access token
-        in: header
-        name: Authorization
-        required: true
-        type: string
       produces:
       - application/json
       responses:
@@ -226,6 +398,8 @@ paths:
           description: Список сессий
           schema:
             $ref: '#/definitions/model.ListResp'
+      security:
+      - ApiKeyAuth: []
       summary: Список сессий
       tags:
       - session
@@ -234,12 +408,6 @@ paths:
       consumes:
       - application/json
       description: Создать новую сессию в чате для авторизованного пользователя
-      parameters:
-      - description: access token
-        in: header
-        name: Authorization
-        required: true
-        type: string
       produces:
       - application/json
       responses:
@@ -251,6 +419,8 @@ paths:
           description: Сессия с таким ID уже существует
           schema:
             type: string
+      security:
+      - ApiKeyAuth: []
       summary: Новая сессия
       tags:
       - session
@@ -260,11 +430,6 @@ paths:
       - application/json
       description: Обновить заголовок сессии, который отображается в интерфейсе
       parameters:
-      - description: access token
-        in: header
-        name: Authorization
-        required: true
-        type: string
       - description: ID и новое название сессии
         in: body
         name: req
@@ -286,7 +451,32 @@ paths:
           description: Сессия с таким ID не найдена
           schema:
             type: string
+      security:
+      - ApiKeyAuth: []
       summary: Обновить заголовок
       tags:
       - session
+  /stock/unique_codes:
+    get:
+      consumes:
+      - application/json
+      description: Получить набор уникальных записей с разделением на регулярные и
+        нерегулярные товары
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Список с товарами
+          schema:
+            $ref: '#/definitions/model.UniqueCodesResp'
+      security:
+      - ApiKeyAuth: []
+      summary: Регулярные товары
+      tags:
+      - stock
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

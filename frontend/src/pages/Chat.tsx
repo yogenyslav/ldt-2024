@@ -39,8 +39,6 @@ const Chat = observer(() => {
                     });
                 });
         } else {
-            rootStore.setActiveSessionId(sessionId);
-
             rootStore.getSession({ id: sessionId }).catch(() => {
                 toast({
                     title: 'Ошибка',
@@ -51,17 +49,17 @@ const Chat = observer(() => {
                 navigate(`/${Pages.Chat}`, { replace: true });
             });
         }
-    }, [rootStore, toast, sessionId, navigate]);
+    }, [rootStore, sessionId, navigate, toast]);
 
     useEffect(() => {
-        rootStore.getSessions().catch(() => {
+        if (rootStore.chatError) {
             toast({
                 title: 'Ошибка',
-                description: 'Не удалось загрузить сессии',
+                description: rootStore.chatError,
                 variant: 'destructive',
             });
-        });
-    }, [rootStore, toast]);
+        }
+    }, [rootStore.chatError, toast]);
 
     const handleKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
         if (event.key === 'Enter' && !event.shiftKey) {
