@@ -33,13 +33,11 @@ const SavedPredictions = () => {
                 <div>Loading...</div>
             ) : savedPredictions.length ? (
                 savedPredictions.map((savedPrediction) => (
-                    <>
-                        <SavedOutputJson
-                            key={savedPrediction.id}
-                            outputJson={savedPrediction.response}
-                            id={savedPrediction.id}
-                        />
-                    </>
+                    <SavedOutputJson
+                        key={savedPrediction.id}
+                        outputJson={savedPrediction.response}
+                        id={savedPrediction.id}
+                    />
                 ))
             ) : (
                 <div>Нет сохраненных планов закупок</div>
