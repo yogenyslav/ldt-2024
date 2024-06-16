@@ -66,7 +66,7 @@ class YaGPTPrompter:
         prompt += f"Наименование категории: {data['code_name']}\n"
         prompt += f"Регулярная/нерегулярная: {'регулярная' if data['is_regular'] else 'нерегулярная'}\n"
         prompt += f"Прогноз закупок:\n"
-        for i, forecast in enumerate(data["forecast"], start=1):
+        for i, forecast in enumerate(data['forecast'], start=1):
             prompt += f"Закупка № {i}\n"
             prompt += f"Рекомендуемая дата заключения: {forecast['date']}\n"
             prompt += f"Рекомендуемая сумма закупки: {forecast['value']}\n"
@@ -76,8 +76,27 @@ class YaGPTPrompter:
         prompt += f"Средняя референсная цена: {data['mean_ref_price']}\n"
 
         prompt += "Топ 5 поставщиков этой категории по объему закупок:\n"
-        for i, seller in enumerate(data["top5_providers"], start=1):
+        for i, seller in enumerate(data['top5_providers'], start=1):
             prompt += f"Поставщик {i}, код исполнителя: {seller}\n"
+
+        prompt += f"\n Выгрзука из файла для оформления закупок: \n"
+        if data['closest_purchase']['volume']:
+            prompt += f"Объем закупки (условные единицы): {data['closest_purchase']['volume']}\n"
+        for i, delivery in enumerate(data['output_json']['rows'], start=1):
+            prompt += f"Позиция {i}:\n"
+            prompt += f"Дата начала поставки: {delivery['DeliverySchedule']['start_date']}\n"
+            prompt += f"Дата окончания поставки: {delivery['DeliverySchedule']['end_date']}\n"
+            if delivery['DeliverySchedule']['deliveryAmount']:
+                prompt += f"Объем поставки (условных единиц): {delivery['DeliverySchedule']['deliveryAmount']}\n"
+            prompt += f"Номер версии: {delivery['id']}\n"
+            prompt += f"Объем в рублях: {delivery['nmc']}\n"
+            prompt += f"ID СПГЗ: {delivery['spgzCharacteristics']['spgzId']}"
+            prompt += f"Наименование СПГЗ: {delivery['spgzCharacteristics']['spgzName']}\n"
+            prompt += f"Код КПГЗ: {delivery['spgzCharacteristics']['kpgzCode']}\n"
+            prompt += f"Наименование КПГЗ: {delivery['spgzCharacteristics']['kpgzName']}\n"
+            if i == 4:
+                break
+            
         return prompt
 
     def prepare_prompt2(self, data: dict) -> str:
@@ -106,29 +125,101 @@ class YaGPTPrompter:
                 break
 
         return prompt
+    
+    def prepare_prompt_with_nan(self, data: dict) -> str:
+        prompt = ""
+        prompt += f"Код категории: {data['code']}\n"
+        prompt += f"Наименование категории: {data['code_name']}\n"
+        return prompt
+    
+    def prepare_prompt_with_empty_forecast(self, data: dict) -> str:
+        prompt = ""
+        prompt += f"Код категории: {data['code']}\n"
+        prompt += f"Наименование категории: {data['code_name']}\n"
+        prompt += f"Регулярная/нерегулярная: {'регулярная' if data['is_regular'] else 'нерегулярная'}\n"
+        prompt += f"Напиши о том, что период прогнозирования выбран слишком мал, поэтому ниже представлена информация о ближайшей закупке\n"
+        prompt += f"ID ближайшей закупки: {data['closest_purchase']['id']}\n"
+        prompt += f"Дата заключения контракта: {data['closest_purchase']['date']}\n"
+        prompt += f"Сумма закупки: {data['closest_purchase']['value']}\n"
+        prompt += f"Объем закупки (условные единицы): {data['closest_purchase']['volume'] if data['closest_purchase']['volume'] else 'Информация отсутствует'}\n"
+        prompt += f"Медианное время выполнения закупки по категории: {data['median_execution_days']}\n"
+        prompt += f"Среднее время до начала выполнения закупки по категории: {data['mean_start_to_execute_days']}\n"
+        prompt += f"Средняя референсная цена: {data['mean_ref_price'] if data['mean_ref_price'] else 'Информация отсутствует'}\n"
+
+        prompt += "Топ 5 поставщиков этой категории по объему закупок:\n"
+        for i, seller in enumerate(data['top5_providers'], start=1):
+            prompt += f"Поставщик {i}, код исполнителя: {seller}\n"
+
+        prompt += f"Подробная информация о ближайшей закупке:\n"
+        prompt += f"ID запроса на закупку: {data['closest_purchase']['id']}\n"
+        prompt += f"Дата заключения контракта: {data['closest_purchase']['date']}\n"
+        prompt += f"Сумма закупки: {data['closest_purchase']['value']}\n"
+        if data['closest_purchase']['volume']:
+            prompt += f"Объем закупки (условные единицы): {data['closest_purchase']['volume']}\n"
 
     def _generate_responce(
         self, prompt: str, request_type: PromptType, stream: bool = False
     ):
         time.sleep(1) # TODO: sorry for this abomination, I'll fix this later 
         prepared_prompt = self._prepare_prompt(prompt, request_type, stream=stream)
-        response = requests.post(
-            self._url,
-            headers=self._headers,
-            data=json.dumps(prepared_prompt),
-            stream=stream,
-        )
         if not stream:
+            retry_attempts = 10
+            while retry_attempts >= 0:
+                try:
+                    response = requests.post(
+                        self._url,
+                        headers=self._headers,
+                        data=json.dumps(prepared_prompt),
+                        stream=stream,
+                    )
+                    response.raise_for_status()
+                    break
+                except requests.exceptions.SSLError as e:
+                    print("SSL Error, retrying...")
+                    retry_attempts -= 1
+                    if retry_attempts > 0:
+                        time.sleep(5)
+                    else:
+                        raise e
+                except requests.exceptions.HTTPError as e:
+                    print("HTTP Error, retrying...")
+                    retry_attempts -= 1
+                    if retry_attempts > 0:
+                        time.sleep(5)
+                    else:
+                        raise e
+
             output = json.loads(response.content.decode("utf-8"))
-            print(output)
             output = output["result"]["alternatives"][-1]["message"]["text"]
         else:
-            output = requests.post(
-                self._url,
-                headers=self._headers,
-                data=json.dumps(prepared_prompt),
-                stream=True,
-            )
+            retry_attempts = 10
+            while retry_attempts >= 0:
+                try:
+                    response = requests.post(
+                        self._url,
+                        headers=self._headers,
+                        data=json.dumps(prepared_prompt),
+                        stream=stream,
+                    )
+                    response.raise_for_status()
+                    break
+                except requests.exceptions.SSLError as e:
+                    print("SSL Error, retrying...")
+                    retry_attempts -= 1
+                    if retry_attempts > 0:
+                        time.sleep(5)
+                    else:
+                        raise e
+                
+                except requests.exceptions.HTTPError as e:
+                    print("HTTP Error, retrying...")
+                    retry_attempts -= 1
+                    if retry_attempts > 0:
+                        time.sleep(5)
+                    else:
+                        raise e
+
+            output = response
         return output
 
     def process_request(self, request: str):
@@ -169,7 +260,7 @@ class YaGPTPrompter:
             else:
                 prompter_output.period = outp.split("Период (в месяцах):")[1].split(
                     "\n"
-                )[0]
+                )[0].replace(" ", "")
                 if not prompter_output.period.isdigit():
                     prompter_output.type = QueryType.UNDEFINED
 
@@ -177,12 +268,21 @@ class YaGPTPrompter:
             prompter_output.period = None
         return prompter_output
 
-    def process_final_request(self, data: str):
+    def process_final_request(self, data: str, prompt_type: PromptType):
         inp = json.loads(data)
-        request = ""
-        request = self.prepare_prompt1(inp)
-        request += self.prepare_prompt2(inp)
-        request += """ЗАПРОС 1: Оформи отчет в MARKDOWN, где нужно, добавь таблицы. Убери None, где нет информации. 
-        В своем отчете укажи всю предоставленную информацию. Не добавляй информацию, которой нет в исходных данных. 
-        Добавь суммаризацию, в которой скажи то, что информацию о закупках можно поменять в соответствии с потребностями заказчика."""
-        return self._generate_responce(request, PromptType.FINAL_PREDICTION_PART1, stream=True)
+        if inp["forecast"] is None:
+            request = self.prepare_prompt_with_nan(inp)
+            request += """ЗАПРОС: Напиши ответ о том, что закупка нерегулярная (не удалось выявить регулярность), 
+            для неё невозможность построить прогноз (2-3 предложения на ответ)
+            Не давай лишней информации, посоветуй пользователю ввести другой товар."""
+        elif inp["forecast"] == []:
+            request = self.prepare_prompt_with_empty_forecast(inp)
+            request += """ЗАПРОС 1: Оформи отчет в MARKDOWN, где нужно, добавь таблицы. Убери None, где нет информации. 
+            В своем отчете укажи всю предоставленную информацию. Не добавляй информацию, которой нет в исходных данных. 
+            Добавь суммаризацию, в которой скажи то, что информацию о закупках можно поменять в соответствии с потребностями заказчика."""
+        else:
+            request = self.prepare_prompt1(inp)
+            request += """ЗАПРОС 1: Оформи отчет в MARKDOWN, где нужно, добавь таблицы. Убери None, где нет информации. 
+            В своем отчете укажи всю предоставленную информацию. Не добавляй информацию, которой нет в исходных данных. 
+            Добавь суммаризацию, в которой скажи то, что информацию о закупках можно поменять в соответствии с потребностями заказчика."""
+        return self._generate_responce(request, prompt_type, stream=True)
