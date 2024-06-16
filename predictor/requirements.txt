@@ -16,3 +16,9 @@ pandas == 2.2.0
 scikit-learn == 1.5.0
 colbert-ai 
 faiss-cpu
+opentelemetry-api
+opentelemetry-sdk
+opentelemetry-exporter-jaeger
+opentelemetry-instrumentation
+opentelemetry-semantic-conventions
+opentelemetry-exporter-otlp
