@@ -25,8 +25,8 @@ import (
 	"github.com/yogenyslav/ldt-2024/api/internal/api/auth/repo"
 	"github.com/yogenyslav/ldt-2024/api/internal/api/middleware"
 	"github.com/yogenyslav/ldt-2024/api/internal/api/pb"
-	"github.com/yogenyslav/ldt-2024/api/internal/api/predictor/handler"
-	ph "github.com/yogenyslav/ldt-2024/api/internal/api/prompter/handler"
+	predh "github.com/yogenyslav/ldt-2024/api/internal/api/predictor/handler"
+	promh "github.com/yogenyslav/ldt-2024/api/internal/api/prompter/handler"
 	"github.com/yogenyslav/ldt-2024/api/pkg/client"
 	"github.com/yogenyslav/ldt-2024/api/pkg/metrics"
 	"github.com/yogenyslav/ldt-2024/api/third_party"
@@ -118,8 +118,8 @@ func (s *Server) Run() {
 		}
 	}()
 
-	pb.RegisterPrompterServer(s.srv, ph.New(prompterClient, s.tracer))
-	pb.RegisterPredictorServer(s.srv, handler.New(predictorClient, s.tracer))
+	pb.RegisterPrompterServer(s.srv, promh.New(prompterClient, s.tracer))
+	pb.RegisterPredictorServer(s.srv, predh.New(predictorClient, s.tracer))
 
 	log.Info().Msg("starting the server")
 	go s.listen()

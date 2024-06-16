@@ -43,10 +43,19 @@ func (h *Handler) Predict(c context.Context, in *pb.PredictReq) (*pb.PredictResp
 	}
 	in.Organization = organization
 
+	switch in.GetType() {
+	case pb.QueryType_PREDICTION:
+		h.m.NumberOfPredictRequests.Inc()
+	case pb.QueryType_STOCK:
+		h.m.NumberOfStockRequests.Inc()
+	}
+
 	resp, err := h.predictor.Predict(pkg.PushSpan(ctx, span), in)
 	if err != nil {
 		log.Error().Err(err).Msg("failed to predict")
+		h.m.PredictionErrors.Inc()
 		return nil, status.Error(codes.Internal, err.Error())
 	}
+	h.m.NumberOfReports.Inc()
 	return resp, status.Error(codes.OK, "predicted")
 }

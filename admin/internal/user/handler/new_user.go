@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/yogenyslav/ldt-2024/admin/internal/shared"
@@ -31,6 +32,17 @@ func (h *Handler) NewUser(c *fiber.Ctx) error {
 
 	if err := h.ctrl.NewUser(c.Context(), req); err != nil {
 		return err
+	}
+
+	for _, role := range req.Roles {
+		switch strings.ToLower(role) {
+		case shared.RoleAdmin.ToString():
+			h.m.AdminUserCount.Inc()
+		case shared.RoleAnalyst.ToString():
+			h.m.AnalystUserCount.Inc()
+		case shared.RoleBuyer.ToString():
+			h.m.BuyerUserCount.Inc()
+		}
 	}
 
 	return c.SendStatus(http.StatusCreated)

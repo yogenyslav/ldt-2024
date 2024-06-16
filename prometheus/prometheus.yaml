@@ -33,3 +33,13 @@ scrape_configs:
     static_configs:
       - targets:
           - api:9991
+
+  - job_name: admin
+    honor_timestamps:
+    scrape_interval: 5s
+    scrape_timeout: 5s
+    metrics_path: /metrics
+    scheme: http
+    static_configs:
+      - targets:
+          - admin:12001

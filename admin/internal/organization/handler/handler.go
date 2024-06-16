@@ -5,6 +5,7 @@ import (
 	"mime/multipart"
 
 	"github.com/yogenyslav/ldt-2024/admin/internal/organization/model"
+	"github.com/yogenyslav/ldt-2024/admin/pkg/metrics"
 	"go.opentelemetry.io/otel/trace"
 )
 
@@ -17,13 +18,15 @@ type organizationController interface {
 // Handler имплементация сервера для организаций.
 type Handler struct {
 	ctrl   organizationController
+	m      *metrics.Metrics
 	tracer trace.Tracer
 }
 
 // New создает новый Handler.
-func New(ctrl organizationController, tracer trace.Tracer) *Handler {
+func New(ctrl organizationController, m *metrics.Metrics, tracer trace.Tracer) *Handler {
 	return &Handler{
 		ctrl:   ctrl,
+		m:      m,
 		tracer: tracer,
 	}
 }

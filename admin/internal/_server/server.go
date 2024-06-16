@@ -31,6 +31,7 @@ import (
 	uh "github.com/yogenyslav/ldt-2024/admin/internal/user/handler"
 	ur "github.com/yogenyslav/ldt-2024/admin/internal/user/repo"
 	"github.com/yogenyslav/ldt-2024/admin/pkg/client"
+	"github.com/yogenyslav/ldt-2024/admin/pkg/metrics"
 	"github.com/yogenyslav/pkg/infrastructure/prom"
 	"github.com/yogenyslav/pkg/infrastructure/tracing"
 	srvresp "github.com/yogenyslav/pkg/response"
@@ -116,18 +117,21 @@ func (s *Server) Run() {
 		}
 	}()
 
+	m := metrics.New()
+	m.Collect()
+
 	authController := ac.New(pb.NewAuthServiceClient(apiClient.GetConn()), s.cfg.Server.CipherKey, s.tracer)
 	authHandler := ah.New(authController)
 	auth.SetupAuthRoutes(s.app, authHandler)
 
 	userRepo := ur.New(s.pg)
 	userController := uc.New(userRepo, s.cfg.KeyCloak, s.kc, s.tracer)
-	userHandler := uh.New(userController, s.tracer)
+	userHandler := uh.New(userController, m, s.tracer)
 	user.SetupUserRoutes(s.app, userHandler, s.kc, s.cfg.KeyCloak.Realm, s.cfg.Server.CipherKey, userRepo)
 
 	organizationRepo := or.New(s.pg)
 	organizationController := oc.New(organizationRepo, s.s3, pb.NewPredictorClient(apiClient.GetConn()), s.tracer)
-	organizationHandler := oh.New(organizationController, s.tracer)
+	organizationHandler := oh.New(organizationController, m, s.tracer)
 	organization.SetupOrganizationRoutes(s.app, organizationHandler, s.kc, s.cfg.KeyCloak.Realm, s.cfg.Server.CipherKey, userRepo)
 
 	go s.listen()

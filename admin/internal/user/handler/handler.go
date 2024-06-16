@@ -5,6 +5,7 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/yogenyslav/ldt-2024/admin/internal/user/model"
+	"github.com/yogenyslav/ldt-2024/admin/pkg/metrics"
 	"go.opentelemetry.io/otel/trace"
 )
 
@@ -19,14 +20,16 @@ type userController interface {
 type Handler struct {
 	ctrl      userController
 	validator *validator.Validate
+	m         *metrics.Metrics
 	tracer    trace.Tracer
 }
 
 // New создает новый Handler.
-func New(ctrl userController, tracer trace.Tracer) *Handler {
+func New(ctrl userController, m *metrics.Metrics, tracer trace.Tracer) *Handler {
 	return &Handler{
 		ctrl:      ctrl,
 		validator: validator.New(validator.WithRequiredStructEnabled()),
+		m:         m,
 		tracer:    tracer,
 	}
 }

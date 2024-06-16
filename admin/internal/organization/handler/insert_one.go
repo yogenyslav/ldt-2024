@@ -37,5 +37,7 @@ func (h *Handler) InsertOne(c *fiber.Ctx) error {
 		return err
 	}
 
+	h.m.NumberOfActivatedCompanies.Inc()
+
 	return c.Status(http.StatusCreated).JSON(resp)
 }
