@@ -25,7 +25,7 @@ class FavoritesApiService {
     }
 
     public async updateFavorite(savedPrediction: SavedPrediction) {
-        await put(`/chat/favorite/${savedPrediction.id}`, savedPrediction);
+        await put(`/chat/favorite`, savedPrediction);
     }
 }
 
