@@ -1,10 +1,11 @@
 include .env
 
-.PHONY: deps
-deps:
+.PHONY: .deps
+.deps:
 	curl -fsSL \
         https://raw.githubusercontent.com/pressly/goose/master/install.sh |\
         GOOSE_INSTALL=. sh
+	docker compose up pg s3 keycloak --build -d
 
 .PHONY: lint
 lint:
@@ -108,5 +109,8 @@ ollama_down:
 	docker stop ollama
 	docker rm ollama
 
+.PHONY: deps
+deps: .deps migrate_up
+
 .PHONY: run_all
-run_all: deps migrate_up ollama_up docker_up
+run_all: deps ollama_up docker_up
