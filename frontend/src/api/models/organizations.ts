@@ -36,3 +36,13 @@ export interface DeleteUserParams {
 export interface CreateOrganizationResponse {
     id: number;
 }
+
+export interface Product {
+    name: string;
+    regular: boolean;
+    segment: string;
+}
+
+export interface GetProductsResponse {
+    codes: Product[];
+}

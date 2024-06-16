@@ -1,6 +1,6 @@
 import { Loader2, LucideIcon } from 'lucide-react';
 import React from 'react';
-import { Button, ButtonProps } from '../ui/button';
+import { Button, ButtonProps } from './button';
 
 type LoaderButtonProps = ButtonProps & {
     isLoading?: boolean;

@@ -5,6 +5,7 @@ import {
     CreateOrganizationResponse,
     CreateUserParams,
     DeleteUserParams,
+    GetProductsResponse,
     GetUsersInOrganizationParams,
     Organization,
 } from './models/organizations';
@@ -56,6 +57,12 @@ class FavoritesApiService {
             },
             timeout: 510000,
         });
+
+        return response;
+    }
+
+    public async getProducts() {
+        const response = await get<GetProductsResponse>('/chat/stock/unique_codes');
 
         return response;
     }

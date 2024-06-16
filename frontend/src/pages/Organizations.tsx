@@ -37,6 +37,8 @@ import {
     FileUploaderItem,
 } from '@/components/ui/file-upload';
 import { useAuth } from '@/auth';
+import { Product } from '@/api/models/organizations';
+import { ProductsComboBox } from '@/components/ProductsComboBox';
 
 const Organizations = observer(() => {
     const { rootStore } = useStores();
@@ -48,6 +50,7 @@ const Organizations = observer(() => {
     const [isDeledingUser, setIsDeletingUser] = useState(false);
     const [files, setFiles] = useState<File[] | null>([]);
     const [isFileUploading, setIsFileUploading] = useState(false);
+    const [products, setProducts] = useState<Product[]>([]);
 
     const auth = useAuth();
 
@@ -67,6 +70,10 @@ const Organizations = observer(() => {
                                 variant: 'destructive',
                             });
                         });
+
+                    OrganizationsApiService.getProducts().then((products) => {
+                        setProducts(products.codes);
+                    });
                 })
                 .catch(() => {
                     toast({
@@ -246,7 +253,7 @@ const Organizations = observer(() => {
                         <Skeleton className='bg-slate-200 h-40 w-full' />
                     </>
                 ) : (
-                    <>
+                    <div>
                         <div>
                             <div className='flex items-center'>
                                 <h1 className='font-semibold text-lg md:text-2xl'>Организация</h1>
@@ -499,7 +506,10 @@ const Organizations = observer(() => {
                                         Загрузка данных
                                     </h1>
 
-                                    <p>Загрузите данные в формате .zip. Архив не должен папки.</p>
+                                    <p>
+                                        Загрузите данные в формате .zip. Архив не должен содержать
+                                        папки.
+                                    </p>
                                 </div>
 
                                 <FileUploader
@@ -532,7 +542,26 @@ const Organizations = observer(() => {
                                 </FileUploader>
                             </div>
                         )}
-                    </>
+
+                        {rootStore.organization && products.length && (
+                            <div>
+                                <div className='flex flex-col'>
+                                    <h1 className='font-semibold text-lg md:text-2xl'>
+                                        Просмотр загруженных данных
+                                    </h1>
+
+                                    <p className='mt-2'>
+                                        Просмотр загруженных данных и поиск регулярных/нерегулярных
+                                        закупок{' '}
+                                    </p>
+
+                                    <div className='mt-4'>
+                                        <ProductsComboBox products={products} />
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
                 )
             ) : (
                 <Alert>
