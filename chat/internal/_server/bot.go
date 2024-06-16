@@ -53,7 +53,7 @@ func NewBot(cfg *config.Config) *Bot {
 	bot, err := tele.NewBot(tele.Settings{
 		Verbose:   cfg.Server.DebugMode,
 		Token:     cfg.Server.BotToken,
-		ParseMode: tele.ModeMarkdownV2,
+		ParseMode: tele.ModeHTML,
 		Poller:    &tele.LongPoller{Timeout: 60 * time.Second},
 		Client: &http.Client{
 			Transport: &http.Transport{
