@@ -78,7 +78,7 @@ const Organizations = observer(() => {
         }
     }, [rootStore, roles]);
 
-    const uploadFiles = (files: File[]) => {
+    const uploadFiles = (files: File[] | null) => {
         setFiles(files);
 
         const file = files?.[0];
