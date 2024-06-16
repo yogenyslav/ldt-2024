@@ -82,7 +82,7 @@ class YaGPTPrompter:
 
     def prepare_prompt2(self, data: dict) -> str:
         prompt = ""
-        for i, deal in enumerate(data["contracts_in_code"], start=1):
+        for i, deal in enumerate(data["example_contracts_in_code"], start=1):
             prompt += f"Контракт № {i}:\n"
             prompt += f"Код СПГЗ: {deal['id_spgz']}\n"
             prompt += f"Конечное наименование КПГЗ: {deal['name_spgz']}\n"
