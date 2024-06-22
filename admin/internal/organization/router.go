@@ -10,14 +10,16 @@ type organizationHandler interface {
 	InsertOne(c *fiber.Ctx) error
 	FindOne(c *fiber.Ctx) error
 	ImportData(c *fiber.Ctx) error
+	UpdateOne(c *fiber.Ctx) error
 }
 
 // SetupOrganizationRoutes устанавливает маршруты для организаций.
-func SetupOrganizationRoutes(app *fiber.App, h organizationHandler, kc *gocloak.GoCloak, realm, cipher string, repo authmw.UserOrganizationRepo) {
+func SetupOrganizationRoutes(app *fiber.App, h organizationHandler, kc *gocloak.GoCloak, realm, cipher string) {
 	g := app.Group("/admin/organization")
-	g.Use(authmw.JWT(kc, realm, cipher, repo))
+	g.Use(authmw.JWT(kc, realm, cipher))
 
 	g.Post("/", h.InsertOne)
 	g.Get("/", h.FindOne)
 	g.Post("/import", h.ImportData)
+	g.Put("/", h.UpdateOne)
 }

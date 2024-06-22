@@ -14,14 +14,14 @@ func (ctrl *Controller) InsertOrganization(ctx context.Context, params model.Use
 		ctx,
 		"Controller.InsertOrganization",
 		trace.WithAttributes(
-			attribute.String("organization", params.Organization),
+			attribute.Int64("organizationID", params.OrganizationID),
 			attribute.String("username", params.Username),
 		),
 	)
 	defer span.End()
 
 	return ctrl.repo.InsertOrganization(ctx, model.UserOrganizationDao{
-		Username:     params.Username,
-		Organization: params.Organization,
+		Username:       params.Username,
+		OrganizationID: params.OrganizationID,
 	})
 }

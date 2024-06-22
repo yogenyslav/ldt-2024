@@ -65,7 +65,7 @@ message LoginRequest {
       description: "Модель запроса на авторизацию, содержащая логин и пароль пользователя."
       required: ["username", "password"]
     }
-    example: "{\"username\": \"test@test.com\", \"password\": \"test123456\"}"
+    example: "{\"username\": \"usernames\", \"password\": \"password\"}"
   };
   string username = 1;
   string password = 2;

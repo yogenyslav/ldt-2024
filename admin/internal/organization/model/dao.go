@@ -6,11 +6,10 @@ import (
 
 // OrganizationDao организация в базе данных.
 type OrganizationDao struct {
+	CreatedAt time.Time
 	Username  string
 	Title     string
-	S3Bucket  string
 	ID        int64
-	CreatedAt time.Time
 }
 
 // ToDto конвертирует OrganizationDao в OrganizationDto.

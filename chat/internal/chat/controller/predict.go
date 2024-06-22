@@ -17,7 +17,7 @@ import (
 // Predict получить предикт по запросу.
 //
 //nolint:funlen // let it be long
-func (ctrl *Controller) Predict(ctx context.Context, out chan<- chatresp.Response, cancel <-chan struct{}, queryID int64) {
+func (ctrl *Controller) Predict(ctx context.Context, out chan<- chatresp.Response, cancel <-chan struct{}, queryID int64, org string) {
 	ctx, span := ctrl.tracer.Start(
 		ctx,
 		"Controller.Predict",
@@ -52,9 +52,10 @@ func (ctrl *Controller) Predict(ctx context.Context, out chan<- chatresp.Respons
 	}
 
 	predict, err := ctrl.predictor.Predict(ctx, &pb.PredictReq{
-		Type:    pb.QueryType(meta.Type),
-		Product: meta.Product,
-		Period:  meta.Period,
+		Type:         pb.QueryType(meta.Type),
+		Product:      meta.Product,
+		Period:       meta.Period,
+		Organization: org,
 	})
 	if err != nil {
 		out <- chatresp.Response{Err: err.Error(), Msg: "predict failed"}

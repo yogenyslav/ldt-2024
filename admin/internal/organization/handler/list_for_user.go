@@ -8,13 +8,13 @@ import (
 )
 
 // FindOne godoc
-// @Summary Получить организацию
-// @Description Получить организацию для пользователя
+// @Summary Получить список организаций
+// @Description Получить список организаций для пользователя
 // @Tags organization
 // @Security ApiKeyAuth
 // @Accept json
 // @Produce json
-// @Success 200 {object} model.OrganizationDto "Информация об организации"
+// @Success 200 {array} model.OrganizationDto "Список организаций пользователя"
 // @Failure 404 {object} string "Организация не найдена"
 // @Router /organization [get]
 func (h *Handler) FindOne(c *fiber.Ctx) error {
@@ -23,7 +23,7 @@ func (h *Handler) FindOne(c *fiber.Ctx) error {
 		return shared.ErrCtxConvertType
 	}
 
-	resp, err := h.ctrl.FindOne(c.UserContext(), username)
+	resp, err := h.ctrl.ListForUser(c.UserContext(), username)
 	if err != nil {
 		return err
 	}

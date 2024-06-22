@@ -10,12 +10,8 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-type UserOrganizationRepo interface {
-	FindOrganization(ctx context.Context, username string) (string, error)
-}
-
 // JWT мидлварь для авторизации по jwt.
-func JWT(kc *gocloak.GoCloak, realm string, repo UserOrganizationRepo) auth.AuthFunc {
+func JWT(kc *gocloak.GoCloak, realm string) auth.AuthFunc {
 	return func(ctx context.Context) (context.Context, error) {
 		token, err := auth.AuthFromMD(ctx, "Bearer")
 		if err != nil {
@@ -25,11 +21,6 @@ func JWT(kc *gocloak.GoCloak, realm string, repo UserOrganizationRepo) auth.Auth
 		if err != nil || userInfo.PreferredUsername == nil {
 			return nil, status.Error(codes.Unauthenticated, err.Error())
 		}
-		org, err := repo.FindOrganization(ctx, *userInfo.PreferredUsername)
-		if err != nil {
-			return nil, status.Error(codes.Internal, err.Error())
-		}
-		ctx = context.WithValue(ctx, shared.OrganizationKey, org)
 		return context.WithValue(ctx, shared.UsernameKey, *userInfo.PreferredUsername), nil
 	}
 }

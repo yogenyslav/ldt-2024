@@ -26,26 +26,24 @@ func (ctrl *Controller) InsertOne(ctx context.Context, params model.Organization
 
 	var resp model.OrganizationCreateResp
 
-	s3Bucket := getOrganizationTitle(params.Title)
-	err := ctrl.s3.CreateBucket(ctx, &minios3.Bucket{
-		Name:   s3Bucket,
-		Region: "eu-central-1",
-	})
-	if err != nil {
-		log.Error().Err(err).Msg("failed to create bucket")
-		return resp, shared.ErrCreateOrganization
-	}
-
 	id, err := ctrl.repo.InsertOne(ctx, model.OrganizationDao{
 		Username: username,
 		Title:    params.Title,
-		S3Bucket: s3Bucket,
 	})
 	if err != nil {
 		if pkg.CheckDuplicateKey(err) {
 			return resp, shared.ErrDuplicateTitle
 		}
 		log.Error().Err(err).Msg("failed to insert organization")
+		return resp, shared.ErrCreateOrganization
+	}
+
+	err = ctrl.s3.CreateBucket(ctx, &minios3.Bucket{
+		Name:   getOrganizationTitle(id),
+		Region: "eu-central-1",
+	})
+	if err != nil {
+		log.Error().Err(err).Msg("failed to create bucket")
 		return resp, shared.ErrCreateOrganization
 	}
 

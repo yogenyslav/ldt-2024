@@ -11,8 +11,8 @@ const (
 	UsernameKey = "x-username"
 	// LoginEndpoint эндпоинт для авторизации.
 	LoginEndpoint = "/api.AuthService/Login"
-	// OrganizationKey ключ для получения организации из контекста.
-	OrganizationKey = "organization"
+	//// OrganizationKey ключ для получения организации из контекста.
+	//OrganizationKey = "organization"
 )
 
 // RoleFromString конвертирует строку роли в число.

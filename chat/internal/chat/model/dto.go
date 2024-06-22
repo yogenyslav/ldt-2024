@@ -28,8 +28,9 @@ type ResponseDto struct {
 
 // QueryCreateReq модель запроса для создания.
 type QueryCreateReq struct {
-	Prompt  string              `json:"prompt,omitempty" validate:"gte=5"`
-	Command shared.QueryCommand `json:"command,omitempty"`
+	Prompt       string              `json:"prompt,omitempty" validate:"gte=5"`
+	Command      shared.QueryCommand `json:"command,omitempty"`
+	Organization string              `json:"organization,omitempty"`
 }
 
 // QueryMeta модель метаданных запроса.
