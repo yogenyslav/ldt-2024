@@ -11,8 +11,8 @@ import (
 
 type userOrgRepo interface {
 	InsertOrganization(ctx context.Context, params model.UserOrganizationDao) error
-	List(ctx context.Context, organization string) ([]string, error)
-	DeleteOrganization(ctx context.Context, username string) error
+	List(ctx context.Context, organizationID int64) ([]string, error)
+	DeleteOrganization(ctx context.Context, params model.UserOrganizationDao) error
 }
 
 // Controller имплементирует методы для работы с пользователями и организациями.

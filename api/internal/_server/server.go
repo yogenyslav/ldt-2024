@@ -22,7 +22,6 @@ import (
 	ac "github.com/yogenyslav/ldt-2024/api/internal/api/auth/controller"
 	ah "github.com/yogenyslav/ldt-2024/api/internal/api/auth/handler"
 	authmw "github.com/yogenyslav/ldt-2024/api/internal/api/auth/middleware"
-	"github.com/yogenyslav/ldt-2024/api/internal/api/auth/repo"
 	"github.com/yogenyslav/ldt-2024/api/internal/api/middleware"
 	"github.com/yogenyslav/ldt-2024/api/internal/api/pb"
 	predh "github.com/yogenyslav/ldt-2024/api/internal/api/predictor/handler"
@@ -68,7 +67,7 @@ func New(cfg *config.Config) *Server {
 	var grpcOpts []grpc.ServerOption
 	grpcOpts = append(grpcOpts, grpc.ChainUnaryInterceptor(
 		logging.UnaryServerInterceptor(middleware.InterceptorLogger(), logOpts...),
-		auth.UnaryServerInterceptor(authmw.JWT(kc, cfg.KeyCloak.Realm, repo.New(pg))),
+		auth.UnaryServerInterceptor(authmw.JWT(kc, cfg.KeyCloak.Realm)),
 	))
 	srv := grpc.NewServer(grpcOpts...)
 

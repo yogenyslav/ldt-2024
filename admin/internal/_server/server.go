@@ -127,12 +127,12 @@ func (s *Server) Run() {
 	userRepo := ur.New(s.pg)
 	userController := uc.New(userRepo, s.cfg.KeyCloak, s.kc, s.tracer)
 	userHandler := uh.New(userController, m, s.tracer)
-	user.SetupUserRoutes(s.app, userHandler, s.kc, s.cfg.KeyCloak.Realm, s.cfg.Server.CipherKey, userRepo)
+	user.SetupUserRoutes(s.app, userHandler, s.kc, s.cfg.KeyCloak.Realm, s.cfg.Server.CipherKey)
 
 	organizationRepo := or.New(s.pg)
 	organizationController := oc.New(organizationRepo, s.s3, pb.NewPredictorClient(apiClient.GetConn()), s.tracer)
 	organizationHandler := oh.New(organizationController, m, s.tracer)
-	organization.SetupOrganizationRoutes(s.app, organizationHandler, s.kc, s.cfg.KeyCloak.Realm, s.cfg.Server.CipherKey, userRepo)
+	organization.SetupOrganizationRoutes(s.app, organizationHandler, s.kc, s.cfg.KeyCloak.Realm, s.cfg.Server.CipherKey)
 
 	go s.listen()
 	go prom.HandlePrometheus(s.cfg.Prom)

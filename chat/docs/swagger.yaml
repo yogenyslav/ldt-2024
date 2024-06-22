@@ -142,6 +142,13 @@ definitions:
       segment:
         type: string
     type: object
+  model.UniqueCodesReq:
+    properties:
+      organization_id:
+        type: integer
+    required:
+    - organization_id
+    type: object
   model.UniqueCodesResp:
     properties:
       codes:
@@ -462,6 +469,13 @@ paths:
       - application/json
       description: Получить набор уникальных записей с разделением на регулярные и
         нерегулярные товары
+      parameters:
+      - description: Параметры запроса
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/model.UniqueCodesReq'
       produces:
       - application/json
       responses:

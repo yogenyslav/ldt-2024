@@ -8,12 +8,12 @@ import (
 )
 
 // List возвращает список пользователей в организации.
-func (ctrl *Controller) List(ctx context.Context, organization string) ([]string, error) {
+func (ctrl *Controller) List(ctx context.Context, organizationID int64) ([]string, error) {
 	ctx, span := ctrl.tracer.Start(
 		ctx,
 		"Controller.List",
-		trace.WithAttributes(attribute.String("organization", organization)),
+		trace.WithAttributes(attribute.Int64("organizationID", organizationID)),
 	)
 	defer span.End()
-	return ctrl.repo.List(ctx, organization)
+	return ctrl.repo.List(ctx, organizationID)
 }

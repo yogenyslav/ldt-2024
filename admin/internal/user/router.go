@@ -14,9 +14,9 @@ type userHandler interface {
 }
 
 // SetupUserRoutes инициализирует роуты для работы с пользователями.
-func SetupUserRoutes(app *fiber.App, h userHandler, kc *gocloak.GoCloak, realm, cipher string, repo authmw.UserOrganizationRepo) {
+func SetupUserRoutes(app *fiber.App, h userHandler, kc *gocloak.GoCloak, realm, cipher string) {
 	g := app.Group("/admin/user")
-	g.Use(authmw.JWT(kc, realm, cipher, repo))
+	g.Use(authmw.JWT(kc, realm, cipher))
 
 	g.Post("/", h.NewUser)
 	g.Post("/organization", h.InsertOrganization)

@@ -14,11 +14,11 @@ import (
 )
 
 // ImportData импортирует данные из архива.
-func (ctrl *Controller) ImportData(ctx context.Context, mpArchive *multipart.FileHeader, org string) error {
+func (ctrl *Controller) ImportData(ctx context.Context, mpArchive *multipart.FileHeader, id int64) error {
 	ctx, span := ctrl.tracer.Start(
 		ctx,
 		"Controller.ImportData",
-		trace.WithAttributes(attribute.String("organization", org)),
+		trace.WithAttributes(attribute.Int64("organizationID", id)),
 	)
 	defer span.End()
 
@@ -35,6 +35,8 @@ func (ctrl *Controller) ImportData(ctx context.Context, mpArchive *multipart.Fil
 		return err
 	}
 
+	organizationTitle := getOrganizationTitle(id)
+
 	sources := make([]*pb.Source, 0, len(archive.File))
 	for _, file := range archive.File {
 		if file.FileInfo().IsDir() {
@@ -48,7 +50,7 @@ func (ctrl *Controller) ImportData(ctx context.Context, mpArchive *multipart.Fil
 
 		if _, err := ctrl.s3.PutObject(
 			ctx,
-			getOrganizationTitle(org),
+			organizationTitle,
 			file.FileInfo().Name(),
 			f,
 			file.FileInfo().Size(),
@@ -58,7 +60,7 @@ func (ctrl *Controller) ImportData(ctx context.Context, mpArchive *multipart.Fil
 			return err
 		}
 
-		url, err := ctrl.s3.PresignedGetObject(ctx, getOrganizationTitle(org), file.FileInfo().Name(), time.Hour, nil)
+		url, err := ctrl.s3.PresignedGetObject(ctx, getOrganizationTitle(id), file.FileInfo().Name(), time.Hour, nil)
 		if err != nil {
 			log.Error().Err(err).Str("file", file.FileInfo().Name()).Msg("failed to get presigned url")
 			return err
@@ -71,7 +73,7 @@ func (ctrl *Controller) ImportData(ctx context.Context, mpArchive *multipart.Fil
 
 	in := &pb.PrepareDataReq{
 		Sources:      sources,
-		Organization: org,
+		Organization: organizationTitle,
 	}
 	if _, err := ctrl.predictor.PrepareData(ctx, in); err != nil {
 		log.Error().Err(err).Msg("failed to prepare data")

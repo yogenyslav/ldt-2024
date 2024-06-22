@@ -507,6 +507,17 @@ const docTemplate = `{
                     "stock"
                 ],
                 "summary": "Регулярные товары",
+                "parameters": [
+                    {
+                        "description": "Параметры запроса",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.UniqueCodesReq"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Список с товарами",
@@ -733,6 +744,17 @@ const docTemplate = `{
                 },
                 "segment": {
                     "type": "string"
+                }
+            }
+        },
+        "model.UniqueCodesReq": {
+            "type": "object",
+            "required": [
+                "organization_id"
+            ],
+            "properties": {
+                "organization_id": {
+                    "type": "integer"
                 }
             }
         },

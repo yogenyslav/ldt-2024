@@ -20,3 +20,9 @@ type OrganizationCreateReq struct {
 type OrganizationCreateResp struct {
 	ID int64 `json:"id"`
 }
+
+// OrganizationUpdateReq запрос на обновление названия организации.
+type OrganizationUpdateReq struct {
+	Title string `json:"title"`
+	ID    int64  `json:"id"`
+}

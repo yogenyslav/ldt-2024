@@ -2,27 +2,26 @@ server:
   port: 10000
   log_level: "debug"
   cors_origins:
-    - "*"
-  cipher_key: "32-bit cipher hex key"
+    - "https://your-domain.com"
+  cipher_key: "32bit hex string"
   bot_token: "BOT:TOKEN"
-  debug_mode: true
-  app_url: "https://misis.larek.tech"
+  app_url: "https://you-domain.com"
 
 keycloak:
-  url: "http://keycloak:8080"
+  url: "http://192.168.1.80:8080"
   realm: "ldt"
 
 postgres:
   user: "pguser"
   password: "pgpass"
-  host: "pg"
+  host: "192.168.1.80"
   port: 5432
   db: "dev"
   ssl: false
   retry_timeout: 20
 
 jaeger:
-  host: "jaeger"
+  host: "192.168.1.80"
   port: 4318
 
 prom:
@@ -30,5 +29,5 @@ prom:
   port: 10001
 
 api:
-  host: "api"
+  host: "192.168.1.80"
   port: 9999

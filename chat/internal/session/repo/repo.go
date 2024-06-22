@@ -106,7 +106,8 @@ const findContent = `
 		on q.session_id = s.id
 	where
 	    q.session_id = $1 
-	  	and s.is_deleted = false;
+	  	and s.is_deleted = false
+	order by q.id;
 `
 
 // FindContent возвращает контент сессии.

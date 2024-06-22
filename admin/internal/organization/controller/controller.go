@@ -12,7 +12,8 @@ import (
 
 type organizationRepo interface {
 	InsertOne(ctx context.Context, params model.OrganizationDao) (int64, error)
-	FindOne(ctx context.Context, username string) (model.OrganizationDao, error)
+	ListForUser(ctx context.Context, username string) ([]model.OrganizationDao, error)
+	UpdateOne(ctx context.Context, params model.OrganizationDao) error
 }
 
 // Controller имплементирует методы для работы с организациями.
@@ -33,6 +34,6 @@ func New(repo organizationRepo, s3 minios3.S3, predictor pb.PredictorClient, tra
 	}
 }
 
-func getOrganizationTitle(org string) string {
-	return fmt.Sprintf("organization-%s", org)
+func getOrganizationTitle(id int64) string {
+	return fmt.Sprintf("organization-%d", id)
 }

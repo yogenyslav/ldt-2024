@@ -141,7 +141,7 @@
           {
             "name": "organization",
             "in": "query",
-            "required": false,
+            "required": true,
             "type": "string"
           }
         ],
@@ -206,8 +206,14 @@
       "type": "object",
       "example": {
         "sources": [
-          "file1.csv",
-          "file2.xlsx"
+          {
+            "name": "source1",
+            "path": "path1"
+          },
+          {
+            "name": "source2",
+            "path": "path2"
+          }
         ],
         "organization": "organization1"
       },
@@ -241,6 +247,10 @@
     },
     "apiSource": {
       "type": "object",
+      "example": {
+        "name": "source1",
+        "path": "path1"
+      },
       "properties": {
         "name": {
           "type": "string"
@@ -248,7 +258,13 @@
         "path": {
           "type": "string"
         }
-      }
+      },
+      "description": "Источник данных для подготовки и парсинга",
+      "title": "Источник данных",
+      "required": [
+        "name",
+        "path"
+      ]
     },
     "apiUniqueCode": {
       "type": "object",

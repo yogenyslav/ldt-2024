@@ -106,6 +106,14 @@ service Predictor {
 }
 
 message Source {
+  option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_schema) = {
+    json_schema: {
+      title: "Источник данных"
+      description: "Источник данных для подготовки и парсинга"
+      required: ["name", "path"]
+    }
+    example: "{\"name\": \"source1\",\"path\": \"path1\"}"
+  };
   string name = 1;
   string path = 2;
 }
@@ -117,7 +125,7 @@ message PrepareDataReq {
       description: "Запрос на подготовку и парсинг данных по .csv/.xlsx файлам. Названия файлов должны совпадать с импортированными в систему"
       required: ["sources", "organization"]
     }
-    example: "{\"sources\": [\"file1.csv\", \"file2.xlsx\"], \"organization\": \"organization1\"}"
+    example: "{\"sources\": [{\"name\": \"source1\",\"path\": \"path1\"}, {\"name\": \"source2\",\"path\": \"path2\"}], \"organization\": \"organization1\"}"
   };
   repeated Source sources = 1;
   string organization = 2;
@@ -150,6 +158,14 @@ message PredictResp {
 }
 
 message UniqueCodesReq {
+  option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_schema) = {
+    json_schema: {
+      title: "Запрос на получение списка уникальных кодов"
+      description: "Запрос на получение списка у��икальных кодов товаров"
+      required: ["organization"]
+    }
+    example: "{\"organization\": \"organization1\"}"
+  };
   string organization = 1;
 }
 
