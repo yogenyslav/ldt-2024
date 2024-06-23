@@ -19,7 +19,11 @@ import {
     StockResponse,
     UNAUTHORIZED_ERR,
 } from '@/api/models';
-import { GetUsersInOrganizationParams, Organization } from '@/api/models/organizations';
+import {
+    GetUsersInOrganizationParams,
+    Organization,
+    UserInOrganization,
+} from '@/api/models/organizations';
 import { LOCAL_STORAGE_KEY } from '@/auth/AuthProvider';
 import { WS_URL } from '@/config';
 import { makeAutoObservable, runInAction } from 'mobx';
@@ -39,9 +43,10 @@ export class RootStore {
 
     websocket: WebSocket | null = null;
 
-    organization: Organization | null = null;
+    adminOrganizations: Organization[] | null = null;
+    selectedAdminOrganization: Organization | null = null;
     isOrganizationLoading: boolean = false;
-    usersInOrganization: string[] = [];
+    usersInOrganization: UserInOrganization[] = [];
     isUsersInOrganizationLoading: boolean = false;
 
     constructor() {
@@ -378,12 +383,12 @@ export class RootStore {
         }
     }
 
-    async getOrganization() {
+    async getOrganizations() {
         this.isOrganizationLoading = true;
 
-        return OrganizationsApiService.getOrganization()
+        return OrganizationsApiService.getOrganizations()
             .then((organization) => {
-                this.organization = organization;
+                this.adminOrganizations = organization;
 
                 return organization;
             })
@@ -392,10 +397,10 @@ export class RootStore {
             });
     }
 
-    async getUsersInOrganization({ organization }: GetUsersInOrganizationParams) {
+    async getUsersInOrganization({ organizationId }: GetUsersInOrganizationParams) {
         this.isUsersInOrganizationLoading = true;
 
-        return OrganizationsApiService.getUsersInOrganization({ organization })
+        return OrganizationsApiService.getUsersInOrganization({ organizationId })
             .then((users) => {
                 this.usersInOrganization = users;
             })
@@ -406,5 +411,11 @@ export class RootStore {
 
     setIsUsersInOrganizationLoading(isLoading: boolean) {
         this.isUsersInOrganizationLoading = isLoading;
+    }
+
+    setSelectedAdminOrganization(organizationId: number) {
+        this.selectedAdminOrganization =
+            this.adminOrganizations?.find((organization) => organization.id === organizationId) ||
+            null;
     }
 }
