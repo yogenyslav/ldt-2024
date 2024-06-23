@@ -143,7 +143,7 @@ func (s *Server) Run() {
 	organization.SetupOrganizationRoutes(g, organizationHandler)
 
 	notificationRepo := nr.New(s.pg)
-	notificationController := nc.New(notificationRepo, s.tracer)
+	notificationController := nc.New(notificationRepo, s.cfg.KeyCloak, s.kc, s.tracer)
 	notificationHandler := nh.New(notificationController)
 	notification.SetupNotificationRoutes(g, notificationHandler)
 
