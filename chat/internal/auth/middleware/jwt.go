@@ -30,9 +30,6 @@ func JWT(kc *gocloak.GoCloak, realm, cipher string) fiber.Handler {
 		}
 
 		c.Locals(shared.UsernameKey, *userInfo.PreferredUsername)
-		c.Locals(shared.FirstNameKey, *userInfo.Name)
-		c.Locals(shared.LastNameKey, *userInfo.FamilyName)
-		c.Locals(shared.EmailKey, *userInfo.Email)
 		c.SetUserContext(pkg.PushToken(c.UserContext(), authToken))
 		return c.Next()
 	}

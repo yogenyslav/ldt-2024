@@ -18,13 +18,13 @@ func New(pg storage.SQLDatabase) *Repo {
 }
 
 const insertOne = `
-	insert into chat.notification (email, first_name, last_name, organization_id)
-	values ($1, $2, $3, $4);
+	insert into chat.notification (email, organization_id)
+	values ($1, $2);
 `
 
 // InsertOne добавляет новое уведомление.
 func (r *Repo) InsertOne(ctx context.Context, params model.NotificationDao) error {
-	_, err := r.pg.Exec(ctx, insertOne, params.Email, params.FirstName, params.LastName, params.OrganizationID)
+	_, err := r.pg.Exec(ctx, insertOne, params.Email, params.OrganizationID)
 	return err
 }
 

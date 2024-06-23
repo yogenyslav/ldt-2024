@@ -30,8 +30,6 @@ func (ctrl *Controller) Switch(ctx context.Context, params model.NotificationUpd
 
 		return ctrl.repo.InsertOne(ctx, model.NotificationDao{
 			Email:          params.Email,
-			FirstName:      params.FirstName,
-			LastName:       params.LastName,
 			OrganizationID: params.OrganizationID,
 		})
 	}

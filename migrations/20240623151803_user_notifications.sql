@@ -2,8 +2,6 @@
 -- +goose StatementBegin
 create table chat.notification (
     email text,
-    first_name text,
-    last_name text,
     organization_id bigint
 );
 

@@ -28,23 +28,6 @@ func (h *Handler) Switch(c *fiber.Ctx) error {
 		return err
 	}
 
-	email, ok := c.Locals(shared.EmailKey).(string)
-	if !ok {
-		return shared.ErrCtxConvertType
-	}
-	firstName, ok := c.Locals(shared.FirstNameKey).(string)
-	if !ok {
-		return shared.ErrCtxConvertType
-	}
-	lastName, ok := c.Locals(shared.LastNameKey).(string)
-	if !ok {
-		return shared.ErrCtxConvertType
-	}
-
-	req.Email = email
-	req.FirstName = firstName
-	req.LastName = lastName
-
 	if err := h.ctrl.Switch(c.UserContext(), req); err != nil {
 		return err
 	}

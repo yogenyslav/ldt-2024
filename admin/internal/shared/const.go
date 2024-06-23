@@ -5,12 +5,6 @@ const (
 	UsernameKey = "username"
 	// TraceCtxKey ключ для локального хранилища контекста с trace.
 	TraceCtxKey = "trace"
-	// FirstNameKey ключ для получения имени из контекста.
-	FirstNameKey = "firstName"
-	// LastNameKey ключ для получения фамилии из контекста.
-	LastNameKey = "lastName"
-	// EmailKey ключ для получения email из контекста.
-	EmailKey = "email"
 )
 
 // UserRole роль пользователя.
