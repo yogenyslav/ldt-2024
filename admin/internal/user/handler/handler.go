@@ -13,7 +13,7 @@ type userController interface {
 	NewUser(ctx context.Context, req model.UserCreateReq) error
 	InsertOrganization(ctx context.Context, req model.UserUpdateOrganizationReq) error
 	DeleteOrganization(ctx context.Context, req model.UserUpdateOrganizationReq) error
-	List(ctx context.Context, organizationID int64) ([]string, error)
+	List(ctx context.Context, organizationID int64) ([]model.UserListResp, error)
 }
 
 // Handler имплементация сервера для работы с пользователями и организациями.

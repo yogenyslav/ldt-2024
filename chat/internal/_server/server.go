@@ -32,10 +32,6 @@ import (
 	fc "github.com/yogenyslav/ldt-2024/chat/internal/favorite/controller"
 	fh "github.com/yogenyslav/ldt-2024/chat/internal/favorite/handler"
 	fr "github.com/yogenyslav/ldt-2024/chat/internal/favorite/repo"
-	"github.com/yogenyslav/ldt-2024/chat/internal/notification"
-	nc "github.com/yogenyslav/ldt-2024/chat/internal/notification/controller"
-	nh "github.com/yogenyslav/ldt-2024/chat/internal/notification/handler"
-	nr "github.com/yogenyslav/ldt-2024/chat/internal/notification/repo"
 	"github.com/yogenyslav/ldt-2024/chat/internal/session"
 	sc "github.com/yogenyslav/ldt-2024/chat/internal/session/controller"
 	sh "github.com/yogenyslav/ldt-2024/chat/internal/session/handler"
@@ -155,11 +151,6 @@ func (s *Server) Run() {
 
 	stockHandler := stockh.New(pb.NewPredictorClient(apiClient.GetConn()))
 	stock.SetupStockRoutes(g, stockHandler)
-
-	notificationRepo := nr.New(s.pg)
-	notificationController := nc.New(notificationRepo, s.tracer)
-	notificationHandler := nh.New(notificationController)
-	notification.SetupNotificationRoutes(g, notificationHandler)
 
 	go s.listen()
 	go prom.HandlePrometheus(s.cfg.Prom)

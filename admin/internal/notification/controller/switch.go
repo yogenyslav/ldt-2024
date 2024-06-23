@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/rs/zerolog/log"
-	"github.com/yogenyslav/ldt-2024/chat/internal/notification/model"
+	"github.com/yogenyslav/ldt-2024/admin/internal/notification/model"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
 )

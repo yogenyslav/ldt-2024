@@ -19,6 +19,16 @@ definitions:
       token:
         type: string
     type: object
+  model.NotificationUpdateReq:
+    properties:
+      active:
+        type: boolean
+      organization_id:
+        minimum: 1
+        type: integer
+    required:
+    - organization_id
+    type: object
   model.OrganizationCreateReq:
     properties:
       title:
@@ -72,6 +82,13 @@ definitions:
     - password
     - roles
     - username
+    type: object
+  model.UserListResp:
+    properties:
+      notifications:
+        type: boolean
+      username:
+        type: string
     type: object
   model.UserUpdateOrganizationReq:
     properties:
@@ -128,6 +145,34 @@ paths:
       summary: Авторизация
       tags:
       - auth
+  /notification/switch:
+    post:
+      consumes:
+      - application/json
+      description: Включает или выключает уведомления.
+      parameters:
+      - description: Параметры запроса
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/model.NotificationUpdateReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Статус уведомлений изменен
+          schema:
+            type: string
+        "400":
+          description: Некорректный запрос
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Включает или выключает уведомления.
+      tags:
+      - notification
   /organization:
     get:
       consumes:
@@ -312,7 +357,7 @@ paths:
           description: Список пользователей
           schema:
             items:
-              type: string
+              $ref: '#/definitions/model.UserListResp'
             type: array
       security:
       - ApiKeyAuth: []

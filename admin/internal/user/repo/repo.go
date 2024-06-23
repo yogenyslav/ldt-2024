@@ -31,14 +31,18 @@ func (r *Repo) InsertOrganization(ctx context.Context, params model.UserOrganiza
 }
 
 const list = `
-	select username
-	from adm.user_organization
+	select uo.username, exists(
+		select 1
+		from chat.notification n
+		where n.email = uo.username and n.organization_id = $1
+	)
+	from adm.user_organization uo
 	where organization_id = $1 and is_deleted = false;
 `
 
 // List возвращает список пользователей по организации.
-func (r *Repo) List(ctx context.Context, organizationID int64) ([]string, error) {
-	var users []string
+func (r *Repo) List(ctx context.Context, organizationID int64) ([]model.UserListResp, error) {
+	var users []model.UserListResp
 	err := r.pg.QuerySlice(ctx, &users, list, organizationID)
 	return users, err
 }

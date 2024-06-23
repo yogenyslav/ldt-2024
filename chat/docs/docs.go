@@ -286,94 +286,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/notification/check/{organization_id}": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Проверяет наличие уведомлений.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "notification"
-                ],
-                "summary": "Проверяет наличие уведомлений.",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "ID организации",
-                        "name": "organization_id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Статус уведомления",
-                        "schema": {
-                            "$ref": "#/definitions/model.NotificationExistsResp"
-                        }
-                    },
-                    "400": {
-                        "description": "Некорректный запрос",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/notification/switch": {
-            "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Включает или выключает уведомления.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "notification"
-                ],
-                "summary": "Включает или выключает уведомления.",
-                "parameters": [
-                    {
-                        "description": "Параметры запроса",
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/model.NotificationUpdateReq"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Статус уведомлений изменен",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "400": {
-                        "description": "Некорректный запрос",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
         "/session/list": {
             "get": {
                 "security": [
@@ -723,29 +635,6 @@ const docTemplate = `{
             "properties": {
                 "id": {
                     "type": "string"
-                }
-            }
-        },
-        "model.NotificationExistsResp": {
-            "type": "object",
-            "properties": {
-                "exists": {
-                    "type": "boolean"
-                }
-            }
-        },
-        "model.NotificationUpdateReq": {
-            "type": "object",
-            "required": [
-                "organization_id"
-            ],
-            "properties": {
-                "active": {
-                    "type": "boolean"
-                },
-                "organization_id": {
-                    "type": "integer",
-                    "minimum": 1
                 }
             }
         },

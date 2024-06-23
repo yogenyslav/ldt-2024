@@ -71,6 +71,51 @@ const docTemplate = `{
                 }
             }
         },
+        "/notification/switch": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Включает или выключает уведомления.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "notification"
+                ],
+                "summary": "Включает или выключает уведомления.",
+                "parameters": [
+                    {
+                        "description": "Параметры запроса",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.NotificationUpdateReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Статус уведомлений изменен",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Некорректный запрос",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/organization": {
             "get": {
                 "security": [
@@ -419,7 +464,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "type": "string"
+                                "$ref": "#/definitions/model.UserListResp"
                             }
                         }
                     }
@@ -454,6 +499,21 @@ const docTemplate = `{
                 },
                 "token": {
                     "type": "string"
+                }
+            }
+        },
+        "model.NotificationUpdateReq": {
+            "type": "object",
+            "required": [
+                "organization_id"
+            ],
+            "properties": {
+                "active": {
+                    "type": "boolean"
+                },
+                "organization_id": {
+                    "type": "integer",
+                    "minimum": 1
                 }
             }
         },
@@ -532,6 +592,17 @@ const docTemplate = `{
                     "items": {
                         "type": "string"
                     }
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.UserListResp": {
+            "type": "object",
+            "properties": {
+                "notifications": {
+                    "type": "boolean"
                 },
                 "username": {
                     "type": "string"

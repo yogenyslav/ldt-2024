@@ -21,3 +21,9 @@ type UserUpdateOrganizationReq struct {
 	Username       string `json:"username" validate:"required"`
 	OrganizationID int64  `json:"organization_id" validate:"required,gte=1"`
 }
+
+// UserListResp ответ на запрос списка пользователей по организации.
+type UserListResp struct {
+	Username      string `json:"username"`
+	Notifications bool   `json:"notifications"`
+}

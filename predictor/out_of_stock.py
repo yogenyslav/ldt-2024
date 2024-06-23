@@ -10,6 +10,9 @@ from typing import Tuple
 import pymongo
 from data_process import filter_forecast
 from utils import convert_datetime_to_str
+from dotenv import load_dotenv
+
+load_dotenv(".env")
 
 mongo_url = f"mongodb://{os.getenv('MONGO_HOST')}:{os.getenv('MONGO_PORT')}"
 mongo_client = pymongo.MongoClient(mongo_url)

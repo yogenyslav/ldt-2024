@@ -4,12 +4,11 @@ import (
 	"context"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/yogenyslav/ldt-2024/chat/internal/notification/model"
+	"github.com/yogenyslav/ldt-2024/admin/internal/notification/model"
 )
 
 type notificationController interface {
 	Switch(ctx context.Context, params model.NotificationUpdateReq) error
-	Check(ctx context.Context, email string, organizationID int64) (bool, error)
 }
 
 // Handler обработчик для уведомлений.

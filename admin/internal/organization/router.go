@@ -1,9 +1,7 @@
 package organization
 
 import (
-	"github.com/Nerzal/gocloak/v13"
 	"github.com/gofiber/fiber/v2"
-	authmw "github.com/yogenyslav/ldt-2024/admin/internal/auth/middleware"
 )
 
 type organizationHandler interface {
@@ -14,9 +12,8 @@ type organizationHandler interface {
 }
 
 // SetupOrganizationRoutes устанавливает маршруты для организаций.
-func SetupOrganizationRoutes(app *fiber.App, h organizationHandler, kc *gocloak.GoCloak, realm, cipher string) {
-	g := app.Group("/admin/organization")
-	g.Use(authmw.JWT(kc, realm, cipher))
+func SetupOrganizationRoutes(app fiber.Router, h organizationHandler) {
+	g := app.Group("/organization")
 
 	g.Post("/", h.InsertOne)
 	g.Get("/", h.FindOne)

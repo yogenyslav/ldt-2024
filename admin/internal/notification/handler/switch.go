@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/yogenyslav/ldt-2024/chat/internal/notification/model"
+	"github.com/yogenyslav/ldt-2024/admin/internal/notification/model"
 	"github.com/yogenyslav/ldt-2024/chat/internal/shared"
 )
 

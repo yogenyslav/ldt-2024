@@ -15,7 +15,7 @@ import (
 // @Produce json
 // @Security ApiKeyAuth
 // @Param organization_id path int true "ID организации"
-// @Success 200 {array} string "Список пользователей"
+// @Success 200 {array} model.UserListResp "Список пользователей"
 // @Router /user/{organization_id} [get]
 func (h *Handler) List(c *fiber.Ctx) error {
 	organizationID, err := c.ParamsInt("organization_id")
