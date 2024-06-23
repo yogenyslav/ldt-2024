@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/yogenyslav/ldt-2024/chat/internal/user/model"
+	"github.com/yogenyslav/ldt-2024/chat/internal/notification/model"
 )
 
 type notificationController interface {

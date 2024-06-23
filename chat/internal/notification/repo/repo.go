@@ -3,7 +3,7 @@ package repo
 import (
 	"context"
 
-	"github.com/yogenyslav/ldt-2024/chat/internal/user/model"
+	"github.com/yogenyslav/ldt-2024/chat/internal/notification/model"
 	"github.com/yogenyslav/pkg/storage"
 )
 
