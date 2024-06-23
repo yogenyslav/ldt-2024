@@ -53,3 +53,9 @@ export interface UserInOrganization {
     notifications: boolean;
     email: string;
 }
+
+export interface SetUserNotificationParams {
+    active: boolean;
+    organization_id: number;
+    username: string;
+}

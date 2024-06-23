@@ -21,6 +21,7 @@ import OrganizationsApiService from '@/api/OrganizationsApiService';
 import { Role } from '@/api/models';
 import { Badge } from '../ui/badge';
 import { observer } from 'mobx-react-lite';
+import { Switch } from '../ui/switch';
 
 type Props = {
     organizationId: number;
@@ -202,6 +203,7 @@ const UsersList = observer(({ organizationId }: Props) => {
                             <TableHead>E-mail</TableHead>
                             <TableHead>Организация</TableHead>
                             <TableHead>Действия</TableHead>
+                            <TableHead>Уведомления</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -241,6 +243,40 @@ const UsersList = observer(({ organizationId }: Props) => {
                                             <span className='sr-only'>Удалить пользователя</span>
                                         </Button>
                                     </div>
+                                </TableCell>
+                                <TableCell>
+                                    <Switch
+                                        checked={user.notifications}
+                                        onCheckedChange={(checked) => {
+                                            OrganizationsApiService.setUserNotifications({
+                                                username: user.username,
+                                                organization_id: organizationId,
+                                                active: checked,
+                                            })
+                                                .then(() => {
+                                                    rootStore.setUserNotifications(
+                                                        user.username,
+                                                        checked
+                                                    );
+
+                                                    toast({
+                                                        title: 'Успех',
+                                                        description:
+                                                            'Настройки уведомлений изменены',
+                                                        variant: 'default',
+                                                    });
+                                                })
+                                                .catch(() => {
+                                                    toast({
+                                                        title: 'Ошибка',
+                                                        description:
+                                                            'Не удалось изменить настройки уведомлений',
+                                                        variant: 'destructive',
+                                                    });
+                                                });
+                                        }}
+                                        id={user.username}
+                                    />
                                 </TableCell>
                             </TableRow>
                         ))}

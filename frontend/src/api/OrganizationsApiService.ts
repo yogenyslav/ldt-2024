@@ -8,6 +8,7 @@ import {
     GetProductsResponse,
     GetUsersInOrganizationParams,
     Organization,
+    SetUserNotificationParams,
     UserInOrganization,
 } from './models/organizations';
 
@@ -67,6 +68,20 @@ class FavoritesApiService {
         const response = await get<GetProductsResponse>(
             `/chat/stock/unique_codes/${organization_id}`
         );
+
+        return response;
+    }
+
+    public async setUserNotifications({
+        active,
+        organization_id,
+        username,
+    }: SetUserNotificationParams) {
+        const response = await post<void>('/admin/notification/switch', {
+            active,
+            organization_id,
+            username,
+        });
 
         return response;
     }
