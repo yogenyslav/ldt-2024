@@ -77,7 +77,7 @@ class YaGPTPrompter:
 
         prompt += f"Медианное время выполнения закупки по категории: {data['median_execution_days']}\n"
         prompt += f"Среднее время до начала выполнения закупки по категории: {data['mean_start_to_execute_days']}\n"
-        prompt += f"Средняя референсная цена: {round(data['mean_ref_price'], 2) if data['mean_ref_price'] else 'Информация отсутствует'}\n"
+        prompt += f"Средняя цена из справочника: {round(data['mean_ref_price'], 2) if data['mean_ref_price'] else 'Информация отсутствует'}\n"
 
         prompt += "Топ 5 поставщиков этой категории по объему закупок:\n"
         for i, seller in enumerate(data["top5_providers"], start=1):
@@ -121,7 +121,7 @@ class YaGPTPrompter:
         prompt += f"Объем закупки (условные единицы): {data['closest_purchase']['volume'] if data['closest_purchase']['volume'] else 'Информация отсутствует'}\n"
         prompt += f"Медианное время выполнения закупки по категории: {data['median_execution_days']}\n"
         prompt += f"Среднее время до начала выполнения закупки по категории: {data['mean_start_to_execute_days']}\n"
-        prompt += f"Средняя референсная цена: {round(data['mean_ref_price'], 2) if data['mean_ref_price'] else 'Информация отсутствует'}\n"
+        prompt += f"Средняя цена из справочника: {round(data['mean_ref_price'], 2) if data['mean_ref_price'] else 'Информация отсутствует'}\n"
 
         prompt += "Топ 5 поставщиков этой категории по объему закупок:\n"
         for i, seller in enumerate(data["top5_providers"], start=1):
