@@ -213,6 +213,11 @@ paths:
         name: data
         required: true
         type: file
+      - description: ID организации
+        in: formData
+        name: organization_id
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -294,11 +299,11 @@ paths:
       - application/json
       description: Возвращает список пользователей по организации.
       parameters:
-      - description: Название организации
+      - description: ID организации
         in: path
-        name: organization
+        name: organization_id
         required: true
-        type: string
+        type: integer
       produces:
       - application/json
       responses:

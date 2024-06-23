@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"net/http"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/rs/zerolog/log"
 )
@@ -12,7 +14,7 @@ import (
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
-// @Param organization path string true "Название организации"
+// @Param organization_id path int true "ID организации"
 // @Success 200 {array} string "Список пользователей"
 // @Router /user/{organization_id} [get]
 func (h *Handler) List(c *fiber.Ctx) error {
@@ -27,5 +29,5 @@ func (h *Handler) List(c *fiber.Ctx) error {
 		return err
 	}
 
-	return c.JSON(users)
+	return c.Status(http.StatusOK).JSON(users)
 }

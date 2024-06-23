@@ -17,6 +17,7 @@ import (
 // @Accept mpfd
 // @Produce json
 // @Param data formData file true "Архив с данными"
+// @Param organization_id formData string true "ID организации"
 // @Success 201 {string} string "Данные успешно загружены"
 // @Failure 400 {object} string "Ошибка при обработке файлов"
 // @Router /organization/import [post]

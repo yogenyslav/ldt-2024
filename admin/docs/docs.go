@@ -216,6 +216,13 @@ const docTemplate = `{
                         "name": "data",
                         "in": "formData",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "ID организации",
+                        "name": "organization_id",
+                        "in": "formData",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -399,9 +406,9 @@ const docTemplate = `{
                 "summary": "Возвращает список пользователей по организации.",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "Название организации",
-                        "name": "organization",
+                        "type": "integer",
+                        "description": "ID организации",
+                        "name": "organization_id",
                         "in": "path",
                         "required": true
                     }
