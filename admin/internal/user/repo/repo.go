@@ -53,3 +53,16 @@ func (r *Repo) DeleteOrganization(ctx context.Context, params model.UserOrganiza
 	_, err := r.pg.Exec(ctx, deleteOne, params.Username, params.OrganizationID)
 	return err
 }
+
+const checkUserOrganization = `
+	select count(*)
+	from adm.user_organization
+	where username = $1 and organization_id = $2;
+`
+
+// CheckUserOrganization проверить, состоит ли пользователь в организации.
+func (r *Repo) CheckUserOrganization(ctx context.Context, username string, organizationID int64) (bool, error) {
+	var exists int
+	err := r.pg.Query(ctx, &exists, checkUserOrganization, username, organizationID)
+	return exists == 1, err
+}

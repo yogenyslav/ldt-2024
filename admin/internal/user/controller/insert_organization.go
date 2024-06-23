@@ -3,6 +3,7 @@ package controller
 import (
 	"context"
 
+	"github.com/rs/zerolog/log"
 	"github.com/yogenyslav/ldt-2024/admin/internal/user/model"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
@@ -19,6 +20,16 @@ func (ctrl *Controller) InsertOrganization(ctx context.Context, params model.Use
 		),
 	)
 	defer span.End()
+
+	exists, err := ctrl.repo.CheckUserOrganization(ctx, params.Username, params.OrganizationID)
+	if err != nil {
+		log.Error().Err(err).Msg("failed to check user in organization")
+		return err
+	}
+	if exists {
+		log.Error().Err(err).Msg("user is already in organization")
+		return nil
+	}
 
 	return ctrl.repo.InsertOrganization(ctx, model.UserOrganizationDao{
 		Username:       params.Username,
