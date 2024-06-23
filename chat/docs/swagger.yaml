@@ -142,13 +142,6 @@ definitions:
       segment:
         type: string
     type: object
-  model.UniqueCodesReq:
-    properties:
-      organization_id:
-        type: integer
-    required:
-    - organization_id
-    type: object
   model.UniqueCodesResp:
     properties:
       codes:
@@ -463,19 +456,18 @@ paths:
       summary: Обновить заголовок
       tags:
       - session
-  /stock/unique_codes:
+  /stock/unique_codes/{organization_id}:
     get:
       consumes:
       - application/json
       description: Получить набор уникальных записей с разделением на регулярные и
         нерегулярные товары
       parameters:
-      - description: Параметры запроса
-        in: body
-        name: body
+      - description: ID организации
+        in: path
+        name: organization_id
         required: true
-        schema:
-          $ref: '#/definitions/model.UniqueCodesReq'
+        type: integer
       produces:
       - application/json
       responses:

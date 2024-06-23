@@ -5,8 +5,8 @@ import (
 	"net/http"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/rs/zerolog/log"
 	"github.com/yogenyslav/ldt-2024/chat/internal/api/pb"
-	"github.com/yogenyslav/ldt-2024/chat/internal/shared"
 	"github.com/yogenyslav/ldt-2024/chat/internal/stock/model"
 )
 
@@ -17,19 +17,17 @@ import (
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
-// @Param body body model.UniqueCodesReq true "Параметры запроса"
+// @Param organization_id path int true "ID организации"
 // @Success 200 {object} model.UniqueCodesResp "Список с товарами"
-// @Router /stock/unique_codes [get]
+// @Router /stock/unique_codes/{organization_id} [get]
 func (h *Handler) UniqueCodes(c *fiber.Ctx) error {
-	var req model.UniqueCodesReq
-	if err := c.BodyParser(&req); err != nil {
-		return shared.ErrParseBody
-	}
-	if err := h.validator.Struct(req); err != nil {
+	id, err := c.ParamsInt("organization_id")
+	if err != nil {
+		log.Error().Err(err).Msg("can't parse organization id")
 		return err
 	}
 
-	in := &pb.UniqueCodesReq{Organization: fmt.Sprintf("organization-%d", req.OrganizationID)}
+	in := &pb.UniqueCodesReq{Organization: fmt.Sprintf("organization-%d", id)}
 	uniqueCodes, err := h.predictor.UniqueCodes(c.UserContext(), in)
 	if err != nil {
 		return err

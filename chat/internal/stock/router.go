@@ -15,5 +15,5 @@ func SetupStockRoutes(app *fiber.App, h stockHandler, kc *gocloak.GoCloak, realm
 	g := app.Group("/chat/stock")
 	g.Use(middleware.JWT(kc, realm, cipher))
 
-	g.Get("/unique_codes", h.UniqueCodes)
+	g.Get("/unique_codes/:organization_id", h.UniqueCodes)
 }
