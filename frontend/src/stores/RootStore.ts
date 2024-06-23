@@ -45,9 +45,11 @@ export class RootStore {
 
     adminOrganizations: Organization[] | null = null;
     selectedAdminOrganization: Organization | null = null;
-    isOrganizationLoading: boolean = false;
+    isOrganizationsLoading: boolean = false;
     usersInOrganization: UserInOrganization[] = [];
     isUsersInOrganizationLoading: boolean = false;
+
+    selectedOrganizationId: number | null = null;
 
     constructor() {
         makeAutoObservable(this);
@@ -161,6 +163,8 @@ export class RootStore {
                 this.websocket.send(
                     JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) as string)?.user?.token
                 );
+
+                this.websocket.send(this.selectedOrganizationId?.toString() || '1');
 
                 this.setChatDisabled(false);
             }
@@ -384,16 +388,20 @@ export class RootStore {
     }
 
     async getOrganizations() {
-        this.isOrganizationLoading = true;
+        this.isOrganizationsLoading = true;
 
         return OrganizationsApiService.getOrganizations()
             .then((organization) => {
                 this.adminOrganizations = organization;
 
+                if (organization.length > 0) {
+                    this.setSelectedOrganizationId(organization[0].id);
+                }
+
                 return organization;
             })
             .finally(() => {
-                this.isOrganizationLoading = false;
+                this.isOrganizationsLoading = false;
             });
     }
 
@@ -417,5 +425,9 @@ export class RootStore {
         this.selectedAdminOrganization =
             this.adminOrganizations?.find((organization) => organization.id === organizationId) ||
             null;
+    }
+
+    setSelectedOrganizationId(organizationId: number) {
+        this.selectedOrganizationId = organizationId;
     }
 }

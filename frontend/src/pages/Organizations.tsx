@@ -49,7 +49,7 @@ const Organizations = observer(() => {
     return (
         <div className='organizations'>
             {roles?.includes(Role.Admin) ? (
-                rootStore.isOrganizationLoading ? (
+                rootStore.isOrganizationsLoading ? (
                     <>
                         <Skeleton className='bg-slate-200 h-40 w-full' />
                         <Skeleton className='bg-slate-200 h-40 w-full' />
