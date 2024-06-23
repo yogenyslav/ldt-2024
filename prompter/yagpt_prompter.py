@@ -1,5 +1,6 @@
 import json
 import os
+import re
 import requests
 import time
 from dataclasses import dataclass
@@ -199,6 +200,14 @@ class YaGPTPrompter:
             output = response
         return output
 
+    def _validate_date(self, date_str: str) -> bool:
+        pattern = r"^\d{2}\.\d{2}\.\d{4}:\d{2}\.\d{2}\.\d{4}$"
+
+        if re.match(pattern, date_str.strip()):
+            return True
+        else:
+            return False
+
     def process_request(self, request: str):
 
         prompter_output = PrompterOutput(type=QueryType.UNDEFINED)
@@ -232,14 +241,11 @@ class YaGPTPrompter:
         if prompter_output.type == QueryType.PREDICTION:
             inp = self._prompts["time_normalizer"].format(request=request)
             outp = self._generate_responce(inp, PromptType.TIME_NORMALIZER)
-            if "Период (в месяцах)" not in outp:
+            if self._validate_date(outp):
                 prompter_output.period = outp
             else:
-                prompter_output.period = (
-                    outp.split("Период (в месяцах):")[1].split("\n")[0].replace(" ", "")
-                )
-                if not prompter_output.period.isdigit():
-                    prompter_output.type = QueryType.UNDEFINED
+                prompter_output.type = QueryType.UNDEFINED
+                return prompter_output
 
         if prompter_output.type == QueryType.STOCK:
             prompter_output.period = None
