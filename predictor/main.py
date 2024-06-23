@@ -135,7 +135,6 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
         period: Union[str, int],
         organization: str,
         code: Optional[str] = None,
-        start_dt: Optional[str] = None,
     ) -> Dict[str, Union[int, str, List, None]]:
         """
         Get forecast information from MongoDB.
@@ -160,15 +159,10 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
         if code_info is None:
             pass  # TODO
         
-        if start_dt is None:
-            start_dt = self.cur_date
-        else:
-            start_dt = datetime.strptime(start_dt, "%Y-%m-%d")
+        start_dt, end_dt = period.split(":")
+        start_dt = datetime.strptime(start_dt, "%d.%m.%Y")
+        end_dt = datetime.strptime(end_dt, "%d.%m.%Y")
             
-        end_dt = start_dt + relativedelta(
-            years=int(period) // 12, months=int(period) % 12
-        )
-
         return filter_forecast(code_info, organization, code, start_dt, end_dt)
 
     @property
