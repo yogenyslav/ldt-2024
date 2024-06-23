@@ -286,6 +286,51 @@ const docTemplate = `{
                 }
             }
         },
+        "/notification/switch": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Включает или выключает уведомления.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "notification"
+                ],
+                "summary": "Включает или выключает уведомления.",
+                "parameters": [
+                    {
+                        "description": "Параметры запроса",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.NotificationUpdateReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Статус уведомлений изменен",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Некорректный запрос",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/session/list": {
             "get": {
                 "security": [
@@ -635,6 +680,22 @@ const docTemplate = `{
             "properties": {
                 "id": {
                     "type": "string"
+                }
+            }
+        },
+        "model.NotificationUpdateReq": {
+            "type": "object",
+            "required": [
+                "active",
+                "organization_id"
+            ],
+            "properties": {
+                "active": {
+                    "type": "boolean"
+                },
+                "organization_id": {
+                    "type": "integer",
+                    "minimum": 1
                 }
             }
         },

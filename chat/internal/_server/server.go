@@ -23,6 +23,7 @@ import (
 	"github.com/yogenyslav/ldt-2024/chat/internal/auth"
 	ac "github.com/yogenyslav/ldt-2024/chat/internal/auth/controller"
 	ah "github.com/yogenyslav/ldt-2024/chat/internal/auth/handler"
+	"github.com/yogenyslav/ldt-2024/chat/internal/auth/middleware"
 	"github.com/yogenyslav/ldt-2024/chat/internal/chat"
 	cc "github.com/yogenyslav/ldt-2024/chat/internal/chat/controller"
 	ch "github.com/yogenyslav/ldt-2024/chat/internal/chat/handler"
@@ -31,6 +32,10 @@ import (
 	fc "github.com/yogenyslav/ldt-2024/chat/internal/favorite/controller"
 	fh "github.com/yogenyslav/ldt-2024/chat/internal/favorite/handler"
 	fr "github.com/yogenyslav/ldt-2024/chat/internal/favorite/repo"
+	"github.com/yogenyslav/ldt-2024/chat/internal/notification"
+	nc "github.com/yogenyslav/ldt-2024/chat/internal/notification/controller"
+	nh "github.com/yogenyslav/ldt-2024/chat/internal/notification/handler"
+	nr "github.com/yogenyslav/ldt-2024/chat/internal/notification/repo"
 	"github.com/yogenyslav/ldt-2024/chat/internal/session"
 	sc "github.com/yogenyslav/ldt-2024/chat/internal/session/controller"
 	sh "github.com/yogenyslav/ldt-2024/chat/internal/session/handler"
@@ -121,10 +126,13 @@ func (s *Server) Run() {
 	authHandler := ah.New(authController)
 	auth.SetupAuthRoutes(s.app, authHandler)
 
+	g := s.app.Group("/chat")
+	g.Use(middleware.JWT(s.kc, s.cfg.KeyCloak.Realm, s.cfg.Server.CipherKey))
+
 	sessionRepo := sr.New(s.pg)
 	sessionController := sc.New(sessionRepo, s.tracer)
 	sessionHandler := sh.New(sessionController)
-	session.SetupSessionRoutes(s.app, sessionHandler, s.kc, s.cfg.KeyCloak.Realm, s.cfg.Server.CipherKey)
+	session.SetupSessionRoutes(g, sessionHandler)
 
 	chatRepo := cr.New(s.pg)
 	chatController := cc.New(
@@ -143,10 +151,15 @@ func (s *Server) Run() {
 	favoriteRepo := fr.New(s.pg)
 	favoriteController := fc.New(favoriteRepo, s.tracer)
 	favoriteHandler := fh.New(favoriteController)
-	favorite.SetupFavoriteRoutes(s.app, favoriteHandler, s.kc, s.cfg.KeyCloak.Realm, s.cfg.Server.CipherKey)
+	favorite.SetupFavoriteRoutes(g, favoriteHandler)
 
 	stockHandler := stockh.New(pb.NewPredictorClient(apiClient.GetConn()))
-	stock.SetupStockRoutes(s.app, stockHandler, s.kc, s.cfg.KeyCloak.Realm, s.cfg.Server.CipherKey)
+	stock.SetupStockRoutes(g, stockHandler)
+
+	notificationRepo := nr.New(s.pg)
+	notificationController := nc.New(notificationRepo, s.tracer)
+	notificationHandler := nh.New(notificationController)
+	notification.SetupNotificationRoutes(g, notificationHandler)
 
 	go s.listen()
 	go prom.HandlePrometheus(s.cfg.Prom)

@@ -72,6 +72,17 @@ definitions:
       id:
         type: string
     type: object
+  model.NotificationUpdateReq:
+    properties:
+      active:
+        type: boolean
+      organization_id:
+        minimum: 1
+        type: integer
+    required:
+    - active
+    - organization_id
+    type: object
   model.QueryDto:
     properties:
       created_at:
@@ -328,6 +339,34 @@ paths:
       summary: Возвращает список избранных предиктов.
       tags:
       - favorite
+  /notification/switch:
+    post:
+      consumes:
+      - application/json
+      description: Включает или выключает уведомления.
+      parameters:
+      - description: Параметры запроса
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/model.NotificationUpdateReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Статус уведомлений изменен
+          schema:
+            type: string
+        "400":
+          description: Некорректный запрос
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Включает или выключает уведомления.
+      tags:
+      - notification
   /session/{id}:
     delete:
       consumes:

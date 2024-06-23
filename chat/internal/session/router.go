@@ -1,9 +1,7 @@
 package session
 
 import (
-	"github.com/Nerzal/gocloak/v13"
 	"github.com/gofiber/fiber/v2"
-	"github.com/yogenyslav/ldt-2024/chat/internal/auth/middleware"
 )
 
 type sessionHandler interface {
@@ -15,9 +13,8 @@ type sessionHandler interface {
 }
 
 // SetupSessionRoutes маппит пути для сессий.
-func SetupSessionRoutes(app *fiber.App, h sessionHandler, kc *gocloak.GoCloak, realm, cipher string) {
-	g := app.Group("/chat/session")
-	g.Use(middleware.JWT(kc, realm, cipher))
+func SetupSessionRoutes(app fiber.Router, h sessionHandler) {
+	g := app.Group("/session")
 
 	g.Post("/new", h.NewSession)
 	g.Get("/list", h.List)

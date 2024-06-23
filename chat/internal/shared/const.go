@@ -3,12 +3,16 @@ package shared
 const (
 	// UsernameKey ключ для получения имени пользователя из контекста.
 	UsernameKey = "x-username"
+	// FirstNameKey ключ для получения имени из контекста.
+	FirstNameKey = "firstName"
+	// LastNameKey ключ для получения фамилии из контекста.
+	LastNameKey = "lastName"
+	// EmailKey ключ для получения email из контекста.
+	EmailKey = "email"
 	// TraceCtxKey ключ для trace внутри контекста.
 	TraceCtxKey = "traceCtx"
 	// UserIDKey ключ для получения userID.
 	UserIDKey = "userID"
-	// TokenKey ключ для получения токена.
-	TokenKey = "token"
 	// UsernameKey ключ для получения username.
 	enumsUndefined = "UNDEFINED"
 
