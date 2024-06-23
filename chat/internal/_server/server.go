@@ -172,10 +172,12 @@ func (s *Server) getWsConfig() websocket.Config {
 	return websocket.Config{
 		RecoverHandler: func(conn *websocket.Conn) {
 			if e := recover(); e != nil {
+				internalErr := fmt.Errorf("can't handle error: %v", e)
 				err := conn.WriteJSON(chatresp.Response{
 					Msg: "internal error",
-					Err: fmt.Errorf("can't handle error: %v", e).Error(),
+					Err: internalErr.Error(),
 				})
+				log.Error().Err(internalErr).Msg("ws panic")
 				if err != nil {
 					log.Warn().Err(err).Msg("failed to recover ws panic")
 				}
