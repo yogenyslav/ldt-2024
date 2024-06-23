@@ -20,6 +20,6 @@ func SetupUserRoutes(app *fiber.App, h userHandler, kc *gocloak.GoCloak, realm, 
 
 	g.Post("/", h.NewUser)
 	g.Post("/organization", h.InsertOrganization)
-	g.Delete("/:username", h.DeleteOrganization)
+	g.Delete("/", h.DeleteOrganization)
 	g.Get("/:organization_id", h.List)
 }
