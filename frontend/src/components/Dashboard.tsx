@@ -103,9 +103,12 @@ export function Dashboard({ children }: DashboardProps) {
                         </Sheet>
 
                         <div className='w-full flex-1'>
-                            <div className='max-w-60'>
-                                <OrganizationSwitcher />
-                            </div>
+                            {location.pathname.match(new RegExp(`chat`)) ||
+                                (location.pathname === '/' && (
+                                    <div className='max-w-60'>
+                                        <OrganizationSwitcher />
+                                    </div>
+                                ))}
                         </div>
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
