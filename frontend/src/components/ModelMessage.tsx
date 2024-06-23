@@ -16,6 +16,7 @@ import MarkdownPreview from '@uiw/react-markdown-preview';
 import { LoaderButton } from './ui/loader-button';
 import FavoritesApiService from '@/api/FavoritesApiService';
 import StocksGroup from './StocksGroup';
+import ChangePeriod from './ChangePeriod';
 
 type ModelMessageProps = {
     incomingMessage: DisplayedIncomingMessage;
@@ -72,27 +73,35 @@ const ModelMessage = ({ incomingMessage, isLastMessage }: ModelMessageProps) => 
                                     Продолжить
                                 </Button>
                                 {showInvalidButton && (
-                                    <Button
-                                        onClick={() => {
-                                            toast({
-                                                title: 'Введите уточняющий запрос',
-                                                description:
-                                                    'Например, "Получить запасы товара картофель"',
-                                            });
+                                    <>
+                                        <Button
+                                            onClick={() => {
+                                                toast({
+                                                    title: 'Введите уточняющий запрос',
+                                                    description:
+                                                        'Например, "Получить запасы товара картофель"',
+                                                });
 
-                                            rootStore.sendMessage({
-                                                command: ChatCommand.Invalid,
-                                            });
+                                                rootStore.sendMessage({
+                                                    command: ChatCommand.Invalid,
+                                                });
 
-                                            setShowInvalidButton(false);
-                                            rootStore.setChatDisabled(false);
-                                            rootStore.setIsModelAnswering(false);
-                                        }}
-                                        variant='outline'
-                                        className='flex-1'
-                                    >
-                                        Уточнить запрос
-                                    </Button>
+                                                setShowInvalidButton(false);
+                                                rootStore.setChatDisabled(false);
+                                                rootStore.setIsModelAnswering(false);
+                                            }}
+                                            variant='outline'
+                                            className='flex-1'
+                                        >
+                                            Уточнить запрос
+                                        </Button>
+
+                                        {incomingMessage.period && (
+                                            <ChangePeriod
+                                                setShowInvalidButton={setShowInvalidButton}
+                                            />
+                                        )}
+                                    </>
                                 )}
                             </div>
                         )}
