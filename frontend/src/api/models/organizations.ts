@@ -59,3 +59,8 @@ export interface SetUserNotificationParams {
     organization_id: number;
     username: string;
 }
+
+export interface EditOrganizationParams {
+    id: number;
+    title: string;
+}

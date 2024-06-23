@@ -1,10 +1,11 @@
-import { get, post, del } from './http';
+import { get, post, del, put } from './http';
 import {
     AddUserToOrganizationParams,
     CreateOrganizationParams,
     CreateOrganizationResponse,
     CreateUserParams,
     DeleteUserParams,
+    EditOrganizationParams,
     GetProductsResponse,
     GetUsersInOrganizationParams,
     Organization,
@@ -15,6 +16,12 @@ import {
 class FavoritesApiService {
     public async createOrganization({ title }: CreateOrganizationParams) {
         const response = await post<CreateOrganizationResponse>('/admin/organization', { title });
+
+        return response;
+    }
+
+    public async editOrganization({ id, title }: EditOrganizationParams) {
+        const response = await put<void>('/admin/organization', { id, title });
 
         return response;
     }

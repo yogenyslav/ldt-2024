@@ -13,7 +13,7 @@ import { Input } from '../ui/input';
 import { LoaderButton } from '../ui/loader-button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
-import { Info } from 'lucide-react';
+import { EditIcon, Info } from 'lucide-react';
 import OrganizationsApiService from '@/api/OrganizationsApiService';
 import { toast } from '../ui/use-toast';
 import { useState } from 'react';
@@ -23,6 +23,11 @@ const OrganizationsList = () => {
     const [isOrganizatiionCreating, setIsOrganizationCreating] = useState(false);
     const [isOgranizationDialogOpen, setIsOrganizationDialogOpen] = useState(false);
     const [organizationName, setOrganizationName] = useState('');
+
+    const [isEditOrganizationDialogOpen, setIsEditOrganizationDialogOpen] = useState(false);
+    const [editOrganizationId, setEditOrganizationId] = useState<number | null>(null);
+    const [editOrganizationName, setEditOrganizationName] = useState('');
+    const [isOrganizationEditing, setIsOrganizationEditing] = useState(false);
 
     function handleCreateOrganizationSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
@@ -57,11 +62,83 @@ const OrganizationsList = () => {
             });
     }
 
+    function handleEditOrganizationSubmit(event: React.FormEvent<HTMLFormElement>) {
+        event.preventDefault();
+
+        setIsOrganizationEditing(true);
+
+        if (editOrganizationId) {
+            OrganizationsApiService.editOrganization({
+                id: editOrganizationId,
+                title: editOrganizationName,
+            })
+                .then(() => {
+                    toast({
+                        title: 'Успех',
+                        description: 'Организация успешно отредактирована',
+                        variant: 'default',
+                    });
+
+                    rootStore.getOrganizations();
+                })
+                .catch(() => {
+                    toast({
+                        title: 'Ошибка',
+                        description: 'Не удалось отредактировать организацию',
+                        variant: 'destructive',
+                    });
+                })
+                .finally(() => {
+                    setIsOrganizationEditing(false);
+                    setIsEditOrganizationDialogOpen(false);
+                });
+        }
+    }
+
     return (
         <>
             <div>
                 <div className='flex items-center'>
                     <h1 className='font-semibold text-lg md:text-2xl'>Организация</h1>
+
+                    <Dialog
+                        open={isEditOrganizationDialogOpen}
+                        onOpenChange={setIsEditOrganizationDialogOpen}
+                    >
+                        <DialogContent className='sm:max-w-[425px]'>
+                            <DialogHeader>
+                                <DialogTitle>Редактирование организации</DialogTitle>
+                                <DialogDescription>
+                                    Отредактируйте название организации
+                                </DialogDescription>
+                            </DialogHeader>
+                            <form onSubmit={handleEditOrganizationSubmit}>
+                                <div className='grid gap-4 py-4'>
+                                    <div className='grid items-center grid-cols-4 gap-4'>
+                                        <Label htmlFor='name' className='text-right'>
+                                            Название
+                                        </Label>
+                                        <Input
+                                            value={editOrganizationName}
+                                            onChange={(e) => {
+                                                setEditOrganizationName(e.target.value);
+                                            }}
+                                            required
+                                            id='name'
+                                            name='name'
+                                            placeholder='Название организации'
+                                            className='col-span-3'
+                                        />
+                                    </div>
+                                </div>
+                                <DialogFooter>
+                                    <LoaderButton isLoading={isOrganizationEditing} type='submit'>
+                                        Изменить
+                                    </LoaderButton>
+                                </DialogFooter>
+                            </form>
+                        </DialogContent>
+                    </Dialog>
 
                     <Dialog
                         open={isOgranizationDialogOpen}
@@ -99,7 +176,7 @@ const OrganizationsList = () => {
                                             required
                                             id='name'
                                             name='name'
-                                            placeholder='Enter organization name'
+                                            placeholder='Название организации'
                                             className='col-span-3'
                                         />
                                     </div>
@@ -119,12 +196,29 @@ const OrganizationsList = () => {
                             <TableHeader>
                                 <TableRow>
                                     <TableHead>Название</TableHead>
+                                    <TableHead>Действия</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
                                 {rootStore.adminOrganizations.map((organization) => (
                                     <TableRow key={organization.id}>
                                         <TableCell>{organization.title}</TableCell>
+                                        <TableCell>
+                                            <Button
+                                                variant='outline'
+                                                size='icon'
+                                                onClick={() => {
+                                                    setEditOrganizationId(organization.id);
+                                                    setEditOrganizationName(organization.title);
+                                                    setIsEditOrganizationDialogOpen(true);
+                                                }}
+                                            >
+                                                <EditIcon className='h-4 w-4' />
+                                                <span className='sr-only'>
+                                                    Удалить пользователя
+                                                </span>
+                                            </Button>
+                                        </TableCell>
                                     </TableRow>
                                 ))}
                             </TableBody>
