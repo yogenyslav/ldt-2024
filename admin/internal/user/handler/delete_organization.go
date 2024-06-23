@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/gofiber/fiber/v2"
@@ -24,6 +25,16 @@ func (h *Handler) DeleteOrganization(c *fiber.Ctx) error {
 	if err := c.BodyParser(&req); err != nil {
 		return shared.ErrParseBody
 	}
+
+	username, ok := c.Locals(shared.UsernameKey).(string)
+	if !ok {
+		return shared.ErrCtxConvertType
+	}
+
+	if req.Username == username {
+		return errors.New("can't delete yourself")
+	}
+
 	if err := h.ctrl.DeleteOrganization(c.Context(), req); err != nil {
 		return err
 	}
