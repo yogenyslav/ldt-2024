@@ -38,6 +38,13 @@ definitions:
       title:
         type: string
     type: object
+  model.OrganizationUpdateReq:
+    properties:
+      id:
+        type: integer
+      title:
+        type: string
+    type: object
   model.UserCreateReq:
     properties:
       email:
@@ -46,8 +53,10 @@ definitions:
         type: string
       last_name:
         type: string
-      organization:
-        type: string
+      organization_ids:
+        items:
+          type: integer
+        type: array
       password:
         type: string
       roles:
@@ -66,12 +75,13 @@ definitions:
     type: object
   model.UserUpdateOrganizationReq:
     properties:
-      organization:
-        type: string
+      organization_id:
+        minimum: 1
+        type: integer
       username:
         type: string
     required:
-    - organization
+    - organization_id
     - username
     type: object
 host: api.misis.larek.tech
@@ -122,21 +132,23 @@ paths:
     get:
       consumes:
       - application/json
-      description: Получить организацию для пользователя
+      description: Получить список организаций для пользователя
       produces:
       - application/json
       responses:
         "200":
-          description: Информация об организации
+          description: Список организаций пользователя
           schema:
-            $ref: '#/definitions/model.OrganizationDto'
+            items:
+              $ref: '#/definitions/model.OrganizationDto'
+            type: array
         "404":
           description: Организация не найдена
           schema:
             type: string
       security:
       - ApiKeyAuth: []
-      summary: Получить организацию
+      summary: Получить список организаций
       tags:
       - organization
     post:
@@ -166,6 +178,31 @@ paths:
       summary: Создает новую организацию.
       tags:
       - organization
+    put:
+      consumes:
+      - application/json
+      description: Изменить название организации
+      parameters:
+      - description: Новое название
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/model.OrganizationUpdateReq'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Название изменено
+        "404":
+          description: Организация не найдена
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Изменить название
+      tags:
+      - organization
   /organization/import:
     post:
       consumes:
@@ -177,6 +214,11 @@ paths:
         name: data
         required: true
         type: file
+      - description: ID организации
+        in: formData
+        name: organization_id
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -194,6 +236,33 @@ paths:
       tags:
       - organization
   /user:
+    delete:
+      consumes:
+      - application/json
+      description: Удаляет организацию.
+      parameters:
+      - description: Параметры на удаление
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/model.UserUpdateOrganizationReq'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Организация удалена
+          schema:
+            type: string
+        "400":
+          description: Ошибка в запросе
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Удаляет организацию.
+      tags:
+      - user
     post:
       consumes:
       - application/json
@@ -225,17 +294,17 @@ paths:
       summary: Создает нового пользователя.
       tags:
       - user
-  /user/{organization}:
+  /user/{organization_id}:
     get:
       consumes:
       - application/json
       description: Возвращает список пользователей по организации.
       parameters:
-      - description: Название организации
+      - description: ID организации
         in: path
-        name: organization
+        name: organization_id
         required: true
-        type: string
+        type: integer
       produces:
       - application/json
       responses:
@@ -248,33 +317,6 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Возвращает список пользователей по организации.
-      tags:
-      - user
-  /user/{username}:
-    delete:
-      consumes:
-      - application/json
-      description: Удаляет организацию.
-      parameters:
-      - description: Имя пользователя
-        in: path
-        name: username
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "204":
-          description: Организация удалена
-          schema:
-            type: string
-        "400":
-          description: Ошибка в запросе
-          schema:
-            type: string
-      security:
-      - ApiKeyAuth: []
-      summary: Удаляет организацию.
       tags:
       - user
   /user/organization:

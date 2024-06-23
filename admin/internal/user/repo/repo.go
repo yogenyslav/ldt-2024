@@ -20,50 +20,49 @@ func New(pg storage.SQLDatabase) *Repo {
 }
 
 const insertOrganization = `
-	insert into adm.user_organization(username, organization)
+	insert into adm.user_organization(username, organization_id)
 	values ($1, $2);
 `
 
 // InsertOrganization добавляет пользователя в организацию.
 func (r *Repo) InsertOrganization(ctx context.Context, params model.UserOrganizationDao) error {
-	_, err := r.pg.Exec(ctx, insertOrganization, params.Username, params.Organization)
+	_, err := r.pg.Exec(ctx, insertOrganization, params.Username, params.OrganizationID)
 	return err
 }
 
 const list = `
 	select username
 	from adm.user_organization
-	where organization = $1 and is_deleted = false;
+	where organization_id = $1 and is_deleted = false;
 `
 
 // List возвращает список пользователей по организации.
-func (r *Repo) List(ctx context.Context, organization string) ([]string, error) {
+func (r *Repo) List(ctx context.Context, organizationID int64) ([]string, error) {
 	var users []string
-	err := r.pg.QuerySlice(ctx, &users, list, organization)
+	err := r.pg.QuerySlice(ctx, &users, list, organizationID)
 	return users, err
 }
 
 const deleteOne = `
-	update adm.user_organization
-	set is_deleted = true
-	where username = $1;
+	delete from adm.user_organization
+	where username = $1 and organization_id = $2;
 `
 
 // DeleteOrganization удаляет пользователя из организации.
-func (r *Repo) DeleteOrganization(ctx context.Context, username string) error {
-	_, err := r.pg.Exec(ctx, deleteOne, username)
+func (r *Repo) DeleteOrganization(ctx context.Context, params model.UserOrganizationDao) error {
+	_, err := r.pg.Exec(ctx, deleteOne, params.Username, params.OrganizationID)
 	return err
 }
 
-const findOrganization = `
-	select organization
+const checkUserOrganization = `
+	select count(*)
 	from adm.user_organization
-	where username = $1;
+	where username = $1 and organization_id = $2;
 `
 
-// FindOrganization находит организацию по username.
-func (r *Repo) FindOrganization(ctx context.Context, username string) (string, error) {
-	var organization string
-	err := r.pg.Query(ctx, &organization, findOrganization, username)
-	return organization, err
+// CheckUserOrganization проверить, состоит ли пользователь в организации.
+func (r *Repo) CheckUserOrganization(ctx context.Context, username string, organizationID int64) (bool, error) {
+	var exists int
+	err := r.pg.Query(ctx, &exists, checkUserOrganization, username, organizationID)
+	return exists == 1, err
 }

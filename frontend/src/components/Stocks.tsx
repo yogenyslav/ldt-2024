@@ -42,7 +42,7 @@ const Stocks = ({ stocks }: Props) => {
                 <div>
                     <BasicBarChart
                         data={dataAmount}
-                        title='Остатки товара (количетство)'
+                        title='Остатки товара (количество)'
                         xLabel='Кварталы'
                         tooltipItemName='Количество товара'
                         tooltipPostfix='шт.'

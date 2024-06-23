@@ -2,36 +2,35 @@ server:
   port: 12000
   log_level: "debug"
   cors_origins:
-    - "*"
-  cipher_key: "32 bit hex value"
+    - "https://your-domain.com"
+  cipher_key: "32bit hex value"
 
 keycloak:
-  url: "http://localhost:8080"
-  client_id: "ldt"
-  client_secret: "secret"
+  url: "http://192.168.1.80:8080"
+  client_secret: "client secret"
   realm: "ldt"
   admin_realm: "master"
-  user: "admin"
-  password: "admin"
+  user: "kcuser"
+  password: "kcpass"
 
 postgres:
   user: "pguser"
   password: "pgpass"
-  host: "localhost"
+  host: "192.168.1.80"
   port: 5432
   db: "dev"
   ssl: false
   retry_timeout: 20
 
 jaeger:
-  host: "localhost"
+  host: "192.168.1.80"
   port: 4318
 
 s3:
-  host: "s3"
+  host: "192.168.1.80"
   port: 9000
-  access_key: "sdfsdf"
-  secret_key: "sdfsdfsdf"
+  access_key: "access_key"
+  secret_key: "secret_key"
   ssl: false
 
 prom:
@@ -39,5 +38,5 @@ prom:
   port: 12001
 
 api:
-  host: "localhost"
+  host: "192.168.1.80"
   port: 9999

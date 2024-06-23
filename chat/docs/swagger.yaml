@@ -456,12 +456,18 @@ paths:
       summary: Обновить заголовок
       tags:
       - session
-  /stock/unique_codes:
+  /stock/unique_codes/{organization_id}:
     get:
       consumes:
       - application/json
       description: Получить набор уникальных записей с разделением на регулярные и
         нерегулярные товары
+      parameters:
+      - description: ID организации
+        in: path
+        name: organization_id
+        required: true
+        type: integer
       produces:
       - application/json
       responses:

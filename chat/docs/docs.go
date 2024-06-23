@@ -489,7 +489,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/stock/unique_codes": {
+        "/stock/unique_codes/{organization_id}": {
             "get": {
                 "security": [
                     {
@@ -507,6 +507,15 @@ const docTemplate = `{
                     "stock"
                 ],
                 "summary": "Регулярные товары",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID организации",
+                        "name": "organization_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Список с товарами",
