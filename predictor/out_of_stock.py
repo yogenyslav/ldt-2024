@@ -92,7 +92,7 @@ async def get_user_data(
     conn: asyncpg.pool.PoolAcquireContext, organization: str
 ) -> list[str]:
     try:
-        org_id = organization.split("-")[1]
+        org_id = int(organization.split("-")[1])
         res = await conn.fetch(
             "select email from chat.notification where organization_id = $1",
             org_id,
