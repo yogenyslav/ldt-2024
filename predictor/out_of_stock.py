@@ -4,6 +4,9 @@ import smtplib
 import asyncpg
 import asyncio
 from email.message import EmailMessage
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.mime.application import MIMEApplication
 from datetime import datetime, timedelta
 from typing import Tuple
 
@@ -81,10 +84,11 @@ def send_email(server: smtplib.SMTP_SSL, email: str, body: str, content: str):
     msg["Subject"] = "Предложение по закупке"
     msg["From"] = os.getenv("MAIL_USERNAME")
     msg["To"] = email
-    msg.set_content(body)
-    msg.add_attachment(
-        content, filename="purchase.json", maintype="application", subtype="json"
-    )
+    msg.attach(MIMEText(body, "plain"))
+    attachment = MIMEApplication(content, _subtype="json")
+    attachment.add_header("Content-Disposition", "attachment", filename="purchase.json")
+    msg.attach(attachment)
+
     server.send_message(msg)
 
 
