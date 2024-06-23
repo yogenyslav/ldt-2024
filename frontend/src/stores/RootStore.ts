@@ -19,7 +19,11 @@ import {
     StockResponse,
     UNAUTHORIZED_ERR,
 } from '@/api/models';
-import { GetUsersInOrganizationParams, Organization } from '@/api/models/organizations';
+import {
+    GetUsersInOrganizationParams,
+    Organization,
+    UserInOrganization,
+} from '@/api/models/organizations';
 import { LOCAL_STORAGE_KEY } from '@/auth/AuthProvider';
 import { WS_URL } from '@/config';
 import { makeAutoObservable, runInAction } from 'mobx';
@@ -39,10 +43,13 @@ export class RootStore {
 
     websocket: WebSocket | null = null;
 
-    organization: Organization | null = null;
-    isOrganizationLoading: boolean = false;
-    usersInOrganization: string[] = [];
+    adminOrganizations: Organization[] | null = null;
+    selectedAdminOrganization: Organization | null = null;
+    isOrganizationsLoading: boolean = false;
+    usersInOrganization: UserInOrganization[] = [];
     isUsersInOrganizationLoading: boolean = false;
+
+    selectedOrganizationId: number | null = null;
 
     constructor() {
         makeAutoObservable(this);
@@ -156,6 +163,8 @@ export class RootStore {
                 this.websocket.send(
                     JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) as string)?.user?.token
                 );
+
+                this.websocket.send(this.selectedOrganizationId?.toString() || '1');
 
                 this.setChatDisabled(false);
             }
@@ -378,24 +387,28 @@ export class RootStore {
         }
     }
 
-    async getOrganization() {
-        this.isOrganizationLoading = true;
+    async getOrganizations() {
+        this.isOrganizationsLoading = true;
 
-        return OrganizationsApiService.getOrganization()
+        return OrganizationsApiService.getOrganizations()
             .then((organization) => {
-                this.organization = organization;
+                this.adminOrganizations = organization;
+
+                if (organization.length > 0) {
+                    this.setSelectedOrganizationId(organization[0].id);
+                }
 
                 return organization;
             })
             .finally(() => {
-                this.isOrganizationLoading = false;
+                this.isOrganizationsLoading = false;
             });
     }
 
-    async getUsersInOrganization({ organization }: GetUsersInOrganizationParams) {
+    async getUsersInOrganization({ organizationId }: GetUsersInOrganizationParams) {
         this.isUsersInOrganizationLoading = true;
 
-        return OrganizationsApiService.getUsersInOrganization({ organization })
+        return OrganizationsApiService.getUsersInOrganization({ organizationId })
             .then((users) => {
                 this.usersInOrganization = users;
             })
@@ -406,5 +419,15 @@ export class RootStore {
 
     setIsUsersInOrganizationLoading(isLoading: boolean) {
         this.isUsersInOrganizationLoading = isLoading;
+    }
+
+    setSelectedAdminOrganization(organizationId: number) {
+        this.selectedAdminOrganization =
+            this.adminOrganizations?.find((organization) => organization.id === organizationId) ||
+            null;
+    }
+
+    setSelectedOrganizationId(organizationId: number) {
+        this.selectedOrganizationId = organizationId;
     }
 }
