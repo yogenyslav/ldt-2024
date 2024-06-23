@@ -546,7 +546,8 @@ const docTemplate = `{
             ],
             "properties": {
                 "organization_id": {
-                    "type": "integer"
+                    "type": "integer",
+                    "minimum": 1
                 },
                 "username": {
                     "type": "string"

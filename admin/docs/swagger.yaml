@@ -76,6 +76,7 @@ definitions:
   model.UserUpdateOrganizationReq:
     properties:
       organization_id:
+        minimum: 1
         type: integer
       username:
         type: string

@@ -13,11 +13,11 @@ type UserCreateReq struct {
 
 // UserListReq запрос на получение списка пользователей по организации.
 type UserListReq struct {
-	OrganizationID int64 `json:"organization_id" validate:"required,ge=1"`
+	OrganizationID int64 `json:"organization_id" validate:"required,gte=1"`
 }
 
 // UserUpdateOrganizationReq запрос на добавление/удаление пользователя в/из организацию(-и).
 type UserUpdateOrganizationReq struct {
 	Username       string `json:"username" validate:"required"`
-	OrganizationID int64  `json:"organization_id" validate:"required,ge=1"`
+	OrganizationID int64  `json:"organization_id" validate:"required,gte=1"`
 }
