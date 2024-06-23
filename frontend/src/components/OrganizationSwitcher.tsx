@@ -5,9 +5,6 @@ import { useStores } from '@/hooks/useStores';
 const OrganizationSwitcher = observer(() => {
     const { rootStore } = useStores();
 
-    console.log('rootStore.adminOrganizations', rootStore.adminOrganizations);
-    console.log('rootStore.selectedOrganizationId', rootStore.selectedOrganizationId);
-
     return (
         <>
             {rootStore.adminOrganizations?.length && rootStore.selectedOrganizationId && (

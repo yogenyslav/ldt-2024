@@ -199,6 +199,7 @@ const UsersList = observer(({ organizationId }: Props) => {
                     <TableHeader>
                         <TableRow>
                             <TableHead>Имя пользователя</TableHead>
+                            <TableHead>E-mail</TableHead>
                             <TableHead>Организация</TableHead>
                             <TableHead>Действия</TableHead>
                         </TableRow>
@@ -208,6 +209,9 @@ const UsersList = observer(({ organizationId }: Props) => {
                             <TableRow key={index}>
                                 <TableCell>
                                     <div className='font-medium'>{user.username}</div>
+                                </TableCell>
+                                <TableCell>
+                                    <div className='font-medium'>{user.email}</div>
                                 </TableCell>
                                 <TableCell>
                                     <Badge className='bg-blue-100 text-blue-900 dark:bg-blue-900 dark:text-blue-100'>
