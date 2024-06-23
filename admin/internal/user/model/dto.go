@@ -25,5 +25,6 @@ type UserUpdateOrganizationReq struct {
 // UserListResp ответ на запрос списка пользователей по организации.
 type UserListResp struct {
 	Username      string `json:"username"`
+	Email         string `json:"email"`
 	Notifications bool   `json:"notifications"`
 }

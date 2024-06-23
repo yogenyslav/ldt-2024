@@ -31,13 +31,16 @@ func (r *Repo) InsertOrganization(ctx context.Context, params model.UserOrganiza
 }
 
 const list = `
-	select uo.username, exists(
+	select uo.username, ue.email, exists(
 		select 1
 		from chat.notification n
-		where n.email = uo.username and n.organization_id = $1
+		where n.email = ue.email and n.organization_id = $1
 	) as notifications
 	from adm.user_organization uo
-	where organization_id = $1 and is_deleted = false;
+	join adm.user_email ue 
+	    on uo.username = ue.username
+	where 
+	    organization_id = $1 and is_deleted = false;
 `
 
 // List возвращает список пользователей по организации.
