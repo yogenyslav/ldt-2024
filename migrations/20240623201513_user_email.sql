@@ -4,6 +4,7 @@ create table adm.user_email (
     email text not null,
     username text not null
 );
+insert into adm.user_email (email, username) values ('test@test.com', 'test_admin');
 -- +goose StatementEnd
 
 -- +goose Down
