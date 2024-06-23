@@ -18,21 +18,15 @@ func (ctrl *Controller) Switch(ctx context.Context, params model.NotificationUpd
 	)
 	defer span.End()
 
-	token, err := ctrl.kc.LoginAdmin(ctx, ctrl.cfg.User, ctrl.cfg.Password, ctrl.cfg.AdminRealm)
+	email, err := ctrl.repo.GetEmailByUsername(ctx, params.Username)
 	if err != nil {
-		log.Error().Err(err).Msg("failed to login admin")
-		return err
-	}
-
-	userInfo, err := ctrl.kc.GetUserInfo(ctx, token.AccessToken, ctrl.cfg.Realm)
-	if err != nil {
-		log.Error().Err(err).Msg("failed to get user info")
+		log.Error().Err(err).Msg("failed to get email by username")
 		return err
 	}
 
 	if params.Active {
 		exists, err := ctrl.repo.CheckNotification(ctx, model.NotificationDao{
-			Email:          *userInfo.Email,
+			Email:          email,
 			OrganizationID: params.OrganizationID,
 		})
 		if err != nil {
@@ -44,9 +38,9 @@ func (ctrl *Controller) Switch(ctx context.Context, params model.NotificationUpd
 		}
 
 		return ctrl.repo.InsertOne(ctx, model.NotificationDao{
-			Email:          *userInfo.Email,
+			Email:          email,
 			OrganizationID: params.OrganizationID,
 		})
 	}
-	return ctrl.repo.DeleteOne(ctx, *userInfo.Email)
+	return ctrl.repo.DeleteOne(ctx, email)
 }

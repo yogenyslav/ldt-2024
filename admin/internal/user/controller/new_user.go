@@ -64,5 +64,10 @@ func (ctrl *Controller) NewUser(ctx context.Context, params model.UserCreateReq)
 		}
 	}
 
+	if err := ctrl.repo.InsertEmailByUsername(ctx, params.Email, params.Username); err != nil {
+		log.Error().Err(err).Msg("failed to insert email")
+		return err
+	}
+
 	return nil
 }

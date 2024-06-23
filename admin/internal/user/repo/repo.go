@@ -70,3 +70,14 @@ func (r *Repo) CheckUserOrganization(ctx context.Context, username string, organ
 	err := r.pg.Query(ctx, &exists, checkUserOrganization, username, organizationID)
 	return exists == 1, err
 }
+
+const insertEmailByUsername = `
+	insert into adm.user_email(email, username)
+	values ($1, $2);
+`
+
+// InsertEmailByUsername записывает email по username.
+func (r *Repo) InsertEmailByUsername(ctx context.Context, email, username string) error {
+	_, err := r.pg.Exec(ctx, insertEmailByUsername, email, username)
+	return err
+}

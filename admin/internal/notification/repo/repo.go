@@ -53,3 +53,16 @@ func (r *Repo) CheckNotification(ctx context.Context, params model.NotificationD
 	err := r.pg.Query(ctx, &exists, checkNotification, params.Email, params.OrganizationID)
 	return exists, err
 }
+
+const getEmailByUsername = `
+	select email 
+	from adm.user_email
+	where username = $1;
+`
+
+// GetEmailByUsername возвращает email по username.
+func (r *Repo) GetEmailByUsername(ctx context.Context, username string) (string, error) {
+	var email string
+	err := r.pg.Query(ctx, &email, getEmailByUsername, username)
+	return email, err
+}

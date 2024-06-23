@@ -1,12 +1,12 @@
 -- +goose Up
 -- +goose StatementBegin
-create table chat.notification (
+create table adm.user_email (
     email text not null,
-    organization_id bigint not null
+    username text not null
 );
 -- +goose StatementEnd
 
 -- +goose Down
 -- +goose StatementBegin
-drop table chat.notification;
+drop table adm.user_email;
 -- +goose StatementEnd

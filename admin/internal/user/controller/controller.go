@@ -14,6 +14,7 @@ type userOrgRepo interface {
 	List(ctx context.Context, organizationID int64) ([]model.UserListResp, error)
 	DeleteOrganization(ctx context.Context, params model.UserOrganizationDao) error
 	CheckUserOrganization(ctx context.Context, username string, organizationID int64) (bool, error)
+	InsertEmailByUsername(ctx context.Context, email, username string) error
 }
 
 // Controller имплементирует методы для работы с пользователями и организациями.
