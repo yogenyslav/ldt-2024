@@ -489,7 +489,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/stock/unique_codes": {
+        "/stock/unique_codes/{organization_id}": {
             "get": {
                 "security": [
                     {
@@ -509,13 +509,11 @@ const docTemplate = `{
                 "summary": "Регулярные товары",
                 "parameters": [
                     {
-                        "description": "Параметры запроса",
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/model.UniqueCodesReq"
-                        }
+                        "type": "integer",
+                        "description": "ID организации",
+                        "name": "organization_id",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -744,17 +742,6 @@ const docTemplate = `{
                 },
                 "segment": {
                     "type": "string"
-                }
-            }
-        },
-        "model.UniqueCodesReq": {
-            "type": "object",
-            "required": [
-                "organization_id"
-            ],
-            "properties": {
-                "organization_id": {
-                    "type": "integer"
                 }
             }
         },
