@@ -76,14 +76,11 @@ def detect(organization: str, current_date: str = "2024-05-18") -> Tuple[str, st
     return all_mails_body
 
 
-def send_email(
-    server: smtplib.SMTP_SSL, data: tuple[str, str, str], body: str, content: str
-):
+def send_email(server: smtplib.SMTP_SSL, email: str, body: str, content: str):
     msg = EmailMessage()
     msg["Subject"] = "Предложение по закупке"
     msg["From"] = os.getenv("MAIL_USERNAME")
-    msg["To"] = data[0]
-    body = f"Здравствуйте, {data[1]} {data[2]}!\n\n{body}"
+    msg["To"] = email
     msg.set_content(body)
     msg.add_attachment(
         content, filename="purchase.json", maintype="application", subtype="json"
@@ -93,14 +90,18 @@ def send_email(
 
 async def get_user_data(
     conn: asyncpg.pool.PoolAcquireContext, organization: str
-) -> list[tuple[str, str, str]]:
-    org_id = organization.split("-")[1]
-    res = await conn.fetch(
-        "select email, first_name, last_name from chat.notification where organization_id = $1",
-        org_id,
-    )
-    print(res)
-    return [(r["email"], r["first_name"], r["last_name"]) for r in res]
+) -> list[str]:
+    try:
+        org_id = organization.split("-")[1]
+        res = await conn.fetch(
+            "select email from chat.notification where organization_id = $1",
+            org_id,
+        )
+        print(res)
+        return [r["email"] for r in res]
+    except Exception as e:
+        print(e)
+        return []
 
 
 async def main():
