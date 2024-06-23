@@ -35,7 +35,7 @@ const list = `
 		select 1
 		from chat.notification n
 		where n.email = uo.username and n.organization_id = $1
-	)
+	) as notifications
 	from adm.user_organization uo
 	where organization_id = $1 and is_deleted = false;
 `
