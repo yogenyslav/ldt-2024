@@ -3,7 +3,6 @@ import os
 import smtplib
 import asyncpg
 import asyncio
-from email.message import EmailMessage
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
@@ -80,7 +79,7 @@ def detect(organization: str, current_date: str = "2024-05-18") -> Tuple[str, st
 
 
 def send_email(server: smtplib.SMTP_SSL, email: str, body: str, content: str):
-    msg = EmailMessage()
+    msg = MIMEMultipart()
     msg["Subject"] = "Предложение по закупке"
     msg["From"] = os.getenv("MAIL_USERNAME")
     msg["To"] = email
