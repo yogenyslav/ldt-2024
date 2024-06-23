@@ -48,8 +48,8 @@ const checkNotification = `
 `
 
 // CheckNotification проверяет наличие уведомления.
-func (r *Repo) CheckNotification(ctx context.Context, email string, organizationID int64) (bool, error) {
+func (r *Repo) CheckNotification(ctx context.Context, params model.NotificationDao) (bool, error) {
 	var exists bool
-	err := r.pg.Query(ctx, &exists, checkNotification, email, organizationID)
+	err := r.pg.Query(ctx, &exists, checkNotification, params.Email, params.OrganizationID)
 	return exists, err
 }

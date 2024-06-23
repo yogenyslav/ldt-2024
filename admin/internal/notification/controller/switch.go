@@ -14,12 +14,27 @@ func (ctrl *Controller) Switch(ctx context.Context, params model.NotificationUpd
 	ctx, span := ctrl.tracer.Start(
 		ctx,
 		"Controller.Switch",
-		trace.WithAttributes(attribute.String("email", params.Email)),
+		trace.WithAttributes(attribute.String("username", params.Username)),
 	)
 	defer span.End()
 
+	token, err := ctrl.kc.LoginAdmin(ctx, ctrl.cfg.User, ctrl.cfg.Password, ctrl.cfg.AdminRealm)
+	if err != nil {
+		log.Error().Err(err).Msg("failed to login admin")
+		return err
+	}
+
+	userInfo, err := ctrl.kc.GetUserInfo(ctx, token.AccessToken, ctrl.cfg.Realm)
+	if err != nil {
+		log.Error().Err(err).Msg("failed to get user info")
+		return err
+	}
+
 	if params.Active {
-		exists, err := ctrl.repo.CheckNotification(ctx, params.Email, params.OrganizationID)
+		exists, err := ctrl.repo.CheckNotification(ctx, model.NotificationDao{
+			Email:          *userInfo.Email,
+			OrganizationID: params.OrganizationID,
+		})
 		if err != nil {
 			log.Error().Err(err).Msg("failed to check if notification exists")
 			return err
@@ -29,9 +44,9 @@ func (ctrl *Controller) Switch(ctx context.Context, params model.NotificationUpd
 		}
 
 		return ctrl.repo.InsertOne(ctx, model.NotificationDao{
-			Email:          params.Email,
+			Email:          *userInfo.Email,
 			OrganizationID: params.OrganizationID,
 		})
 	}
-	return ctrl.repo.DeleteOne(ctx, params.Email)
+	return ctrl.repo.DeleteOne(ctx, *userInfo.Email)
 }

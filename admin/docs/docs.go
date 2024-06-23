@@ -505,7 +505,8 @@ const docTemplate = `{
         "model.NotificationUpdateReq": {
             "type": "object",
             "required": [
-                "organization_id"
+                "organization_id",
+                "username"
             ],
             "properties": {
                 "active": {
@@ -514,6 +515,9 @@ const docTemplate = `{
                 "organization_id": {
                     "type": "integer",
                     "minimum": 1
+                },
+                "username": {
+                    "type": "string"
                 }
             }
         },
