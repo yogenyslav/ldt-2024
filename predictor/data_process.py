@@ -11,7 +11,7 @@ from process_stock import Quarters, Stock, StockType, process_and_merge_stocks
 from scipy.optimize import linear_sum_assignment
 from scipy.spatial.distance import cdist
 from sentence_transformers import SentenceTransformer
-from utils import convert_datetime_to_str, get_tracer, trace_function
+from utils import convert_datetime_to_str, convert_float_nan_to_none, get_tracer, trace_function
 
 tracer = get_tracer("jaeger:4317")
 
@@ -590,3 +590,56 @@ def parse_filename(filename: str) -> Optional[Tuple[int, int, str]]:
 
         return quarter, year, account
     return None
+
+@trace_function(tracer, "filter_forecast")
+def filter_forecast(
+    code_info: Dict,
+    organization: str,
+    code: str,
+    start_dt: datetime,
+    end_dt: datetime,
+):
+    rows_by_date = code_info.pop("rows_by_date")
+
+    if code_info["forecast"] is not None:
+        forecast_start_filtered = [
+            x
+            for x in code_info["forecast"]
+            if start_dt.timestamp() <= x["date"].timestamp()
+        ]
+        closest_purchase = forecast_start_filtered[0]
+        forecast = [
+            x
+            for x in forecast_start_filtered
+            if x["date"].timestamp() <= end_dt.timestamp()
+        ]
+
+    else:
+        forecast = None
+        closest_purchase = None
+
+    if forecast is None:
+        rows = None
+        out_id = None
+    elif len(forecast) > 0:
+        rows = rows_by_date.get(convert_datetime_to_str(forecast[0]["date"]), None)
+        out_id = (
+            hash(str(forecast[0]["id"])) + hash(code) + hash(organization)
+        ) % int(1e9)
+    else:
+        rows = []
+        out_id = None
+
+    output_json = {
+        "id": out_id,
+        "CustomerId": organization,
+        "rows": rows,
+    }
+
+    code_info["forecast"] = forecast
+    code_info["output_json"] = output_json
+    code_info["closest_purchase"] = closest_purchase
+
+    code_info = convert_datetime_to_str(code_info)
+    code_info = convert_float_nan_to_none(code_info)
+    return code_info
