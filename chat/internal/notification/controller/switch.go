@@ -3,6 +3,7 @@ package controller
 import (
 	"context"
 
+	"github.com/rs/zerolog/log"
 	"github.com/yogenyslav/ldt-2024/chat/internal/notification/model"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
@@ -18,6 +19,15 @@ func (ctrl *Controller) Switch(ctx context.Context, params model.NotificationUpd
 	defer span.End()
 
 	if params.Active {
+		exists, err := ctrl.repo.CheckNotification(ctx, params.Email, params.OrganizationID)
+		if err != nil {
+			log.Error().Err(err).Msg("failed to check if notification exists")
+			return err
+		}
+		if exists {
+			return nil
+		}
+
 		return ctrl.repo.InsertOne(ctx, model.NotificationDao{
 			Email:          params.Email,
 			FirstName:      params.FirstName,

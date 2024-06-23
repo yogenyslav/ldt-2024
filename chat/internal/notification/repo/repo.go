@@ -38,3 +38,18 @@ func (r *Repo) DeleteOne(ctx context.Context, email string) error {
 	_, err := r.pg.Exec(ctx, deleteOne, email)
 	return err
 }
+
+const checkNotification = `
+	select exists (
+		select 1
+		from chat.notification
+		where email = $1 and organization_id = $2
+	);
+`
+
+// CheckNotification проверяет наличие уведомления.
+func (r *Repo) CheckNotification(ctx context.Context, email string, organizationID int64) (bool, error) {
+	var exists bool
+	err := r.pg.Query(ctx, &exists, checkNotification, email, organizationID)
+	return exists, err
+}

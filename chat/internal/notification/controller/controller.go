@@ -10,6 +10,7 @@ import (
 type notificationRepo interface {
 	InsertOne(ctx context.Context, params model.NotificationDao) error
 	DeleteOne(ctx context.Context, email string) error
+	CheckNotification(ctx context.Context, email string, organizationID int64) (bool, error)
 }
 
 // Controller контроллер для уведомлений.

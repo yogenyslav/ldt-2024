@@ -9,6 +9,7 @@ import (
 
 type notificationController interface {
 	Switch(ctx context.Context, params model.NotificationUpdateReq) error
+	Check(ctx context.Context, email string, organizationID int64) (bool, error)
 }
 
 // Handler обработчик для уведомлений.

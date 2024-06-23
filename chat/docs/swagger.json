@@ -280,6 +280,49 @@
                 }
             }
         },
+        "/notification/check/{organization_id}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Проверяет наличие уведомлений.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "notification"
+                ],
+                "summary": "Проверяет наличие уведомлений.",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID организации",
+                        "name": "organization_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Статус уведомления",
+                        "schema": {
+                            "$ref": "#/definitions/model.NotificationExistsResp"
+                        }
+                    },
+                    "400": {
+                        "description": "Некорректный запрос",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/notification/switch": {
             "post": {
                 "security": [
@@ -677,10 +720,17 @@
                 }
             }
         },
+        "model.NotificationExistsResp": {
+            "type": "object",
+            "properties": {
+                "exists": {
+                    "type": "boolean"
+                }
+            }
+        },
         "model.NotificationUpdateReq": {
             "type": "object",
             "required": [
-                "active",
                 "organization_id"
             ],
             "properties": {
