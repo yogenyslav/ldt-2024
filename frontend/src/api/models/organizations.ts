@@ -51,4 +51,16 @@ export interface GetProductsResponse {
 export interface UserInOrganization {
     username: string;
     notifications: boolean;
+    email: string;
+}
+
+export interface SetUserNotificationParams {
+    active: boolean;
+    organization_id: number;
+    username: string;
+}
+
+export interface EditOrganizationParams {
+    id: number;
+    title: string;
 }

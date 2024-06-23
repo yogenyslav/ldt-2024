@@ -430,4 +430,12 @@ export class RootStore {
     setSelectedOrganizationId(organizationId: number) {
         this.selectedOrganizationId = organizationId;
     }
+
+    setUserNotifications(username: string, notifications: boolean) {
+        const user = this.usersInOrganization.find((user) => user.username === username);
+
+        if (user) {
+            user.notifications = notifications;
+        }
+    }
 }

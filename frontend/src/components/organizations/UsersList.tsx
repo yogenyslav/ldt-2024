@@ -21,6 +21,7 @@ import OrganizationsApiService from '@/api/OrganizationsApiService';
 import { Role } from '@/api/models';
 import { Badge } from '../ui/badge';
 import { observer } from 'mobx-react-lite';
+import { Switch } from '../ui/switch';
 
 type Props = {
     organizationId: number;
@@ -199,8 +200,10 @@ const UsersList = observer(({ organizationId }: Props) => {
                     <TableHeader>
                         <TableRow>
                             <TableHead>Имя пользователя</TableHead>
+                            <TableHead>E-mail</TableHead>
                             <TableHead>Организация</TableHead>
                             <TableHead>Действия</TableHead>
+                            <TableHead>Уведомления</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -208,6 +211,9 @@ const UsersList = observer(({ organizationId }: Props) => {
                             <TableRow key={index}>
                                 <TableCell>
                                     <div className='font-medium'>{user.username}</div>
+                                </TableCell>
+                                <TableCell>
+                                    <div className='font-medium'>{user.email}</div>
                                 </TableCell>
                                 <TableCell>
                                     <Badge className='bg-blue-100 text-blue-900 dark:bg-blue-900 dark:text-blue-100'>
@@ -237,6 +243,40 @@ const UsersList = observer(({ organizationId }: Props) => {
                                             <span className='sr-only'>Удалить пользователя</span>
                                         </Button>
                                     </div>
+                                </TableCell>
+                                <TableCell>
+                                    <Switch
+                                        checked={user.notifications}
+                                        onCheckedChange={(checked) => {
+                                            OrganizationsApiService.setUserNotifications({
+                                                username: user.username,
+                                                organization_id: organizationId,
+                                                active: checked,
+                                            })
+                                                .then(() => {
+                                                    rootStore.setUserNotifications(
+                                                        user.username,
+                                                        checked
+                                                    );
+
+                                                    toast({
+                                                        title: 'Успех',
+                                                        description:
+                                                            'Настройки уведомлений изменены',
+                                                        variant: 'default',
+                                                    });
+                                                })
+                                                .catch(() => {
+                                                    toast({
+                                                        title: 'Ошибка',
+                                                        description:
+                                                            'Не удалось изменить настройки уведомлений',
+                                                        variant: 'destructive',
+                                                    });
+                                                });
+                                        }}
+                                        id={user.username}
+                                    />
                                 </TableCell>
                             </TableRow>
                         ))}

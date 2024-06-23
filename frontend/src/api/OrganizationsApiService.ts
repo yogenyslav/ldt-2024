@@ -1,19 +1,27 @@
-import { get, post, del } from './http';
+import { get, post, del, put } from './http';
 import {
     AddUserToOrganizationParams,
     CreateOrganizationParams,
     CreateOrganizationResponse,
     CreateUserParams,
     DeleteUserParams,
+    EditOrganizationParams,
     GetProductsResponse,
     GetUsersInOrganizationParams,
     Organization,
+    SetUserNotificationParams,
     UserInOrganization,
 } from './models/organizations';
 
 class FavoritesApiService {
     public async createOrganization({ title }: CreateOrganizationParams) {
         const response = await post<CreateOrganizationResponse>('/admin/organization', { title });
+
+        return response;
+    }
+
+    public async editOrganization({ id, title }: EditOrganizationParams) {
+        const response = await put<void>('/admin/organization', { id, title });
 
         return response;
     }
@@ -67,6 +75,20 @@ class FavoritesApiService {
         const response = await get<GetProductsResponse>(
             `/chat/stock/unique_codes/${organization_id}`
         );
+
+        return response;
+    }
+
+    public async setUserNotifications({
+        active,
+        organization_id,
+        username,
+    }: SetUserNotificationParams) {
+        const response = await post<void>('/admin/notification/switch', {
+            active,
+            organization_id,
+            username,
+        });
 
         return response;
     }
