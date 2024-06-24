@@ -3,7 +3,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
 import { useStores } from '@/hooks/useStores';
-import { ArrowUpIcon, FilePenIcon, Loader2, StopCircleIcon } from 'lucide-react';
+import { ArrowUpIcon, FilePenIcon, Loader2, StopCircleIcon, MicIcon } from 'lucide-react';
 import { observer } from 'mobx-react-lite';
 import { ChangeEvent, KeyboardEvent, useEffect, useRef, useState } from 'react';
 import debounce from 'lodash/debounce';
@@ -19,8 +19,11 @@ const Chat = observer(() => {
     const navigate = useNavigate();
     const [message, setMessage] = useState('');
     const [titleValue, setTitleValue] = useState('');
+    const [recognizing, setRecognizing] = useState(false);
 
     const titleInputRef = useRef<HTMLInputElement>(null);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const recognitionRef = useRef<any | null>(null);
 
     useEffect(() => {
         console.log('sessionId', sessionId);
@@ -105,6 +108,66 @@ const Chat = observer(() => {
         }
     };
 
+    const startRecognition = () => {
+        if (!('SpeechRecognition' in window) && !('webkitSpeechRecognition' in window)) {
+            toast({
+                title: 'Ошибка',
+                description: 'Ваш браузер не поддерживает Web Speech API',
+                variant: 'destructive',
+            });
+            return;
+        }
+
+        if (!recognitionRef.current) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const recognition = new SpeechRecognition();
+            recognition.continuous = false;
+            recognition.interimResults = true;
+            recognition.lang = 'ru-RU';
+
+            recognition.onstart = () => {
+                setRecognizing(true);
+            };
+
+            // eslint-disable-next-line
+            // @ts-ignore
+            recognition.onresult = (event) => {
+                let interimTranscript = '';
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    if (event.results[i].isFinal) {
+                        setMessage(event.results[i][0].transcript);
+                    } else {
+                        interimTranscript += event.results[i][0].transcript;
+                    }
+                }
+                setMessage((prev) => prev + interimTranscript);
+            };
+
+            // eslint-disable-next-line
+            // @ts-ignore
+            recognition.onerror = (event) => {
+                console.error(event.error);
+                toast({
+                    title: 'Ошибка',
+                    description: 'Ошибка распознавания речи',
+                    variant: 'destructive',
+                });
+            };
+
+            recognition.onend = () => {
+                setRecognizing(false);
+            };
+
+            recognitionRef.current = recognition;
+        }
+
+        recognitionRef.current.start();
+    };
+
+    const stopRecognition = () => {
+        recognitionRef.current?.stop();
+    };
+
     return (
         <>
             <div className='chat'>
@@ -183,17 +246,25 @@ const Chat = observer(() => {
                                 size='icon'
                                 variant='outline'
                                 className={`absolute top-3 right-12 w-8 h-8 ${
-                                    !rootStore.isModelAnswering && 'hidden'
+                                    !recognizing && 'hidden'
                                 }`}
-                                onClick={sendMessage}
+                                onClick={stopRecognition}
                             >
-                                <StopCircleIcon
-                                    onClick={() => {
-                                        rootStore.cancelRequest();
-                                    }}
-                                    className='w-4 h-4'
-                                />
+                                <StopCircleIcon className='w-4 h-4' />
                                 <span className='sr-only'>Остановить запрос</span>
+                            </Button>
+
+                            <Button
+                                type='button'
+                                size='icon'
+                                className={`absolute top-3 right-12 w-8 h-8 ${
+                                    recognizing && 'hidden'
+                                }`}
+                                onClick={startRecognition}
+                                disabled={recognizing}
+                            >
+                                <MicIcon className='w-4 h-4' />
+                                <span className='sr-only'>Начать распознавание</span>
                             </Button>
 
                             <Button
