@@ -23,3 +23,4 @@ opentelemetry-instrumentation
 opentelemetry-semantic-conventions
 opentelemetry-exporter-otlp
 asyncpg
+python-dateutil
