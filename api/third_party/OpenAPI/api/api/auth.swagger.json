@@ -73,8 +73,8 @@
     "apiLoginRequest": {
       "type": "object",
       "example": {
-        "username": "test@test.com",
-        "password": "test123456"
+        "username": "usernames",
+        "password": "password"
       },
       "properties": {
         "username": {

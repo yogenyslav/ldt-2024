@@ -11,8 +11,9 @@ import (
 
 type organizationController interface {
 	InsertOne(ctx context.Context, params model.OrganizationCreateReq, username string) (model.OrganizationCreateResp, error)
-	FindOne(ctx context.Context, username string) (model.OrganizationDto, error)
-	ImportData(ctx context.Context, mpArchive *multipart.FileHeader, org string) error
+	ListForUser(ctx context.Context, username string) ([]model.OrganizationDto, error)
+	ImportData(ctx context.Context, mpArchive *multipart.FileHeader, id int64) error
+	UpdateOne(ctx context.Context, params model.OrganizationUpdateReq, username string) error
 }
 
 // Handler имплементация сервера для организаций.

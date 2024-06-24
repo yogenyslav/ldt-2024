@@ -1,9 +1,7 @@
 package favorite
 
 import (
-	"github.com/Nerzal/gocloak/v13"
 	"github.com/gofiber/fiber/v2"
-	"github.com/yogenyslav/ldt-2024/chat/internal/auth/middleware"
 )
 
 type favoriteHandler interface {
@@ -15,9 +13,8 @@ type favoriteHandler interface {
 }
 
 // SetupFavoriteRoutes настраивает маршруты для избранных предиктов.
-func SetupFavoriteRoutes(app *fiber.App, h favoriteHandler, kc *gocloak.GoCloak, realm, cipher string) {
-	g := app.Group("/chat/favorite")
-	g.Use(middleware.JWT(kc, realm, cipher))
+func SetupFavoriteRoutes(app fiber.Router, h favoriteHandler) {
+	g := app.Group("/favorite")
 
 	g.Post("/", h.InsertOne)
 	g.Get("/list", h.List)

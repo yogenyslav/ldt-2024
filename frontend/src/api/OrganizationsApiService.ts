@@ -1,13 +1,16 @@
-import { get, post, del } from './http';
+import { get, post, del, put } from './http';
 import {
     AddUserToOrganizationParams,
     CreateOrganizationParams,
     CreateOrganizationResponse,
     CreateUserParams,
     DeleteUserParams,
+    EditOrganizationParams,
     GetProductsResponse,
     GetUsersInOrganizationParams,
     Organization,
+    SetUserNotificationParams,
+    UserInOrganization,
 } from './models/organizations';
 
 class FavoritesApiService {
@@ -17,8 +20,14 @@ class FavoritesApiService {
         return response;
     }
 
-    public async getOrganization() {
-        const response = await get<Organization>('/admin/organization');
+    public async editOrganization({ id, title }: EditOrganizationParams) {
+        const response = await put<void>('/admin/organization', { id, title });
+
+        return response;
+    }
+
+    public async getOrganizations() {
+        const response = await get<Organization[]>('/admin/organization');
 
         return response;
     }
@@ -29,8 +38,8 @@ class FavoritesApiService {
         return response;
     }
 
-    public async getUsersInOrganization({ organization }: GetUsersInOrganizationParams) {
-        const response = await get<string[]>(`/admin/user/${organization}`);
+    public async getUsersInOrganization({ organizationId }: GetUsersInOrganizationParams) {
+        const response = await get<UserInOrganization[]>(`/admin/user/${organizationId}`);
 
         return response;
     }
@@ -41,15 +50,16 @@ class FavoritesApiService {
         return response;
     }
 
-    public async deleteUser({ username }: DeleteUserParams) {
-        const response = await del<void>(`/admin/user/${username}`);
+    public async deleteUser({ organization_id, username }: DeleteUserParams) {
+        const response = await del<void>(`/admin/user`, { data: { organization_id, username } });
 
         return response;
     }
 
-    public async uploadFile(file: File): Promise<string> {
+    public async uploadFile(file: File, organization_id: number): Promise<string> {
         const formData = new FormData();
         formData.append('data', file);
+        formData.append('organization_id', organization_id.toString());
 
         const response = await post<string>(`/admin/organization/import`, formData, {
             headers: {
@@ -61,8 +71,24 @@ class FavoritesApiService {
         return response;
     }
 
-    public async getProducts() {
-        const response = await get<GetProductsResponse>('/chat/stock/unique_codes');
+    public async getProducts(organization_id: number) {
+        const response = await get<GetProductsResponse>(
+            `/chat/stock/unique_codes/${organization_id}`
+        );
+
+        return response;
+    }
+
+    public async setUserNotifications({
+        active,
+        organization_id,
+        username,
+    }: SetUserNotificationParams) {
+        const response = await post<void>('/admin/notification/switch', {
+            active,
+            organization_id,
+            username,
+        });
 
         return response;
     }

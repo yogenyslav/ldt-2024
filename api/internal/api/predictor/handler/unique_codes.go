@@ -5,7 +5,6 @@ import (
 
 	"github.com/rs/zerolog/log"
 	"github.com/yogenyslav/ldt-2024/api/internal/api/pb"
-	"github.com/yogenyslav/ldt-2024/api/internal/shared"
 	"github.com/yogenyslav/ldt-2024/api/pkg"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -25,13 +24,6 @@ func (h *Handler) UniqueCodes(c context.Context, in *pb.UniqueCodesReq) (*pb.Uni
 
 	ctx, span := h.tracer.Start(ctx, "Handler.UniqueCodes")
 	defer span.End()
-
-	organization, ok := ctx.Value(shared.OrganizationKey).(string)
-	if !ok {
-		log.Error().Msg("failed to get organization")
-		return nil, status.Error(codes.Internal, "failed to get organization")
-	}
-	in.Organization = organization
 
 	resp, err := h.predictor.UniqueCodes(pkg.PushSpan(ctx, span), in)
 	if err != nil {

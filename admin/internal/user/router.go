@@ -1,9 +1,7 @@
 package user
 
 import (
-	"github.com/Nerzal/gocloak/v13"
 	"github.com/gofiber/fiber/v2"
-	authmw "github.com/yogenyslav/ldt-2024/admin/internal/auth/middleware"
 )
 
 type userHandler interface {
@@ -14,12 +12,11 @@ type userHandler interface {
 }
 
 // SetupUserRoutes инициализирует роуты для работы с пользователями.
-func SetupUserRoutes(app *fiber.App, h userHandler, kc *gocloak.GoCloak, realm, cipher string, repo authmw.UserOrganizationRepo) {
-	g := app.Group("/admin/user")
-	g.Use(authmw.JWT(kc, realm, cipher, repo))
+func SetupUserRoutes(app fiber.Router, h userHandler) {
+	g := app.Group("/user")
 
 	g.Post("/", h.NewUser)
 	g.Post("/organization", h.InsertOrganization)
-	g.Delete("/:username", h.DeleteOrganization)
-	g.Get("/:organization", h.List)
+	g.Delete("/", h.DeleteOrganization)
+	g.Get("/:organization_id", h.List)
 }

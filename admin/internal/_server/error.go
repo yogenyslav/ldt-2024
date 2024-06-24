@@ -12,7 +12,7 @@ var errStatus = map[error]srvresp.ErrorResponse{
 	shared.ErrParseBody: {
 		Status: http.StatusBadRequest,
 	},
-	shared.ErrParseFormFile: {
+	shared.ErrParseFormValue: {
 		Status: http.StatusBadRequest,
 	},
 	shared.ErrDuplicateTitle: {

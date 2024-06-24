@@ -52,14 +52,21 @@ func (ctrl *Controller) NewUser(ctx context.Context, params model.UserCreateReq)
 		}
 	}
 
-	if params.Organization != "" {
-		if err := ctrl.repo.InsertOrganization(ctx, model.UserOrganizationDao{
-			Username:     params.Username,
-			Organization: params.Organization,
-		}); err != nil {
-			log.Error().Err(err).Msg("failed to insert organization")
-			return err
+	if params.OrganizationIDs != nil {
+		for _, id := range params.OrganizationIDs {
+			if err := ctrl.repo.InsertOrganization(ctx, model.UserOrganizationDao{
+				Username:       params.Username,
+				OrganizationID: id,
+			}); err != nil {
+				log.Error().Err(err).Msg("failed to insert organization")
+				return err
+			}
 		}
+	}
+
+	if err := ctrl.repo.InsertEmailByUsername(ctx, params.Email, params.Username); err != nil {
+		log.Error().Err(err).Msg("failed to insert email")
+		return err
 	}
 
 	return nil

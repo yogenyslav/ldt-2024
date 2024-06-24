@@ -12,23 +12,28 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
-// FindOne находит организацию по username.
-func (ctrl *Controller) FindOne(ctx context.Context, username string) (model.OrganizationDto, error) {
+// ListForUser находит список организаций по username.
+func (ctrl *Controller) ListForUser(ctx context.Context, username string) ([]model.OrganizationDto, error) {
 	ctx, span := ctrl.tracer.Start(
 		ctx,
-		"Controller.FindOne",
+		"Controller.ListForUser",
 		trace.WithAttributes(attribute.String("username", username)),
 	)
 	defer span.End()
 
-	org, err := ctrl.repo.FindOne(ctx, username)
+	organizationDB, err := ctrl.repo.ListForUser(ctx, username)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return model.OrganizationDto{}, shared.ErrNoOrganization
+			return nil, shared.ErrNoOrganization
 		}
 		log.Error().Err(err).Msg("failed to get organization")
-		return model.OrganizationDto{}, shared.ErrGetOrganization
+		return nil, shared.ErrGetOrganization
 	}
 
-	return org.ToDto(), nil
+	organization := make([]model.OrganizationDto, len(organizationDB))
+	for i := 0; i < len(organizationDB); i++ {
+		organization[i] = organizationDB[i].ToDto()
+	}
+
+	return organization, nil
 }

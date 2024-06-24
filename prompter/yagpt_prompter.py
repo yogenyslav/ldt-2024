@@ -1,10 +1,13 @@
 import json
 import os
+import re
 import requests
 import time
 from dataclasses import dataclass
 from dotenv import load_dotenv
 from enum import Enum
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
 
 from api.prompter_pb2 import QueryType
 
@@ -76,7 +79,7 @@ class YaGPTPrompter:
 
         prompt += f"Медианное время выполнения закупки по категории: {data['median_execution_days']}\n"
         prompt += f"Среднее время до начала выполнения закупки по категории: {data['mean_start_to_execute_days']}\n"
-        prompt += f"Средняя референсная цена: {round(data['mean_ref_price'], 2) if data['mean_ref_price'] else 'Информация отсутствует'}\n"
+        prompt += f"Цена из справочника: {round(data['mean_ref_price'], 2) if data['mean_ref_price'] else 'Информация отсутствует'}\n"
 
         prompt += "Топ 5 поставщиков этой категории по объему закупок:\n"
         for i, seller in enumerate(data["top5_providers"], start=1):
@@ -120,7 +123,7 @@ class YaGPTPrompter:
         prompt += f"Объем закупки (условные единицы): {data['closest_purchase']['volume'] if data['closest_purchase']['volume'] else 'Информация отсутствует'}\n"
         prompt += f"Медианное время выполнения закупки по категории: {data['median_execution_days']}\n"
         prompt += f"Среднее время до начала выполнения закупки по категории: {data['mean_start_to_execute_days']}\n"
-        prompt += f"Средняя референсная цена: {round(data['mean_ref_price'], 2) if data['mean_ref_price'] else 'Информация отсутствует'}\n"
+        prompt += f"Цена из справочника: {round(data['mean_ref_price'], 2) if data['mean_ref_price'] else 'Информация отсутствует'}\n"
 
         prompt += "Топ 5 поставщиков этой категории по объему закупок:\n"
         for i, seller in enumerate(data["top5_providers"], start=1):
@@ -199,6 +202,25 @@ class YaGPTPrompter:
             output = response
         return output
 
+    def _validate_date(self, date_str: str) -> bool:
+        pattern = r"^\d{2}\.\d{2}\.\d{4}:\d{2}\.\d{2}\.\d{4}$"
+
+        if re.match(pattern, date_str.strip()):
+            return True
+        else:
+            return False
+
+    def _validate_date_sanity(self, date_str: str) -> bool:
+        date1 = datetime.strptime(date_str.split(":")[0], "%d.%m.%Y")
+        date2 = datetime.strptime(date_str.split(":")[1], "%d.%m.%Y")
+        if (
+            date2 > date1
+            and datetime.strptime("01.01.2023", "%d.%m.%Y") <= date1
+            and datetime.strptime("01.01.2033", "%d.%m.%Y") >= date2
+        ):
+            return True
+        return False
+
     def process_request(self, request: str):
 
         prompter_output = PrompterOutput(type=QueryType.UNDEFINED)
@@ -230,16 +252,37 @@ class YaGPTPrompter:
                 )[0]
 
         if prompter_output.type == QueryType.PREDICTION:
-            inp = self._prompts["time_normalizer"].format(request=request)
+            today_date = datetime.now()
+
+            inp = self._prompts["time_normalizer"].format(
+                request=prompter_output.period,
+                today_date=today_date.strftime("%d.%m.%Y"),
+                month_3_ahead=(today_date + relativedelta(months=3)).strftime(
+                    "%d.%m.%Y"
+                ),
+                years_5_ahead=(today_date + relativedelta(years=5)).strftime(
+                    "%d.%m.%Y"
+                ),
+                years_3_ahead=(today_date + relativedelta(years=2)).strftime(
+                    "%d.%m.%Y"
+                ),
+                quarters_2_ahead=(today_date + relativedelta(months=6)).strftime(
+                    "%d.%m.%Y"
+                ),
+            )
+
             outp = self._generate_responce(inp, PromptType.TIME_NORMALIZER)
-            if "Период (в месяцах)" not in outp:
-                prompter_output.period = outp
-            else:
-                prompter_output.period = (
-                    outp.split("Период (в месяцах):")[1].split("\n")[0].replace(" ", "")
-                )
-                if not prompter_output.period.isdigit():
+
+            if self._validate_date(outp):
+                if self._validate_date_sanity(outp):
+                    prompter_output.period = outp
+                else:
                     prompter_output.type = QueryType.UNDEFINED
+                    return prompter_output
+
+            else:
+                prompter_output.type = QueryType.UNDEFINED
+                return prompter_output
 
         if prompter_output.type == QueryType.STOCK:
             prompter_output.period = None

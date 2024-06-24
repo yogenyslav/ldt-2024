@@ -23,6 +23,7 @@ import (
 	"github.com/yogenyslav/ldt-2024/chat/internal/auth"
 	ac "github.com/yogenyslav/ldt-2024/chat/internal/auth/controller"
 	ah "github.com/yogenyslav/ldt-2024/chat/internal/auth/handler"
+	"github.com/yogenyslav/ldt-2024/chat/internal/auth/middleware"
 	"github.com/yogenyslav/ldt-2024/chat/internal/chat"
 	cc "github.com/yogenyslav/ldt-2024/chat/internal/chat/controller"
 	ch "github.com/yogenyslav/ldt-2024/chat/internal/chat/handler"
@@ -121,10 +122,13 @@ func (s *Server) Run() {
 	authHandler := ah.New(authController)
 	auth.SetupAuthRoutes(s.app, authHandler)
 
+	g := s.app.Group("/chat")
+	g.Use(middleware.JWT(s.kc, s.cfg.KeyCloak.Realm, s.cfg.Server.CipherKey))
+
 	sessionRepo := sr.New(s.pg)
 	sessionController := sc.New(sessionRepo, s.tracer)
 	sessionHandler := sh.New(sessionController)
-	session.SetupSessionRoutes(s.app, sessionHandler, s.kc, s.cfg.KeyCloak.Realm, s.cfg.Server.CipherKey)
+	session.SetupSessionRoutes(g, sessionHandler)
 
 	chatRepo := cr.New(s.pg)
 	chatController := cc.New(
@@ -143,10 +147,10 @@ func (s *Server) Run() {
 	favoriteRepo := fr.New(s.pg)
 	favoriteController := fc.New(favoriteRepo, s.tracer)
 	favoriteHandler := fh.New(favoriteController)
-	favorite.SetupFavoriteRoutes(s.app, favoriteHandler, s.kc, s.cfg.KeyCloak.Realm, s.cfg.Server.CipherKey)
+	favorite.SetupFavoriteRoutes(g, favoriteHandler)
 
 	stockHandler := stockh.New(pb.NewPredictorClient(apiClient.GetConn()))
-	stock.SetupStockRoutes(s.app, stockHandler, s.kc, s.cfg.KeyCloak.Realm, s.cfg.Server.CipherKey)
+	stock.SetupStockRoutes(g, stockHandler)
 
 	go s.listen()
 	go prom.HandlePrometheus(s.cfg.Prom)
@@ -168,10 +172,12 @@ func (s *Server) getWsConfig() websocket.Config {
 	return websocket.Config{
 		RecoverHandler: func(conn *websocket.Conn) {
 			if e := recover(); e != nil {
+				internalErr := fmt.Errorf("can't handle error: %v", e)
 				err := conn.WriteJSON(chatresp.Response{
 					Msg: "internal error",
-					Err: fmt.Errorf("can't handle error: %v", e).Error(),
+					Err: internalErr.Error(),
 				})
+				log.Error().Err(internalErr).Msg("ws panic")
 				if err != nil {
 					log.Warn().Err(err).Msg("failed to recover ws panic")
 				}

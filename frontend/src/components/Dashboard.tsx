@@ -17,6 +17,7 @@ import { useEffect } from 'react';
 import { useStores } from '@/hooks/useStores';
 import { toast } from './ui/use-toast';
 import { Pages } from '@/router/constants';
+import OrganizationSwitcher from './OrganizationSwitcher';
 
 type DashboardProps = {
     children: React.ReactNode;
@@ -35,6 +36,14 @@ export function Dashboard({ children }: DashboardProps) {
             toast({
                 title: 'Ошибка',
                 description: 'Не удалось загрузить сессии',
+                variant: 'destructive',
+            });
+        });
+
+        rootStore.getOrganizations().catch(() => {
+            toast({
+                title: 'Ошибка',
+                description: 'Не удалось загрузить организации',
                 variant: 'destructive',
             });
         });
@@ -62,6 +71,7 @@ export function Dashboard({ children }: DashboardProps) {
                         </div>
                     </div>
                 </div>
+
                 <div className='flex flex-col'>
                     <header className='flex h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6'>
                         <Sheet>
@@ -91,7 +101,15 @@ export function Dashboard({ children }: DashboardProps) {
                                 <SessionsHistory />
                             </SheetContent>
                         </Sheet>
-                        <div className='w-full flex-1'></div>
+
+                        <div className='w-full flex-1'>
+                            {(location.pathname.match(new RegExp(`chat`)) ||
+                                location.pathname === '/') && (
+                                <div className='max-w-60'>
+                                    <OrganizationSwitcher />
+                                </div>
+                            )}
+                        </div>
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Button variant='secondary' size='icon' className='rounded-full'>

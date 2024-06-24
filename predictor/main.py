@@ -3,9 +3,9 @@ import logging
 import math
 import os
 from concurrent import futures
-from datetime import datetime
+from datetime import datetime, timedelta
 from pprint import pprint
-from typing import Dict, List, Set, Tuple, Union
+from typing import Dict, List, Optional, Set, Tuple, Union
 
 import pandas as pd
 import pymongo
@@ -14,7 +14,7 @@ from api.predictor_pb2 import (PredictReq, PredictResp, PrepareDataReq,
                                UniqueCode, UniqueCodesReq, UniqueCodesResp)
 from api.prompter_pb2 import QueryType
 from data_process import (get_codes_data, get_merged_df, parse_sources,
-                          prepare_stocks_df)
+                          prepare_stocks_df, filter_forecast)
 from dateutil.relativedelta import relativedelta
 from dotenv import load_dotenv
 from google.protobuf.empty_pb2 import Empty
@@ -127,13 +127,14 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
             )
 
         return {"data": top_stocks}
-
+    
     @trace_function(tracer, "get_forecast_from_mdb")
     def get_forecast(
         self,
         product: str,
         period: Union[str, int],
         organization: str,
+        code: Optional[str] = None,
     ) -> Dict[str, Union[int, str, List, None]]:
         """
         Get forecast information from MongoDB.
@@ -142,12 +143,14 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
             product (str): The product name.
             period (Union[str, int]): The period for forecast.
             organization (str): The organization name.
-
+            code (str): The code of the product. Defaults to None.
+            start_dt (str): Tghe start date of the forecast. Defaults to None.
         Returns:
             Dict[str, Union[int, str, List, None]]:
             A dictionary containing forecast and other information.
         """
-        code = self._code_matcher.match_code(product)
+        if code is None:
+            code = self._code_matcher.match_code(product)
 
         collection_name = "codes"
         collection = mongo_client[organization][collection_name]
@@ -155,56 +158,12 @@ class Predictor(predictor_pb2_grpc.PredictorServicer):
 
         if code_info is None:
             pass  # TODO
-
-        start_dt = self.cur_date
-        end_dt = start_dt + relativedelta(
-            years=int(period) // 12, months=int(period) % 12
-        )
-
-        rows_by_date = code_info.pop("rows_by_date")
-
-        if code_info["forecast"] is not None:
-            forecast_start_filtered = [
-                x
-                for x in code_info["forecast"]
-                if start_dt.timestamp() <= x["date"].timestamp()
-            ]
-            closest_purchase = forecast_start_filtered[0]
-            forecast = [
-                x
-                for x in forecast_start_filtered
-                if x["date"].timestamp() <= end_dt.timestamp()
-            ]
-
-        else:
-            forecast = None
-            closest_purchase = None
-
-        if forecast is None:
-            rows = None
-            out_id = None
-        elif len(forecast) > 0:
-            rows = rows_by_date.get(convert_datetime_to_str(forecast[0]["date"]), None)
-            out_id = (
-                hash(str(forecast[0]["id"])) + hash(code) + hash(organization)
-            ) % int(1e9)
-        else:
-            rows = []
-            out_id = None
-
-        output_json = {
-            "id": out_id,
-            "CustomerId": organization,
-            "rows": rows,
-        }
-
-        code_info["forecast"] = forecast
-        code_info["output_json"] = output_json
-        code_info["closest_purchase"] = closest_purchase
-
-        code_info = convert_datetime_to_str(code_info)
-        code_info = convert_float_nan_to_none(code_info)
-        return code_info
+        
+        start_dt, end_dt = period.split(":")
+        start_dt = datetime.strptime(start_dt, "%d.%m.%Y")
+        end_dt = datetime.strptime(end_dt, "%d.%m.%Y")
+            
+        return filter_forecast(code_info, organization, code, start_dt, end_dt)
 
     @property
     def cur_date(self) -> datetime:

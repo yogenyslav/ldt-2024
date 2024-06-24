@@ -22,6 +22,11 @@ import (
 	"github.com/yogenyslav/ldt-2024/admin/internal/auth"
 	ac "github.com/yogenyslav/ldt-2024/admin/internal/auth/controller"
 	ah "github.com/yogenyslav/ldt-2024/admin/internal/auth/handler"
+	"github.com/yogenyslav/ldt-2024/admin/internal/auth/middleware"
+	"github.com/yogenyslav/ldt-2024/admin/internal/notification"
+	nc "github.com/yogenyslav/ldt-2024/admin/internal/notification/controller"
+	nh "github.com/yogenyslav/ldt-2024/admin/internal/notification/handler"
+	nr "github.com/yogenyslav/ldt-2024/admin/internal/notification/repo"
 	"github.com/yogenyslav/ldt-2024/admin/internal/organization"
 	oc "github.com/yogenyslav/ldt-2024/admin/internal/organization/controller"
 	oh "github.com/yogenyslav/ldt-2024/admin/internal/organization/handler"
@@ -124,15 +129,23 @@ func (s *Server) Run() {
 	authHandler := ah.New(authController)
 	auth.SetupAuthRoutes(s.app, authHandler)
 
+	g := s.app.Group("/admin")
+	g.Use(middleware.JWT(s.kc, s.cfg.KeyCloak.Realm, s.cfg.Server.CipherKey))
+
 	userRepo := ur.New(s.pg)
 	userController := uc.New(userRepo, s.cfg.KeyCloak, s.kc, s.tracer)
 	userHandler := uh.New(userController, m, s.tracer)
-	user.SetupUserRoutes(s.app, userHandler, s.kc, s.cfg.KeyCloak.Realm, s.cfg.Server.CipherKey, userRepo)
+	user.SetupUserRoutes(g, userHandler)
 
 	organizationRepo := or.New(s.pg)
 	organizationController := oc.New(organizationRepo, s.s3, pb.NewPredictorClient(apiClient.GetConn()), s.tracer)
 	organizationHandler := oh.New(organizationController, m, s.tracer)
-	organization.SetupOrganizationRoutes(s.app, organizationHandler, s.kc, s.cfg.KeyCloak.Realm, s.cfg.Server.CipherKey, userRepo)
+	organization.SetupOrganizationRoutes(g, organizationHandler)
+
+	notificationRepo := nr.New(s.pg)
+	notificationController := nc.New(notificationRepo, s.tracer)
+	notificationHandler := nh.New(notificationController)
+	notification.SetupNotificationRoutes(g, notificationHandler)
 
 	go s.listen()
 	go prom.HandlePrometheus(s.cfg.Prom)

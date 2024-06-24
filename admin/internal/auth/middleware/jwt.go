@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"context"
 	"strings"
 
 	"github.com/Nerzal/gocloak/v13"
@@ -11,12 +10,8 @@ import (
 	"github.com/yogenyslav/ldt-2024/admin/pkg/secure"
 )
 
-type UserOrganizationRepo interface {
-	FindOrganization(ctx context.Context, username string) (string, error)
-}
-
 // JWT валидирует jwt токен.
-func JWT(kc *gocloak.GoCloak, realm, cipher string, repo UserOrganizationRepo) fiber.Handler {
+func JWT(kc *gocloak.GoCloak, realm, cipher string) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		authHeader := c.Get("Authorization")
 		t := strings.Split(authHeader, " ")
@@ -50,14 +45,6 @@ func JWT(kc *gocloak.GoCloak, realm, cipher string, repo UserOrganizationRepo) f
 		}
 		if !hasAccess {
 			return shared.ErrForbidden
-		}
-
-		if c.Path() != "/admin/organization" {
-			org, err := repo.FindOrganization(c.UserContext(), *userInfo.PreferredUsername)
-			if err != nil {
-				return err
-			}
-			c.Locals(shared.OrganizationKey, org)
 		}
 
 		c.Locals(shared.UsernameKey, *userInfo.PreferredUsername)

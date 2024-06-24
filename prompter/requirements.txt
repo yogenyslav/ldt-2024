@@ -13,3 +13,4 @@ sentencepiece
 ollama
 python-dotenv
 requests==2.31.0
+python-dateutil

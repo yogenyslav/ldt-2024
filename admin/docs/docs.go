@@ -71,6 +71,51 @@ const docTemplate = `{
                 }
             }
         },
+        "/notification/switch": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Включает или выключает уведомления.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "notification"
+                ],
+                "summary": "Включает или выключает уведомления.",
+                "parameters": [
+                    {
+                        "description": "Параметры запроса",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.NotificationUpdateReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Статус уведомлений изменен",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Некорректный запрос",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/organization": {
             "get": {
                 "security": [
@@ -78,7 +123,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Получить организацию для пользователя",
+                "description": "Получить список организаций для пользователя",
                 "consumes": [
                     "application/json"
                 ],
@@ -88,13 +133,56 @@ const docTemplate = `{
                 "tags": [
                     "organization"
                 ],
-                "summary": "Получить организацию",
+                "summary": "Получить список организаций",
                 "responses": {
                     "200": {
-                        "description": "Информация об организации",
+                        "description": "Список организаций пользователя",
                         "schema": {
-                            "$ref": "#/definitions/model.OrganizationDto"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.OrganizationDto"
+                            }
                         }
+                    },
+                    "404": {
+                        "description": "Организация не найдена",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Изменить название организации",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "organization"
+                ],
+                "summary": "Изменить название",
+                "parameters": [
+                    {
+                        "description": "Новое название",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.OrganizationUpdateReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Название изменено"
                     },
                     "404": {
                         "description": "Организация не найдена",
@@ -173,6 +261,13 @@ const docTemplate = `{
                         "name": "data",
                         "in": "formData",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "ID организации",
+                        "name": "organization_id",
+                        "in": "formData",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -240,6 +335,49 @@ const docTemplate = `{
                         }
                     }
                 }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Удаляет организацию.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Удаляет организацию.",
+                "parameters": [
+                    {
+                        "description": "Параметры на удаление",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.UserUpdateOrganizationReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Организация удалена",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Ошибка в запросе",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
             }
         },
         "/user/organization": {
@@ -293,7 +431,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/user/{organization}": {
+        "/user/{organization_id}": {
             "get": {
                 "security": [
                     {
@@ -313,9 +451,9 @@ const docTemplate = `{
                 "summary": "Возвращает список пользователей по организации.",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "Название организации",
-                        "name": "organization",
+                        "type": "integer",
+                        "description": "ID организации",
+                        "name": "organization_id",
                         "in": "path",
                         "required": true
                     }
@@ -326,51 +464,8 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "type": "string"
+                                "$ref": "#/definitions/model.UserListResp"
                             }
-                        }
-                    }
-                }
-            }
-        },
-        "/user/{username}": {
-            "delete": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Удаляет организацию.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "user"
-                ],
-                "summary": "Удаляет организацию.",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Имя пользователя",
-                        "name": "username",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "Организация удалена",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "400": {
-                        "description": "Ошибка в запросе",
-                        "schema": {
-                            "type": "string"
                         }
                     }
                 }
@@ -407,6 +502,25 @@ const docTemplate = `{
                 }
             }
         },
+        "model.NotificationUpdateReq": {
+            "type": "object",
+            "required": [
+                "organization_id",
+                "username"
+            ],
+            "properties": {
+                "active": {
+                    "type": "boolean"
+                },
+                "organization_id": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
         "model.OrganizationCreateReq": {
             "type": "object",
             "properties": {
@@ -437,6 +551,17 @@ const docTemplate = `{
                 }
             }
         },
+        "model.OrganizationUpdateReq": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
         "model.UserCreateReq": {
             "type": "object",
             "required": [
@@ -457,8 +582,11 @@ const docTemplate = `{
                 "last_name": {
                     "type": "string"
                 },
-                "organization": {
-                    "type": "string"
+                "organization_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
                 },
                 "password": {
                     "type": "string"
@@ -474,15 +602,27 @@ const docTemplate = `{
                 }
             }
         },
+        "model.UserListResp": {
+            "type": "object",
+            "properties": {
+                "notifications": {
+                    "type": "boolean"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
         "model.UserUpdateOrganizationReq": {
             "type": "object",
             "required": [
-                "organization",
+                "organization_id",
                 "username"
             ],
             "properties": {
-                "organization": {
-                    "type": "string"
+                "organization_id": {
+                    "type": "integer",
+                    "minimum": 1
                 },
                 "username": {
                     "type": "string"

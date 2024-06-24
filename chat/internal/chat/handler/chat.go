@@ -29,6 +29,12 @@ func (h *Handler) Chat(c *websocket.Conn) {
 	if authErr != nil {
 		return
 	}
+
+	organization, orgErr := h.GetOrganization(c)
+	if orgErr != nil {
+		return
+	}
+
 	sessionID, uuidErr := uuid.Parse(c.Params("session_id"))
 	if uuidErr != nil {
 		chatresp.RespondError(c, "invalid session uuid", uuidErr)
@@ -57,6 +63,7 @@ func (h *Handler) Chat(c *websocket.Conn) {
 			cancel <- struct{}{}
 			continue
 		}
+		req.Organization = organization
 
 		select {
 		case queryID := <-hint:
@@ -71,7 +78,7 @@ func (h *Handler) Chat(c *websocket.Conn) {
 			continue
 		case queryID := <-validate:
 			if req.Command == shared.CommandValid {
-				go h.ctrl.Predict(ctx, out, cancel, queryID)
+				go h.ctrl.Predict(ctx, out, cancel, queryID, organization)
 				if err := h.ctrl.UpdateStatus(ctx, queryID, shared.StatusValid); err != nil {
 					chatresp.RespondError(c, "failed to update status to valid", err)
 					validate <- queryID

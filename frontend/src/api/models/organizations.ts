@@ -14,14 +14,14 @@ export interface CreateUserParams {
     email: string;
     first_name: string;
     last_name: string;
-    organization?: string;
+    organization_ids: number[];
     password: string;
     roles: Role[];
     username: string;
 }
 
 export interface GetUsersInOrganizationParams {
-    organization: string;
+    organizationId: number;
 }
 
 export interface AddUserToOrganizationParams {
@@ -30,6 +30,7 @@ export interface AddUserToOrganizationParams {
 }
 
 export interface DeleteUserParams {
+    organization_id: number;
     username: string;
 }
 
@@ -45,4 +46,21 @@ export interface Product {
 
 export interface GetProductsResponse {
     codes: Product[];
+}
+
+export interface UserInOrganization {
+    username: string;
+    notifications: boolean;
+    email: string;
+}
+
+export interface SetUserNotificationParams {
+    active: boolean;
+    organization_id: number;
+    username: string;
+}
+
+export interface EditOrganizationParams {
+    id: number;
+    title: string;
 }
