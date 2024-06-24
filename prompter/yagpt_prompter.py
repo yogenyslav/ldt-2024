@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from dotenv import load_dotenv
 from enum import Enum
 from datetime import datetime
+from dateutil.relativedelta import relativedelta
 
 from api.prompter_pb2 import QueryType
 
@@ -252,11 +253,26 @@ class YaGPTPrompter:
 
         if prompter_output.type == QueryType.PREDICTION:
             today_date = datetime.now()
+
             inp = self._prompts["time_normalizer"].format(
-                request=request,
+                request=prompter_output.period,
                 today_date=today_date.strftime("%d.%m.%Y"),
+                month_3_ahead=(today_date + relativedelta(months=3)).strftime(
+                    "%d.%m.%Y"
+                ),
+                years_5_ahead=(today_date + relativedelta(years=5)).strftime(
+                    "%d.%m.%Y"
+                ),
+                years_3_ahead=(today_date + relativedelta(years=2)).strftime(
+                    "%d.%m.%Y"
+                ),
+                quarters_2_ahead=(today_date + relativedelta(months=6)).strftime(
+                    "%d.%m.%Y"
+                ),
             )
+
             outp = self._generate_responce(inp, PromptType.TIME_NORMALIZER)
+
             if self._validate_date(outp):
                 if self._validate_date_sanity(outp):
                     prompter_output.period = outp
