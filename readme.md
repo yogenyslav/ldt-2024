@@ -193,3 +193,11 @@ TypeScript, React, MobX и Shadcn используются вместе для �
 
 #### Структура сервиса
 ![alt text](ArchiMate/ServiceStructure.png "ArchiMate")
+
+## Состав команды
+
+**[Евгений Шмат](https://github.com/ShmatEugene)** - frontend
+**[Евгений Гуров](https://github.com/yogenyslav)** - backend
+**[Роман Шинкаренко](https://github.com/Kasuich)** - ML
+**[Ярослав Романенко](https://github.com/fropych)** - ML
+**[Максим Голиков]** - product manager
