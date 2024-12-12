@@ -200,4 +200,4 @@ TypeScript, React, MobX и Shadcn используются вместе для �
 - **[Евгений Гуров](https://github.com/yogenyslav)** - backend
 - **[Роман Шинкаренко](https://github.com/Kasuich)** - ML
 - **[Ярослав Романенко](https://github.com/fropych)** - ML
-- **[Максим Голиков]** - product manager
+- **Максим Голиков** - product manager
